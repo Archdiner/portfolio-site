@@ -34,7 +34,7 @@ const App = () => {
       hero: {
         badge: 'AVAILABLE FOR NEW VENTURES',
         title: 'Bridging Web3 and Artificial Intelligence.',
-        sub: "I'm an international student from Bahrain, currently based in Ithaca, NY, studying CS at Cornell. I'm a full‑stack developer specializing in blockchain and AI‑powered applications.",
+        sub: "I'm an international student from Bahrain studying CS at Cornell. I'm a full‑stack developer specializing in blockchain and AI‑powered applications.",
         cta1: 'View My Work',
         cta2: 'Get In Touch'
       },
@@ -48,7 +48,7 @@ const App = () => {
       hero: {
         badge: 'متاح للمشاريع الجديدة',
         title: 'الربط بين Web3 والذكاء الاصطناعي.',
-        sub: 'طالب دولي من البحرين، مقيم حالياً في إيثاكا، نيويورك، أدرس علوم الحاسوب في كورنيل. أنا مطور واجهات متكاملة متخصص في البلوك تشين وتطبيقات الذكاء الاصطناعي.',
+        sub: 'طالب دولي من البحرين أدرس علوم الحاسوب في كورنيل. أنا مطور واجهات متكاملة متخصص في البلوك تشين وتطبيقات الذكاء الاصطناعي.',
         cta1: 'مشاهدة أعمالي',
         cta2: 'تواصل معي'
       },
@@ -273,7 +273,7 @@ const App = () => {
       <nav className="fixed top-0 left-0 w-full z-50 p-6">
         <div className={`max-w-6xl mx-auto backdrop-blur-md ${isDarkMode ? 'bg-black/40 border-white/5' : 'bg-white/40 border-black/5'} border rounded-2xl px-6 py-4 flex items-center justify-between`}>
           <div className="text-xl font-black tracking-tighter">
-            <span>ASAD</span>
+            <span>{lang === 'en' ? "Hi, I'm Asad." : 'مرحباً، أنا أسد.'}</span>
           </div>
 
           <div className="hidden lg:flex items-center space-x-8 rtl:space-x-reverse text-[11px] font-black tracking-[0.2em]">
