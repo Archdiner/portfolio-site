@@ -69,7 +69,7 @@ const App = () => {
     {
       title: 'CommitMint',
       stack: ['Solana', 'Anchor', 'Next.js', 'FastAPI', 'Supabase'],
-      image: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=800',
+      image: '/commitmint-screenshot.png',
       link: 'https://commitmint.com'
     },
     {
@@ -81,8 +81,8 @@ const App = () => {
     {
       title: 'Music Practice Tracker',
       stack: ['React', 'TypeScript', 'Supabase'],
-      image: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?q=80&w=800',
-      link: 'https://github.com/Archdiner/music-practice-tracker'
+      image: '/notelog-screenshot.png',
+      link: 'https://note-log-lac.vercel.app/login'
     },
     {
       title: 'Reel Responder Bot',
