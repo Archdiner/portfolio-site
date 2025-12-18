@@ -333,7 +333,7 @@ const App = () => {
             transform: 'translate(-50%, -50%)',
             width: '600px',
             height: '600px',
-            background: 'radial-gradient(circle, rgba(249, 115, 22, 0.15) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, rgba(249, 115, 22, 0.35) 0%, rgba(249, 115, 22, 0.15) 40%, transparent 70%)',
             filter: 'blur(80px)',
             zIndex: 0,
             opacity: mousePosition.x > 0 && mousePosition.y > 0 ? 1 : 0,
