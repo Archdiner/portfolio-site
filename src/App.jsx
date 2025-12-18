@@ -26,6 +26,7 @@ const App = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [lang, setLang] = useState('en');
   const [selectedProject, setSelectedProject] = useState(null);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
   // Translations
   const t = {
@@ -116,7 +117,7 @@ const App = () => {
       stack: ['Solana', 'Anchor', 'Next.js', 'FastAPI', 'Supabase'],
       image: '/commitmint-screenshot.png',
       githubLink: 'https://github.com/Archdiner/commitment-parties',
-      projectLink: 'https://commitmint.com',
+      projectLink: 'https://commitmint.app',
       screenshots: ['/commitmint-screenshot.png'],
       description: lang === 'en' 
         ? 'A Solana-based commitment pool platform that helps users maintain accountability and build positive habits. Built with Anchor for smart contracts, Next.js for the frontend, and FastAPI for backend services. Users can create commitment pools, stake tokens, and track their progress toward goals with blockchain-based verification.'
@@ -309,11 +310,51 @@ const App = () => {
       </nav>
 
       {/* Hero Section */}
-      <header id="home" className="min-h-[85vh] flex items-center px-6 pt-32 pb-16 max-w-7xl mx-auto">
-        <div className="grid lg:grid-cols-2 gap-12 items-center w-full">
+      <header 
+        id="home" 
+        className="min-h-[85vh] flex items-center px-6 pt-32 pb-16 max-w-7xl mx-auto relative"
+        onMouseMove={(e) => {
+          const rect = e.currentTarget.getBoundingClientRect();
+          setMousePosition({
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top
+          });
+        }}
+        onMouseLeave={() => {
+          setMousePosition({ x: 0, y: 0 });
+        }}
+      >
+        {/* Mouse-following orange glow background with mask for smooth edges */}
+        <div 
+          className="absolute pointer-events-none transition-all duration-300 ease-out"
+          style={{
+            left: `${mousePosition.x}px`,
+            top: `${mousePosition.y}px`,
+            transform: 'translate(-50%, -50%)',
+            width: '600px',
+            height: '600px',
+            background: 'radial-gradient(circle, rgba(249, 115, 22, 0.15) 0%, transparent 70%)',
+            filter: 'blur(80px)',
+            zIndex: 0,
+            opacity: mousePosition.x > 0 && mousePosition.y > 0 ? 1 : 0,
+            maskImage: `radial-gradient(ellipse 80% 80% at center, black 30%, transparent 85%)`,
+            WebkitMaskImage: `radial-gradient(ellipse 80% 80% at center, black 30%, transparent 85%)`,
+            maskRepeat: 'no-repeat',
+            WebkitMaskRepeat: 'no-repeat'
+          }}
+        />
+        
+        {/* Edge fade overlay for smoother transition */}
+        <div 
+          className="absolute inset-0 pointer-events-none z-10"
+          style={{
+            background: `radial-gradient(ellipse 85% 75% at center, transparent 0%, transparent 60%, ${isDarkMode ? 'rgba(5, 5, 5, 0.3)' : 'rgba(250, 250, 250, 0.3)'} 80%, ${isDarkMode ? '#050505' : '#fafafa'} 100%)`
+          }}
+        />
+        
+        <div className="grid lg:grid-cols-2 gap-12 items-center w-full relative z-10">
           {/* Left: Picture Place */}
-          <div className="relative group">
-            <div className={`absolute -inset-4 bg-orange-500/20 blur-3xl rounded-full opacity-50 group-hover:opacity-100 transition-opacity`}></div>
+          <div className="relative">
             <div className={`aspect-[4/5] w-full max-w-md mx-auto rounded-3xl overflow-hidden border ${isDarkMode ? 'border-white/10 bg-white/5' : 'border-black/5 bg-black/5'} relative transition-all duration-700`}>
                <img src="/portrait.JPG" alt="Portrait" className="w-full h-full object-cover" />
             </div>
