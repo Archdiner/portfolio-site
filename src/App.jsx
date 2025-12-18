@@ -133,7 +133,7 @@ const App = () => {
     },
     {
       title: 'Music Practice Tracker',
-      stack: ['React', 'TypeScript', 'Supabase'],
+      stack: ['React', 'TypeScript', 'Supabase', 'OpenAI'],
       image: '/notelog-screenshot.png',
       githubLink: 'https://github.com/Archdiner/music-practice-tracker',
       projectLink: 'https://note-log-lac.vercel.app/login',
@@ -184,7 +184,7 @@ const App = () => {
     if (!iconKey || !simpleIcons[iconKey]) {
       // Fallback to first two letters if icon not found
       return (
-        <div className="w-4 h-4 bg-orange-500/20 rounded flex items-center justify-center font-black text-orange-500 text-[10px]">
+        <div className="w-5 h-5 bg-orange-500/20 rounded flex items-center justify-center font-black text-orange-500 text-xs">
           {techName.substring(0, 2).toUpperCase()}
         </div>
       );
@@ -198,7 +198,7 @@ const App = () => {
       <svg
         role="img"
         viewBox="0 0 24 24"
-        className="w-4 h-4"
+        className="w-5 h-5"
         fill={iconColor}
         xmlns="http://www.w3.org/2000/svg"
       >
@@ -477,11 +477,11 @@ const App = () => {
           <div className="space-y-3">
             {/* Row 1 */}
             <div className="flex whitespace-nowrap overflow-hidden group/pause" onMouseEnter={(e) => e.currentTarget.querySelector('.animate-scroll')?.classList.add('pause-animation')} onMouseLeave={(e) => e.currentTarget.querySelector('.animate-scroll')?.classList.remove('pause-animation')}>
-              <div className="flex gap-2 animate-scroll">
+              <div className="flex gap-3 animate-scroll">
                 {[...techRow1, ...techRow1].map((tech, i) => (
-                  <div key={i} className={`flex items-center gap-2 px-3 py-2 border ${isDarkMode ? 'bg-black border-white/5' : 'bg-white border-black/5'} rounded-lg flex-shrink-0`}>
+                  <div key={i} className={`flex items-center gap-2.5 px-4 py-2.5 border ${isDarkMode ? 'bg-black border-white/5' : 'bg-white border-black/5'} rounded-lg flex-shrink-0`}>
                     <TechIcon techName={tech} />
-                    <span className="font-bold text-xs">{tech}</span>
+                    <span className="font-bold text-sm">{tech}</span>
                   </div>
                 ))}
               </div>
@@ -489,11 +489,11 @@ const App = () => {
 
             {/* Row 2 */}
             <div className="flex whitespace-nowrap overflow-hidden group/pause" onMouseEnter={(e) => e.currentTarget.querySelector('.animate-scroll-reverse')?.classList.add('pause-animation')} onMouseLeave={(e) => e.currentTarget.querySelector('.animate-scroll-reverse')?.classList.remove('pause-animation')}>
-              <div className="flex gap-2 animate-scroll-reverse">
+              <div className="flex gap-3 animate-scroll-reverse">
                 {[...techRow2, ...techRow2].map((tech, i) => (
-                  <div key={i} className={`flex items-center gap-2 px-3 py-2 border ${isDarkMode ? 'bg-black border-white/5' : 'bg-white border-black/5'} rounded-lg flex-shrink-0`}>
+                  <div key={i} className={`flex items-center gap-2.5 px-4 py-2.5 border ${isDarkMode ? 'bg-black border-white/5' : 'bg-white border-black/5'} rounded-lg flex-shrink-0`}>
                     <TechIcon techName={tech} />
-                    <span className="font-bold text-xs">{tech}</span>
+                    <span className="font-bold text-sm">{tech}</span>
                   </div>
                 ))}
               </div>
