@@ -9,7 +9,8 @@ import {
   Languages,
   ArrowUpRight,
   MoveRight,
-  MoveLeft
+  MoveLeft,
+  Twitter
 } from 'lucide-react';
 import * as simpleIcons from 'simple-icons';
 
@@ -52,16 +53,28 @@ const App = () => {
 
   const careerTimeline = [
     {
-      year: '2023 - 2025',
-      role: lang === 'en' ? 'Senior Full Stack & AI Engineer' : 'كبير مهندسي الذكاء الاصطناعي',
-      company: 'Nexus AI Solutions',
-      desc: lang === 'en' ? 'Leading LLM-integrated dashboards and autonomous agent architectures.' : 'قيادة لوحات التحكم المدمجة بنماذج اللغة الكبيرة وبنيات الوكلاء الذاتيين.'
+      year: 'Oct 2025 - Present',
+      role: lang === 'en' ? 'Accelerator Subteam Member' : 'عضو فريق التسريع',
+      company: 'Cornell Blockchain',
+      desc: lang === 'en' ? 'Full-time member working on blockchain accelerator initiatives and startup ventures.' : 'عضو بدوام كامل يعمل على مبادرات مسرع البلوك تشين والمشاريع الناشئة.'
     },
     {
-      year: '2021 - 2023',
-      role: lang === 'en' ? 'Web3 Lead Developer' : 'مطور Web3 رئيسي',
-      company: 'EtherFlow Protocol',
-      desc: lang === 'en' ? 'Architected DeFi lending smart contracts and governance portals.' : 'هندسة العقود الذكية للإقراض اللامركزي وبوابات الحوكمة.'
+      year: 'Oct 2025 - Present',
+      role: lang === 'en' ? 'AI Engineer' : 'مهندس الذكاء الاصطناعي',
+      company: 'Generative AI at Cornell',
+      desc: lang === 'en' ? 'Building AI solutions with focus on Large Language Models (LLM) and artificial intelligence applications.' : 'بناء حلول الذكاء الاصطناعي مع التركيز على نماذج اللغة الكبيرة وتطبيقات الذكاء الاصطناعي.'
+    },
+    {
+      year: 'Jun 2024 - Present',
+      role: lang === 'en' ? 'Co-Founder' : 'الشريك المؤسس',
+      company: 'Gulf Intel',
+      desc: lang === 'en' ? 'Providing affordable and customizable AI-powered tools for small businesses in Bahrain. Products include chatbots, inventory management software, review analytics, and Instagram automation tools.' : 'تقديم أدوات ذكاء اصطناعي ميسورة التكلفة وقابلة للتخصيص للشركات الصغيرة في البحرين. تشمل المنتجات روبوتات المحادثة وبرمجيات إدارة المخزون وتحليلات المراجعات.'
+    },
+    {
+      year: 'Jul 2024',
+      role: lang === 'en' ? 'LLM Application Developer Intern' : 'متدرب مطور تطبيقات نماذج اللغة',
+      company: 'RIIG - HOOTL',
+      desc: lang === 'en' ? 'Developed an AI system for financial regulatory analysis. Designed and implemented an automated system to generate high-quality summaries of financial documents and regulations.' : 'طور نظام ذكاء اصطناعي لتحليل اللوائح المالية. صمم ونفذ نظامًا آليًا لإنشاء ملخصات عالية الجودة للوثائق واللوائح المالية.'
     }
   ];
 
@@ -75,7 +88,7 @@ const App = () => {
     {
       title: 'GraphRAG Dodd-Frank',
       stack: ['Python', 'GraphRAG', 'LangChain', 'Microsoft'],
-      image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&w=800',
+      image: '/graphrag_ss.png',
       link: 'https://github.com/Archdiner/GraphRAG-Dodd-Frank'
     },
     {
@@ -87,7 +100,7 @@ const App = () => {
     {
       title: 'Reel Responder Bot',
       stack: ['Python', 'OpenAI', 'Apify', 'Instagram'],
-      image: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=800',
+      image: '/doomscroll_ss.jpeg',
       link: 'https://github.com/Archdiner/reel-responder-bot'
     }
   ];
@@ -349,12 +362,13 @@ const App = () => {
               {content.contact.sub}
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-              <a href="mailto:hello@dev.com" className={`px-12 py-6 rounded-2xl font-black uppercase text-xs tracking-widest transition-all hover:scale-105 ${isDarkMode ? 'bg-black text-white' : 'bg-white text-black'}`}>
+              <a href="mailto:sar367@cornell.edu" className={`px-12 py-6 rounded-2xl font-black uppercase text-xs tracking-widest transition-all hover:scale-105 ${isDarkMode ? 'bg-black text-white' : 'bg-white text-black'}`}>
                 Email Me
               </a>
               <div className="flex items-center gap-4">
-                <a href="#" className="p-4 rounded-xl border border-current opacity-50 hover:opacity-100"><Github /></a>
-                <a href="#" className="p-4 rounded-xl border border-current opacity-50 hover:opacity-100"><Linkedin /></a>
+                <a href="https://github.com/Archdiner" target="_blank" rel="noopener noreferrer" className="p-4 rounded-xl border border-current opacity-50 hover:opacity-100"><Github /></a>
+                <a href="https://www.linkedin.com/in/asad-rizvi-02a1782a2/" target="_blank" rel="noopener noreferrer" className="p-4 rounded-xl border border-current opacity-50 hover:opacity-100"><Linkedin /></a>
+                <a href="https://twitter.com/carne_asado" target="_blank" rel="noopener noreferrer" className="p-4 rounded-xl border border-current opacity-50 hover:opacity-100"><Twitter /></a>
               </div>
             </div>
           </div>
