@@ -16,7 +16,8 @@ import {
   Code,
   Sparkles,
   Rocket,
-  X
+  X,
+  MapPin
 } from 'lucide-react';
 import * as simpleIcons from 'simple-icons';
 
@@ -29,30 +30,30 @@ const App = () => {
   // Translations
   const t = {
     en: {
-      nav: { me: 'ME', works: 'WORKS', stack: 'STACK', timeline: 'EXPERIENCE', contact: 'CONTACT' },
+      nav: { me: 'ME', works: 'PROJECTS', stack: 'STACK', timeline: 'EXPERIENCE', contact: 'CONTACT' },
       hero: {
         badge: 'AVAILABLE FOR NEW VENTURES',
         title: 'Bridging Web3 and Artificial Intelligence.',
-        sub: "I'm a Cornell CS student and full‑stack developer specializing in blockchain and AI‑powered applications.",
+        sub: "I'm an international student from Bahrain, currently based in Ithaca, NY, studying CS at Cornell. I'm a full‑stack developer specializing in blockchain and AI‑powered applications.",
         cta1: 'View My Work',
         cta2: 'Get In Touch'
       },
       career: { title: 'EXPERIENCE', subtitle: 'Where I\'ve built, learned, and grown.' },
-      projects: { title: 'SELECTED WORKS', archive: 'VIEW ARCHIVE' },
+      projects: { title: 'FEATURED PROJECTS', archive: 'VIEW ARCHIVE' },
       stack: { title: 'TECH CORE' },
       contact: { title: 'LET\'S BUILD THE FUTURE.', sub: 'Currently open to innovative projects in the decentralized space and AI orchestration.' }
     },
     ar: {
-      nav: { me: 'أنا', works: 'الأعمال', stack: 'التقنيات', timeline: 'الخبرة', contact: 'اتصل' },
+      nav: { me: 'أنا', works: 'المشاريع', stack: 'التقنيات', timeline: 'الخبرة', contact: 'اتصل' },
       hero: {
         badge: 'متاح للمشاريع الجديدة',
         title: 'الربط بين Web3 والذكاء الاصطناعي.',
-        sub: 'طالب علوم حاسوب في كورنيل ومطور واجهات متكاملة متخصص في البلوك تشين وتطبيقات الذكاء الاصطناعي.',
+        sub: 'طالب دولي من البحرين، مقيم حالياً في إيثاكا، نيويورك، أدرس علوم الحاسوب في كورنيل. أنا مطور واجهات متكاملة متخصص في البلوك تشين وتطبيقات الذكاء الاصطناعي.',
         cta1: 'مشاهدة أعمالي',
         cta2: 'تواصل معي'
       },
       career: { title: 'الخبرة', subtitle: 'حيث بنيت وتعلمت ونمت.' },
-      projects: { title: 'أعمال مختارة', archive: 'الأرشيف' },
+      projects: { title: 'مشاريع مميزة', archive: 'الأرشيف' },
       stack: { title: 'التقنيات الأساسية' },
       contact: { title: 'لنصنع المستقبل معاً.', sub: 'متاح حالياً للمشاريع المبتكرة في المجال اللامركزي وتنسيق الذكاء الاصطناعي.' }
     }
@@ -184,7 +185,7 @@ const App = () => {
     if (!iconKey || !simpleIcons[iconKey]) {
       // Fallback to first two letters if icon not found
       return (
-        <div className="w-5 h-5 bg-orange-500/20 rounded flex items-center justify-center font-black text-orange-500 text-xs">
+        <div className="w-7 h-7 bg-orange-500/20 rounded flex items-center justify-center font-black text-orange-500 text-base">
           {techName.substring(0, 2).toUpperCase()}
         </div>
       );
@@ -198,7 +199,7 @@ const App = () => {
       <svg
         role="img"
         viewBox="0 0 24 24"
-        className="w-5 h-5"
+        className="w-7 h-7"
         fill={iconColor}
         xmlns="http://www.w3.org/2000/svg"
       >
@@ -329,6 +330,10 @@ const App = () => {
             <p className={`text-lg max-w-lg mx-auto lg:mx-0 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
               {content.hero.sub}
             </p>
+            <div className={`flex items-center gap-2 justify-center lg:justify-start text-sm ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+              <MapPin size={16} className="text-orange-500" />
+              <span>Ithaca, NY</span>
+            </div>
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4">
               <a 
                 href="#projects" 
@@ -477,11 +482,11 @@ const App = () => {
           <div className="space-y-3">
             {/* Row 1 */}
             <div className="flex whitespace-nowrap overflow-hidden group/pause" onMouseEnter={(e) => e.currentTarget.querySelector('.animate-scroll')?.classList.add('pause-animation')} onMouseLeave={(e) => e.currentTarget.querySelector('.animate-scroll')?.classList.remove('pause-animation')}>
-              <div className="flex gap-3 animate-scroll">
+              <div className="flex gap-4 animate-scroll">
                 {[...techRow1, ...techRow1].map((tech, i) => (
-                  <div key={i} className={`flex items-center gap-2.5 px-4 py-2.5 border ${isDarkMode ? 'bg-black border-white/5' : 'bg-white border-black/5'} rounded-lg flex-shrink-0`}>
+                  <div key={i} className={`flex items-center gap-3 px-6 py-3.5 border ${isDarkMode ? 'bg-black border-white/5' : 'bg-white border-black/5'} rounded-lg flex-shrink-0`}>
                     <TechIcon techName={tech} />
-                    <span className="font-bold text-sm">{tech}</span>
+                    <span className="font-bold text-base">{tech}</span>
                   </div>
                 ))}
               </div>
@@ -489,11 +494,11 @@ const App = () => {
 
             {/* Row 2 */}
             <div className="flex whitespace-nowrap overflow-hidden group/pause" onMouseEnter={(e) => e.currentTarget.querySelector('.animate-scroll-reverse')?.classList.add('pause-animation')} onMouseLeave={(e) => e.currentTarget.querySelector('.animate-scroll-reverse')?.classList.remove('pause-animation')}>
-              <div className="flex gap-3 animate-scroll-reverse">
+              <div className="flex gap-4 animate-scroll-reverse">
                 {[...techRow2, ...techRow2].map((tech, i) => (
-                  <div key={i} className={`flex items-center gap-2.5 px-4 py-2.5 border ${isDarkMode ? 'bg-black border-white/5' : 'bg-white border-black/5'} rounded-lg flex-shrink-0`}>
+                  <div key={i} className={`flex items-center gap-3 px-6 py-3.5 border ${isDarkMode ? 'bg-black border-white/5' : 'bg-white border-black/5'} rounded-lg flex-shrink-0`}>
                     <TechIcon techName={tech} />
-                    <span className="font-bold text-sm">{tech}</span>
+                    <span className="font-bold text-base">{tech}</span>
                   </div>
                 ))}
               </div>
