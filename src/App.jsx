@@ -15,7 +15,8 @@ import {
   Briefcase,
   Code,
   Sparkles,
-  Rocket
+  Rocket,
+  X
 } from 'lucide-react';
 import * as simpleIcons from 'simple-icons';
 
@@ -23,6 +24,7 @@ const App = () => {
   const [activeSection, setActiveSection] = useState('home');
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [lang, setLang] = useState('en');
+  const [selectedProject, setSelectedProject] = useState(null);
 
   // Translations
   const t = {
@@ -112,25 +114,43 @@ const App = () => {
       title: 'CommitMint',
       stack: ['Solana', 'Anchor', 'Next.js', 'FastAPI', 'Supabase'],
       image: '/commitmint-screenshot.png',
-      link: 'https://commitmint.com'
+      githubLink: 'https://github.com/Archdiner/commitment-parties',
+      projectLink: 'https://commitmint.com',
+      screenshots: ['/commitmint-screenshot.png'],
+      description: lang === 'en' 
+        ? 'A Solana-based commitment pool platform that helps users maintain accountability and build positive habits. Built with Anchor for smart contracts, Next.js for the frontend, and FastAPI for backend services. Users can create commitment pools, stake tokens, and track their progress toward goals with blockchain-based verification.'
+        : 'منصة تجمع الالتزامات القائمة على Solana تساعد المستخدمين على الحفاظ على المساءلة وبناء عادات إيجابية. تم بناؤها باستخدام Anchor للعقود الذكية وNext.js للواجهة الأمامية وFastAPI لخدمات الخلفية.'
     },
     {
       title: 'GraphRAG Dodd-Frank',
       stack: ['Python', 'GraphRAG', 'LangChain', 'Microsoft'],
       image: '/graphrag_ss.png',
-      link: 'https://github.com/Archdiner/GraphRAG-Dodd-Frank'
+      githubLink: 'https://github.com/Archdiner/GraphRAG-Dodd-Frank',
+      screenshots: ['/graphrag_ss.png'],
+      description: lang === 'en'
+        ? 'A research project implementing Microsoft\'s GraphRAG technique to analyze and summarize the Dodd-Frank financial regulations. Used graph-based retrieval augmented generation to create structured knowledge graphs from complex regulatory documents, enabling efficient querying and summarization of financial regulations using LangChain and advanced LLM orchestration.'
+        : 'مشروع بحثي يطبق تقنية GraphRAG من Microsoft لتحليل وتلخيص لوائح Dodd-Frank المالية. استخدم الجيل المعزز بالاسترجاع القائم على الرسوم البيانية لإنشاء رسوم بيانية معرفية منظمة من الوثائق التنظيمية المعقدة.'
     },
     {
       title: 'Music Practice Tracker',
       stack: ['React', 'TypeScript', 'Supabase'],
       image: '/notelog-screenshot.png',
-      link: 'https://note-log-lac.vercel.app/login'
+      githubLink: 'https://github.com/Archdiner/music-practice-tracker',
+      projectLink: 'https://note-log-lac.vercel.app/login',
+      screenshots: ['/notelog-screenshot.png'],
+      description: lang === 'en'
+        ? 'A web application for musicians to track their practice sessions and monitor progress. Built with React and TypeScript for a type-safe frontend, and Supabase for real-time data synchronization. Features include practice session logging, progress analytics, and goal setting to help musicians stay organized and motivated.'
+        : 'تطبيق ويب للموسيقيين لتتبع جلسات التدريب ومراقبة التقدم. مبني بـ React وTypeScript للواجهة الأمامية الآمنة بالنوع وSupabase لمزامنة البيانات في الوقت الفعلي.'
     },
     {
       title: 'Reel Responder Bot',
       stack: ['Python', 'OpenAI', 'Apify', 'Instagram'],
       image: '/doomscroll_ss.jpeg',
-      link: 'https://github.com/Archdiner/reel-responder-bot'
+      githubLink: 'https://github.com/Archdiner/reel-responder-bot',
+      screenshots: ['/doomscroll_ss.jpeg'],
+      description: lang === 'en'
+        ? 'An AI-powered Instagram bot that automatically responds to reel messages from friends. Uses Apify to scrape comments from Instagram reels, then leverages OpenAI\'s GPT-4o-mini to generate contextual, humorous responses based on the reel\'s content. Includes duplicate detection to prevent repeated responses and continuous monitoring with configurable polling intervals.'
+        : 'بوت إنستغرام مدعوم بالذكاء الاصطناعي يرد تلقائياً على رسائل الريل من الأصدقاء. يستخدم Apify لجمع التعليقات من ريلز إنستغرام ثم يستفيد من GPT-4o-mini من OpenAI لإنشاء ردود سياقية ومرحة بناءً على محتوى الريل.'
     }
   ];
 
@@ -164,7 +184,7 @@ const App = () => {
     if (!iconKey || !simpleIcons[iconKey]) {
       // Fallback to first two letters if icon not found
       return (
-        <div className="w-8 h-8 bg-orange-500/20 rounded flex items-center justify-center font-black text-orange-500 text-xs">
+        <div className="w-4 h-4 bg-orange-500/20 rounded flex items-center justify-center font-black text-orange-500 text-[10px]">
           {techName.substring(0, 2).toUpperCase()}
         </div>
       );
@@ -178,7 +198,7 @@ const App = () => {
       <svg
         role="img"
         viewBox="0 0 24 24"
-        className="w-8 h-8"
+        className="w-4 h-4"
         fill={iconColor}
         xmlns="http://www.w3.org/2000/svg"
       >
@@ -245,6 +265,7 @@ const App = () => {
         }
         .animate-scroll { animation: scroll 30s linear infinite; }
         .animate-scroll-reverse { animation: scroll-reverse 30s linear infinite; }
+        .pause-animation { animation-play-state: paused; }
       `}</style>
 
       {/* Navigation */}
@@ -333,11 +354,9 @@ const App = () => {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
           {projects.map((project, idx) => (
-            <a 
+            <div
               key={idx} 
-              href={project.link}
-              target="_blank"
-              rel="noopener noreferrer"
+              onClick={() => setSelectedProject(project)}
               className="group cursor-pointer block"
             >
               <div className="aspect-square rounded-3xl overflow-hidden mb-6 relative">
@@ -355,39 +374,129 @@ const App = () => {
                 <h3 className="text-xl font-bold">{project.title}</h3>
                 <ArrowUpRight className="text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
-            </a>
+            </div>
           ))}
         </div>
+
+        {/* Project Modal */}
+        {selectedProject && (
+          <div 
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            onClick={() => setSelectedProject(null)}
+          >
+            <div 
+              className={`max-w-6xl w-full max-h-[90vh] overflow-auto rounded-3xl ${isDarkMode ? 'bg-[#050505] border border-white/10' : 'bg-white border border-black/10'} shadow-2xl`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="sticky top-0 z-10 flex justify-between items-center p-6 border-b border-current/10">
+                <h2 className="text-3xl font-bold">{selectedProject.title}</h2>
+                <button 
+                  onClick={() => setSelectedProject(null)}
+                  className="p-2 rounded-lg hover:bg-orange-500/10 transition-colors"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+              
+              <div className="grid md:grid-cols-2 gap-8 p-8">
+                {/* Left: Screenshots */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-bold uppercase tracking-wider">Screenshots</h3>
+                  {selectedProject.screenshots?.map((screenshot, idx) => (
+                    <div key={idx} className="rounded-2xl overflow-hidden border border-current/10">
+                      <img 
+                        src={screenshot} 
+                        alt={`${selectedProject.title} screenshot ${idx + 1}`} 
+                        className="w-full h-auto object-contain"
+                      />
+                    </div>
+                  ))}
+                  <div className="flex flex-col gap-3">
+                    {selectedProject.projectLink && (
+                      <a 
+                        href={selectedProject.projectLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-orange-500 text-black font-bold rounded-xl hover:bg-orange-400 transition-colors"
+                      >
+                        View Project <ExternalLink size={18} />
+                      </a>
+                    )}
+                    <a 
+                      href={selectedProject.githubLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold transition-colors ${isDarkMode ? 'bg-white/10 hover:bg-white/20 border border-white/20' : 'bg-black/10 hover:bg-black/20 border border-black/20'}`}
+                    >
+                      <Github size={18} />
+                      View on GitHub
+                    </a>
+                  </div>
+                </div>
+
+                {/* Right: Description */}
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-lg font-bold uppercase tracking-wider mb-4">About</h3>
+                    <p className={`leading-relaxed ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                      {selectedProject.description}
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-lg font-bold uppercase tracking-wider mb-4">Tech Stack</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedProject.stack.map((tech, idx) => (
+                        <span 
+                          key={idx} 
+                          className={`px-4 py-2 rounded-lg font-bold text-sm ${isDarkMode ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'bg-orange-500/10 text-orange-600 border border-orange-500/20'}`}
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </section>
 
-      {/* Rotating Tech Ticker */}
-      <section id="skills" className="py-20 bg-orange-500/[0.02] overflow-hidden">
-        <div className="max-w-6xl mx-auto px-6 mb-16">
+      {/* Rotating Tech Ticker with fade-out */}
+      <section id="skills" className="py-20 bg-orange-500/[0.02]">
+        <div className="max-w-6xl mx-auto px-6 mb-12">
           <h2 className="text-center text-4xl font-bold tracking-tighter">{content.stack.title}</h2>
         </div>
 
-        <div className="space-y-4">
-          {/* Row 1 */}
-          <div className="flex whitespace-nowrap overflow-hidden">
-            <div className="flex gap-4 animate-scroll">
-              {[...techRow1, ...techRow1].map((tech, i) => (
-                <div key={i} className={`flex items-center gap-4 px-8 py-6 border ${isDarkMode ? 'bg-black border-white/5' : 'bg-white border-black/5'} rounded-2xl`}>
-                  <TechIcon techName={tech} />
-                  <span className="font-bold text-lg">{tech}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+        <div className="relative mx-6 md:mx-12">
+          {/* Fade gradients */}
+          <div className={`absolute left-0 top-0 bottom-0 w-24 z-10 pointer-events-none ${isDarkMode ? 'bg-gradient-to-r from-[#050505] to-transparent' : 'bg-gradient-to-r from-[#fafafa] to-transparent'}`}></div>
+          <div className={`absolute right-0 top-0 bottom-0 w-24 z-10 pointer-events-none ${isDarkMode ? 'bg-gradient-to-l from-[#050505] to-transparent' : 'bg-gradient-to-l from-[#fafafa] to-transparent'}`}></div>
 
-          {/* Row 2 */}
-          <div className="flex whitespace-nowrap overflow-hidden">
-            <div className="flex gap-4 animate-scroll-reverse">
-              {[...techRow2, ...techRow2].map((tech, i) => (
-                <div key={i} className={`flex items-center gap-4 px-8 py-6 border ${isDarkMode ? 'bg-black border-white/5' : 'bg-white border-black/5'} rounded-2xl`}>
-                  <TechIcon techName={tech} />
-                  <span className="font-bold text-lg">{tech}</span>
-                </div>
-              ))}
+          <div className="space-y-3">
+            {/* Row 1 */}
+            <div className="flex whitespace-nowrap overflow-hidden group/pause" onMouseEnter={(e) => e.currentTarget.querySelector('.animate-scroll')?.classList.add('pause-animation')} onMouseLeave={(e) => e.currentTarget.querySelector('.animate-scroll')?.classList.remove('pause-animation')}>
+              <div className="flex gap-2 animate-scroll">
+                {[...techRow1, ...techRow1].map((tech, i) => (
+                  <div key={i} className={`flex items-center gap-2 px-3 py-2 border ${isDarkMode ? 'bg-black border-white/5' : 'bg-white border-black/5'} rounded-lg flex-shrink-0`}>
+                    <TechIcon techName={tech} />
+                    <span className="font-bold text-xs">{tech}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Row 2 */}
+            <div className="flex whitespace-nowrap overflow-hidden group/pause" onMouseEnter={(e) => e.currentTarget.querySelector('.animate-scroll-reverse')?.classList.add('pause-animation')} onMouseLeave={(e) => e.currentTarget.querySelector('.animate-scroll-reverse')?.classList.remove('pause-animation')}>
+              <div className="flex gap-2 animate-scroll-reverse">
+                {[...techRow2, ...techRow2].map((tech, i) => (
+                  <div key={i} className={`flex items-center gap-2 px-3 py-2 border ${isDarkMode ? 'bg-black border-white/5' : 'bg-white border-black/5'} rounded-lg flex-shrink-0`}>
+                    <TechIcon techName={tech} />
+                    <span className="font-bold text-xs">{tech}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -409,8 +518,7 @@ const App = () => {
                 className="relative pl-12 rtl:pl-0 rtl:pr-12 group cursor-default"
               >
                 {/* Animated dot */}
-                <div className={`absolute left-[-13px] rtl:left-auto rtl:right-[-13px] top-2 w-6 h-6 rounded-full bg-orange-500 border-4 ${isDarkMode ? 'border-[#050505]' : 'border-[#fafafa]'} flex items-center justify-center transition-all duration-300 group-hover:scale-125 group-hover:bg-orange-400`}>
-                  <Icon className="w-3 h-3 text-black" />
+                <div className={`absolute left-[-13px] rtl:left-auto rtl:right-[-13px] top-2 w-6 h-6 rounded-full bg-orange-500 border-4 ${isDarkMode ? 'border-[#050505]' : 'border-[#fafafa]'} transition-all duration-300 group-hover:scale-125 group-hover:bg-orange-400`}>
                 </div>
                 
                 {/* Card content */}
