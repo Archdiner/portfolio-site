@@ -10,7 +10,12 @@ import {
   ArrowUpRight,
   MoveRight,
   MoveLeft,
-  Twitter
+  Twitter,
+  GraduationCap,
+  Briefcase,
+  Code,
+  Sparkles,
+  Rocket
 } from 'lucide-react';
 import * as simpleIcons from 'simple-icons';
 
@@ -22,29 +27,29 @@ const App = () => {
   // Translations
   const t = {
     en: {
-      nav: { me: 'ME', timeline: 'TIMELINE', works: 'WORKS', stack: 'STACK', contact: 'CONTACT' },
+      nav: { me: 'ME', works: 'WORKS', stack: 'STACK', timeline: 'EXPERIENCE', contact: 'CONTACT' },
       hero: {
         badge: 'AVAILABLE FOR NEW VENTURES',
-        title: 'Bridging Web3 & Generative Intelligence.',
-        sub: "I'm a Full Stack Developer specializing in decentralized protocols and autonomous AI applications.",
+        title: 'Bridging Web3 and Artificial Intelligence.',
+        sub: "I'm a Cornell CS student and full‑stack developer specializing in blockchain and AI‑powered applications.",
         cta1: 'View My Work',
         cta2: 'Get In Touch'
       },
-      career: { title: 'JOURNEY', subtitle: 'A timeline of my professional evolution.' },
+      career: { title: 'EXPERIENCE', subtitle: 'Where I\'ve built, learned, and grown.' },
       projects: { title: 'SELECTED WORKS', archive: 'VIEW ARCHIVE' },
       stack: { title: 'TECH CORE' },
       contact: { title: 'LET\'S BUILD THE FUTURE.', sub: 'Currently open to innovative projects in the decentralized space and AI orchestration.' }
     },
     ar: {
-      nav: { me: 'أنا', timeline: 'المسار', works: 'الأعمال', stack: 'التقنيات', contact: 'اتصل' },
+      nav: { me: 'أنا', works: 'الأعمال', stack: 'التقنيات', timeline: 'الخبرة', contact: 'اتصل' },
       hero: {
         badge: 'متاح للمشاريع الجديدة',
-        title: 'الربط بين الـ Web3 والذكاء الاصطناعي التوليدي.',
-        sub: 'مطور واجهات متكاملة متخصص في البروتوكولات اللامركزية وتطبيقات الذكاء الاصطناعي ذاتية التشغيل.',
+        title: 'الربط بين Web3 والذكاء الاصطناعي.',
+        sub: 'طالب علوم حاسوب في كورنيل ومطور واجهات متكاملة متخصص في البلوك تشين وتطبيقات الذكاء الاصطناعي.',
         cta1: 'مشاهدة أعمالي',
         cta2: 'تواصل معي'
       },
-      career: { title: 'المسار المهني', subtitle: 'جدول زمني لتطوري المهني.' },
+      career: { title: 'الخبرة', subtitle: 'حيث بنيت وتعلمت ونمت.' },
       projects: { title: 'أعمال مختارة', archive: 'الأرشيف' },
       stack: { title: 'التقنيات الأساسية' },
       contact: { title: 'لنصنع المستقبل معاً.', sub: 'متاح حالياً للمشاريع المبتكرة في المجال اللامركزي وتنسيق الذكاء الاصطناعي.' }
@@ -56,26 +61,50 @@ const App = () => {
       year: 'Oct 2025 - Present',
       role: lang === 'en' ? 'Accelerator Subteam Member' : 'عضو فريق التسريع',
       company: 'Cornell Blockchain',
-      desc: lang === 'en' ? 'Full-time member working on blockchain accelerator initiatives and startup ventures.' : 'عضو بدوام كامل يعمل على مبادرات مسرع البلوك تشين والمشاريع الناشئة.'
+      companyUrl: 'https://cornellblockchain.org',
+      icon: Rocket,
+      tags: ['Blockchain', 'Startups'],
+      desc:
+        lang === 'en'
+          ? 'Full-time member working on blockchain accelerator initiatives and startup ventures.'
+          : 'عضو بدوام كامل يعمل على مبادرات مسرع البلوك تشين والمشاريع الناشئة.',
     },
     {
       year: 'Oct 2025 - Present',
       role: lang === 'en' ? 'AI Engineer' : 'مهندس الذكاء الاصطناعي',
       company: 'Generative AI at Cornell',
-      desc: lang === 'en' ? 'Building AI solutions with focus on Large Language Models (LLM) and artificial intelligence applications.' : 'بناء حلول الذكاء الاصطناعي مع التركيز على نماذج اللغة الكبيرة وتطبيقات الذكاء الاصطناعي.'
+      companyUrl: 'https://cornellgenai.com',
+      icon: Sparkles,
+      tags: ['LLMs', 'AI Research'],
+      desc:
+        lang === 'en'
+          ? 'Building AI solutions with focus on Large Language Models (LLM) and artificial intelligence applications.'
+          : 'بناء حلول الذكاء الاصطناعي مع التركيز على نماذج اللغة الكبيرة وتطبيقات الذكاء الاصطناعي.',
     },
     {
       year: 'Jun 2024 - Present',
       role: lang === 'en' ? 'Co-Founder' : 'الشريك المؤسس',
-      company: 'Gulf Intel',
-      desc: lang === 'en' ? 'Providing affordable and customizable AI-powered tools for small businesses in Bahrain. Products include chatbots, inventory management software, review analytics, and Instagram automation tools.' : 'تقديم أدوات ذكاء اصطناعي ميسورة التكلفة وقابلة للتخصيص للشركات الصغيرة في البحرين. تشمل المنتجات روبوتات المحادثة وبرمجيات إدارة المخزون وتحليلات المراجعات.'
+      company: 'Gulf Intel AI',
+      companyUrl: 'https://gulfintelai.com',
+      icon: Briefcase,
+      tags: ['AI Tools', 'SaaS'],
+      desc:
+        lang === 'en'
+          ? 'Providing affordable and customizable AI-powered tools for small businesses in Bahrain. Products include chatbots, inventory management software, review analytics, and Instagram automation tools.'
+          : 'تقديم أدوات ذكاء اصطناعي ميسورة التكلفة وقابلة للتخصيص للشركات الصغيرة في البحرين. تشمل المنتجات روبوتات المحادثة وبرمجيات إدارة المخزون وتحليلات المراجعات.',
     },
     {
       year: 'Jul 2024',
       role: lang === 'en' ? 'LLM Application Developer Intern' : 'متدرب مطور تطبيقات نماذج اللغة',
       company: 'RIIG - HOOTL',
-      desc: lang === 'en' ? 'Developed an AI system for financial regulatory analysis. Designed and implemented an automated system to generate high-quality summaries of financial documents and regulations.' : 'طور نظام ذكاء اصطناعي لتحليل اللوائح المالية. صمم ونفذ نظامًا آليًا لإنشاء ملخصات عالية الجودة للوثائق واللوائح المالية.'
-    }
+      companyUrl: 'https://www.riigtech.com',
+      icon: Code,
+      tags: ['LLMs', 'FinTech'],
+      desc:
+        lang === 'en'
+          ? 'Developed an AI system for financial regulatory analysis. Designed and implemented an automated system to generate high-quality summaries of financial documents and regulations.'
+          : 'طور نظام ذكاء اصطناعي لتحليل اللوائح المالية. صمم ونفذ نظامًا آليًا لإنشاء ملخصات عالية الجودة للوثائق واللوائح المالية.',
+    },
   ];
 
   const projects = [
@@ -159,20 +188,42 @@ const App = () => {
     );
   };
 
+  const handleNavClick = (e, targetId) => {
+    e.preventDefault();
+    const element = document.getElementById(targetId);
+    if (element) {
+      const navHeight = 100;
+      const elementPosition = element.offsetTop - navHeight;
+      window.scrollTo({
+        top: elementPosition,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   useEffect(() => {
     const handleScroll = () => {
-      const sections = ['home', 'career', 'projects', 'skills', 'contact'];
-      const scrollPos = window.scrollY + 100;
+      const sections = ['home', 'projects', 'skills', 'career', 'contact'];
+      const scrollPos = window.scrollY + 150;
       for (const section of sections) {
         const element = document.getElementById(section);
-        if (element && scrollPos >= element.offsetTop && scrollPos < element.offsetTop + element.offsetHeight) {
-          setActiveSection(section);
-          break;
+        if (element) {
+          const offsetTop = element.offsetTop;
+          const offsetHeight = element.offsetHeight;
+          if (scrollPos >= offsetTop && scrollPos < offsetTop + offsetHeight) {
+            setActiveSection(section);
+            break;
+          }
         }
       }
     };
+    
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    handleScroll(); // Initial check
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   const toggleLang = () => setLang(lang === 'en' ? 'ar' : 'en');
@@ -205,15 +256,23 @@ const App = () => {
           </div>
 
           <div className="hidden lg:flex items-center space-x-8 rtl:space-x-reverse text-[11px] font-black tracking-[0.2em]">
-            {Object.entries(content.nav).map(([key, label]) => (
-              <a 
-                key={key} 
-                href={`#${key === 'me' ? 'home' : key === 'stack' ? 'skills' : key}`}
-                className={`transition-colors hover:text-emerald-500 ${activeSection === (key === 'me' ? 'home' : key === 'stack' ? 'skills' : key) ? 'text-emerald-500' : ''}`}
-              >
-                {label}
-              </a>
-            ))}
+            {Object.entries(content.nav).map(([key, label]) => {
+              let targetId = key;
+              if (key === 'me') targetId = 'home';
+              else if (key === 'stack') targetId = 'skills';
+              else if (key === 'timeline') targetId = 'career';
+              else if (key === 'works') targetId = 'projects';
+              return (
+                <a 
+                  key={key} 
+                  href={`#${targetId}`}
+                  onClick={(e) => handleNavClick(e, targetId)}
+                  className={`transition-colors hover:text-emerald-500 ${activeSection === targetId ? 'text-emerald-500' : ''}`}
+                >
+                  {label}
+                </a>
+              );
+            })}
           </div>
 
           <div className="flex items-center gap-4">
@@ -229,7 +288,7 @@ const App = () => {
       </nav>
 
       {/* Hero Section */}
-      <header id="home" className="min-h-screen flex items-center px-6 pt-20 max-w-7xl mx-auto">
+      <header id="home" className="min-h-[85vh] flex items-center px-6 pt-32 pb-16 max-w-7xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-12 items-center w-full">
           {/* Left: Picture Place */}
           <div className="relative group">
@@ -240,7 +299,7 @@ const App = () => {
           </div>
 
           {/* Right: Title Thing */}
-          <div className="space-y-8 text-center lg:text-start">
+          <div className="space-y-6 text-center lg:text-start">
             <div className="inline-block px-4 py-1 rounded-full border border-emerald-500/30 text-emerald-500 text-[10px] font-bold tracking-widest uppercase">
               {content.hero.badge}
             </div>
@@ -251,7 +310,11 @@ const App = () => {
               {content.hero.sub}
             </p>
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4">
-              <a href="#projects" className="px-10 py-5 bg-emerald-500 text-black font-black uppercase text-xs tracking-widest rounded-xl hover:bg-emerald-400 transition-all flex items-center gap-3 group">
+              <a 
+                href="#projects" 
+                onClick={(e) => handleNavClick(e, 'projects')}
+                className="px-10 py-5 bg-emerald-500 text-black font-black uppercase text-xs tracking-widest rounded-xl hover:bg-emerald-400 transition-all flex items-center gap-3 group"
+              >
                 {content.hero.cta1}
                 {lang === 'en' ? <MoveRight className="group-hover:translate-x-1 transition-transform" /> : <MoveLeft className="group-hover:-translate-x-1 transition-transform" />}
               </a>
@@ -260,64 +323,9 @@ const App = () => {
         </div>
       </header>
 
-      {/* Career Timeline */}
-      <section id="career" className="py-32 px-6 max-w-5xl mx-auto">
-        <div className="mb-20">
-          <h2 className="text-4xl font-bold tracking-tighter mb-4">{content.career.title}</h2>
-          <p className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'} font-medium uppercase tracking-widest text-xs`}>{content.career.subtitle}</p>
-        </div>
-
-        <div className={`relative border-l-2 ${isDarkMode ? 'border-white/5' : 'border-black/5'} ml-4 space-y-16 rtl:border-l-0 rtl:border-r-2 rtl:mr-4`}>
-          {careerTimeline.map((item, idx) => (
-            <div key={idx} className="relative pl-12 rtl:pl-0 rtl:pr-12 group">
-              <div className="absolute left-[-9px] rtl:left-auto rtl:right-[-9px] top-1.5 w-4 h-4 bg-emerald-500 rounded-full border-4 border-[#050505]" />
-              <div className="space-y-4">
-                <span className="text-xs font-black text-emerald-500 uppercase tracking-[0.2em]">{item.year}</span>
-                <h3 className="text-2xl font-bold">{item.role}</h3>
-                <p className="text-gray-500 font-bold">{item.company}</p>
-                <p className={`max-w-2xl leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{item.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Rotating Tech Ticker */}
-      <section id="skills" className="py-32 bg-emerald-500/[0.02] overflow-hidden">
-        <div className="max-w-6xl mx-auto px-6 mb-16">
-          <h2 className="text-center text-4xl font-bold tracking-tighter">{content.stack.title}</h2>
-        </div>
-
-        <div className="space-y-4">
-          {/* Row 1 */}
-          <div className="flex whitespace-nowrap overflow-hidden">
-            <div className="flex gap-4 animate-scroll">
-              {[...techRow1, ...techRow1].map((tech, i) => (
-                <div key={i} className={`flex items-center gap-4 px-8 py-6 border ${isDarkMode ? 'bg-black border-white/5' : 'bg-white border-black/5'} rounded-2xl`}>
-                  <TechIcon techName={tech} />
-                  <span className="font-bold text-lg">{tech}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Row 2 */}
-          <div className="flex whitespace-nowrap overflow-hidden">
-            <div className="flex gap-4 animate-scroll-reverse">
-              {[...techRow2, ...techRow2].map((tech, i) => (
-                <div key={i} className={`flex items-center gap-4 px-8 py-6 border ${isDarkMode ? 'bg-black border-white/5' : 'bg-white border-black/5'} rounded-2xl`}>
-                  <TechIcon techName={tech} />
-                  <span className="font-bold text-lg">{tech}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Projects */}
-      <section id="projects" className="py-32 px-6 max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-20">
+      {/* Projects - Moved up to be more prominent */}
+      <section id="projects" className="py-20 px-6 max-w-7xl mx-auto">
+        <div className="flex items-center justify-between mb-12">
           <h2 className="text-4xl font-bold tracking-tighter">{content.projects.title}</h2>
           <a href="#" className="flex items-center gap-2 text-[10px] font-black tracking-widest uppercase hover:text-emerald-500 transition-colors">
             {content.projects.archive} <ArrowUpRight size={14} />
@@ -353,8 +361,107 @@ const App = () => {
         </div>
       </section>
 
+      {/* Rotating Tech Ticker */}
+      <section id="skills" className="py-20 bg-emerald-500/[0.02] overflow-hidden">
+        <div className="max-w-6xl mx-auto px-6 mb-16">
+          <h2 className="text-center text-4xl font-bold tracking-tighter">{content.stack.title}</h2>
+        </div>
+
+        <div className="space-y-4">
+          {/* Row 1 */}
+          <div className="flex whitespace-nowrap overflow-hidden">
+            <div className="flex gap-4 animate-scroll">
+              {[...techRow1, ...techRow1].map((tech, i) => (
+                <div key={i} className={`flex items-center gap-4 px-8 py-6 border ${isDarkMode ? 'bg-black border-white/5' : 'bg-white border-black/5'} rounded-2xl`}>
+                  <TechIcon techName={tech} />
+                  <span className="font-bold text-lg">{tech}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Row 2 */}
+          <div className="flex whitespace-nowrap overflow-hidden">
+            <div className="flex gap-4 animate-scroll-reverse">
+              {[...techRow2, ...techRow2].map((tech, i) => (
+                <div key={i} className={`flex items-center gap-4 px-8 py-6 border ${isDarkMode ? 'bg-black border-white/5' : 'bg-white border-black/5'} rounded-2xl`}>
+                  <TechIcon techName={tech} />
+                  <span className="font-bold text-lg">{tech}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Career Timeline - Enhanced with visuals */}
+      <section id="career" className="py-20 px-6 max-w-5xl mx-auto relative">
+        <div className="mb-12">
+          <h2 className="text-4xl font-bold tracking-tighter mb-3">{content.career.title}</h2>
+          <p className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'} font-medium uppercase tracking-widest text-xs`}>{content.career.subtitle}</p>
+        </div>
+
+        <div className={`relative border-l-2 ${isDarkMode ? 'border-emerald-500/20' : 'border-emerald-500/10'} ml-6 space-y-8 rtl:border-l-0 rtl:border-r-2 rtl:mr-6`}>
+          {careerTimeline.map((item, idx) => {
+            const Icon = item.icon || Briefcase;
+            return (
+              <div 
+                key={idx} 
+                className="relative pl-12 rtl:pl-0 rtl:pr-12 group cursor-default"
+              >
+                {/* Animated dot */}
+                <div className={`absolute left-[-13px] rtl:left-auto rtl:right-[-13px] top-2 w-6 h-6 rounded-full bg-emerald-500 border-4 ${isDarkMode ? 'border-[#050505]' : 'border-[#fafafa]'} flex items-center justify-center transition-all duration-300 group-hover:scale-125 group-hover:bg-emerald-400`}>
+                  <Icon className="w-3 h-3 text-black" />
+                </div>
+                
+                {/* Card content */}
+                <div className={`rounded-2xl p-6 transition-all duration-300 group-hover:scale-[1.02] ${isDarkMode ? 'bg-white/5 hover:bg-white/10 border border-white/5' : 'bg-black/5 hover:bg-black/10 border border-black/5'}`}>
+                  <div className="space-y-3">
+                    <span className="text-xs font-black text-emerald-500 uppercase tracking-[0.2em]">
+                      {item.year}
+                    </span>
+                    <h3 className="text-xl font-bold">{item.role}</h3>
+                    {item.companyUrl ? (
+                      <a
+                        href={item.companyUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-gray-500 font-bold underline-offset-4 hover:underline hover:text-emerald-500 transition-colors inline-block"
+                      >
+                        {item.company} <ArrowUpRight className="inline w-3 h-3 ml-1" />
+                      </a>
+                    ) : (
+                      <p className="text-gray-500 font-bold">{item.company}</p>
+                    )}
+                    {item.tags && item.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-2 pt-1">
+                        {item.tags.map((tag, tagIdx) => (
+                          <span 
+                            key={tagIdx} 
+                            className={`text-[10px] font-bold px-2.5 py-1 rounded-md ${isDarkMode ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20'}`}
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    <p
+                      className={`max-w-2xl leading-relaxed pt-1 ${
+                        isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                      }`}
+                    >
+                      {item.desc}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
       {/* Contact */}
-      <section id="contact" className="py-32 px-6">
+      <section id="contact" className="py-20 px-6">
         <div className={`max-w-4xl mx-auto p-12 md:p-24 rounded-[3rem] text-center overflow-hidden relative ${isDarkMode ? 'bg-white text-black' : 'bg-black text-white'}`}>
           <div className="relative z-10">
             <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-8 leading-none">{content.contact.title}</h2>
