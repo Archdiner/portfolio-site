@@ -21,7 +21,7 @@ import * as simpleIcons from 'simple-icons';
 
 const App = () => {
   const [activeSection, setActiveSection] = useState('home');
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const [lang, setLang] = useState('en');
 
   // Translations
@@ -164,7 +164,7 @@ const App = () => {
     if (!iconKey || !simpleIcons[iconKey]) {
       // Fallback to first two letters if icon not found
       return (
-        <div className="w-8 h-8 bg-emerald-500/20 rounded flex items-center justify-center font-black text-emerald-500 text-xs">
+        <div className="w-8 h-8 bg-orange-500/20 rounded flex items-center justify-center font-black text-orange-500 text-xs">
           {techName.substring(0, 2).toUpperCase()}
         </div>
       );
@@ -250,9 +250,8 @@ const App = () => {
       {/* Navigation */}
       <nav className="fixed top-0 left-0 w-full z-50 p-6">
         <div className={`max-w-6xl mx-auto backdrop-blur-md ${isDarkMode ? 'bg-black/40 border-white/5' : 'bg-white/40 border-black/5'} border rounded-2xl px-6 py-4 flex items-center justify-between`}>
-          <div className="text-xl font-black tracking-tighter flex items-center gap-2">
-            <div className="w-6 h-6 bg-emerald-500 rounded-sm"></div>
-            <span>DEV.</span>
+          <div className="text-xl font-black tracking-tighter">
+            <span>ASAD</span>
           </div>
 
           <div className="hidden lg:flex items-center space-x-8 rtl:space-x-reverse text-[11px] font-black tracking-[0.2em]">
@@ -267,7 +266,7 @@ const App = () => {
                   key={key} 
                   href={`#${targetId}`}
                   onClick={(e) => handleNavClick(e, targetId)}
-                  className={`transition-colors hover:text-emerald-500 ${activeSection === targetId ? 'text-emerald-500' : ''}`}
+                  className={`transition-colors hover:text-orange-500 ${activeSection === targetId ? 'text-orange-500' : ''}`}
                 >
                   {label}
                 </a>
@@ -276,10 +275,10 @@ const App = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 rounded-lg hover:bg-emerald-500/10 transition-colors">
+            <button onClick={() => setIsDarkMode(!isDarkMode)} className="p-2 rounded-lg hover:bg-orange-500/10 transition-colors">
               {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
             </button>
-            <button onClick={toggleLang} className="p-2 rounded-lg hover:bg-emerald-500/10 transition-colors flex items-center gap-1 font-bold text-xs">
+            <button onClick={toggleLang} className="p-2 rounded-lg hover:bg-orange-500/10 transition-colors flex items-center gap-1 font-bold text-xs">
               <Languages size={18} />
               <span>{lang.toUpperCase()}</span>
             </button>
@@ -292,7 +291,7 @@ const App = () => {
         <div className="grid lg:grid-cols-2 gap-12 items-center w-full">
           {/* Left: Picture Place */}
           <div className="relative group">
-            <div className={`absolute -inset-4 bg-emerald-500/20 blur-3xl rounded-full opacity-50 group-hover:opacity-100 transition-opacity`}></div>
+            <div className={`absolute -inset-4 bg-orange-500/20 blur-3xl rounded-full opacity-50 group-hover:opacity-100 transition-opacity`}></div>
             <div className={`aspect-[4/5] w-full max-w-md mx-auto rounded-3xl overflow-hidden border ${isDarkMode ? 'border-white/10 bg-white/5' : 'border-black/5 bg-black/5'} relative transition-all duration-700`}>
                <img src="/portrait.JPG" alt="Portrait" className="w-full h-full object-cover" />
             </div>
@@ -300,7 +299,7 @@ const App = () => {
 
           {/* Right: Title Thing */}
           <div className="space-y-6 text-center lg:text-start">
-            <div className="inline-block px-4 py-1 rounded-full border border-emerald-500/30 text-emerald-500 text-[10px] font-bold tracking-widest uppercase">
+            <div className="inline-block px-4 py-1 rounded-full border border-orange-500/30 text-orange-500 text-[10px] font-bold tracking-widest uppercase">
               {content.hero.badge}
             </div>
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-[0.95] lg:max-w-xl">
@@ -313,7 +312,7 @@ const App = () => {
               <a 
                 href="#projects" 
                 onClick={(e) => handleNavClick(e, 'projects')}
-                className="px-10 py-5 bg-emerald-500 text-black font-black uppercase text-xs tracking-widest rounded-xl hover:bg-emerald-400 transition-all flex items-center gap-3 group"
+                className="px-10 py-5 bg-orange-500 text-black font-black uppercase text-xs tracking-widest rounded-xl hover:bg-orange-400 transition-all flex items-center gap-3 group"
               >
                 {content.hero.cta1}
                 {lang === 'en' ? <MoveRight className="group-hover:translate-x-1 transition-transform" /> : <MoveLeft className="group-hover:-translate-x-1 transition-transform" />}
@@ -327,7 +326,7 @@ const App = () => {
       <section id="projects" className="py-20 px-6 max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-12">
           <h2 className="text-4xl font-bold tracking-tighter">{content.projects.title}</h2>
-          <a href="#" className="flex items-center gap-2 text-[10px] font-black tracking-widest uppercase hover:text-emerald-500 transition-colors">
+          <a href="#" className="flex items-center gap-2 text-[10px] font-black tracking-widest uppercase hover:text-orange-500 transition-colors">
             {content.projects.archive} <ArrowUpRight size={14} />
           </a>
         </div>
@@ -343,7 +342,7 @@ const App = () => {
             >
               <div className="aspect-square rounded-3xl overflow-hidden mb-6 relative">
                 <img src={project.image} alt={project.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                <div className="absolute inset-0 bg-emerald-500/90 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-center items-center p-8 text-center">
+                <div className="absolute inset-0 bg-orange-500/90 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-center items-center p-8 text-center">
                   <p className="text-black text-xs font-black tracking-widest uppercase mb-4">Stack</p>
                   <div className="flex flex-wrap justify-center gap-2">
                     {project.stack.map((s, i) => (
@@ -354,7 +353,7 @@ const App = () => {
               </div>
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-bold">{project.title}</h3>
-                <ArrowUpRight className="text-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <ArrowUpRight className="text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
             </a>
           ))}
@@ -362,7 +361,7 @@ const App = () => {
       </section>
 
       {/* Rotating Tech Ticker */}
-      <section id="skills" className="py-20 bg-emerald-500/[0.02] overflow-hidden">
+      <section id="skills" className="py-20 bg-orange-500/[0.02] overflow-hidden">
         <div className="max-w-6xl mx-auto px-6 mb-16">
           <h2 className="text-center text-4xl font-bold tracking-tighter">{content.stack.title}</h2>
         </div>
@@ -401,7 +400,7 @@ const App = () => {
           <p className={`${isDarkMode ? 'text-gray-500' : 'text-gray-400'} font-medium uppercase tracking-widest text-xs`}>{content.career.subtitle}</p>
         </div>
 
-        <div className={`relative border-l-2 ${isDarkMode ? 'border-emerald-500/20' : 'border-emerald-500/10'} ml-6 space-y-8 rtl:border-l-0 rtl:border-r-2 rtl:mr-6`}>
+        <div className={`relative border-l-2 ${isDarkMode ? 'border-orange-500/20' : 'border-orange-500/10'} ml-6 space-y-8 rtl:border-l-0 rtl:border-r-2 rtl:mr-6`}>
           {careerTimeline.map((item, idx) => {
             const Icon = item.icon || Briefcase;
             return (
@@ -410,14 +409,14 @@ const App = () => {
                 className="relative pl-12 rtl:pl-0 rtl:pr-12 group cursor-default"
               >
                 {/* Animated dot */}
-                <div className={`absolute left-[-13px] rtl:left-auto rtl:right-[-13px] top-2 w-6 h-6 rounded-full bg-emerald-500 border-4 ${isDarkMode ? 'border-[#050505]' : 'border-[#fafafa]'} flex items-center justify-center transition-all duration-300 group-hover:scale-125 group-hover:bg-emerald-400`}>
+                <div className={`absolute left-[-13px] rtl:left-auto rtl:right-[-13px] top-2 w-6 h-6 rounded-full bg-orange-500 border-4 ${isDarkMode ? 'border-[#050505]' : 'border-[#fafafa]'} flex items-center justify-center transition-all duration-300 group-hover:scale-125 group-hover:bg-orange-400`}>
                   <Icon className="w-3 h-3 text-black" />
                 </div>
                 
                 {/* Card content */}
                 <div className={`rounded-2xl p-6 transition-all duration-300 group-hover:scale-[1.02] ${isDarkMode ? 'bg-white/5 hover:bg-white/10 border border-white/5' : 'bg-black/5 hover:bg-black/10 border border-black/5'}`}>
                   <div className="space-y-3">
-                    <span className="text-xs font-black text-emerald-500 uppercase tracking-[0.2em]">
+                    <span className="text-xs font-black text-orange-500 uppercase tracking-[0.2em]">
                       {item.year}
                     </span>
                     <h3 className="text-xl font-bold">{item.role}</h3>
@@ -426,7 +425,7 @@ const App = () => {
                         href={item.companyUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-gray-500 font-bold underline-offset-4 hover:underline hover:text-emerald-500 transition-colors inline-block"
+                        className="text-gray-500 font-bold underline-offset-4 hover:underline hover:text-orange-500 transition-colors inline-block"
                       >
                         {item.company} <ArrowUpRight className="inline w-3 h-3 ml-1" />
                       </a>
@@ -438,7 +437,7 @@ const App = () => {
                         {item.tags.map((tag, tagIdx) => (
                           <span 
                             key={tagIdx} 
-                            className={`text-[10px] font-bold px-2.5 py-1 rounded-md ${isDarkMode ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20'}`}
+                            className={`text-[10px] font-bold px-2.5 py-1 rounded-md ${isDarkMode ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'bg-orange-500/10 text-orange-600 border border-orange-500/20'}`}
                           >
                             {tag}
                           </span>
@@ -482,11 +481,6 @@ const App = () => {
         </div>
       </section>
 
-      <footer className={`py-12 border-t ${isDarkMode ? 'border-white/5' : 'border-black/5'} text-center`}>
-        <p className="text-[10px] font-black tracking-[0.4em] opacity-40 uppercase">
-          {lang === 'en' ? 'Built by Developer 2025' : 'تم التطوير بواسطة المبرمج ٢٠٢٥'}
-        </p>
-      </footer>
     </div>
   );
 };
