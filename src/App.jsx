@@ -268,7 +268,7 @@ const App = () => {
       const regex = new RegExp(`(${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
       processedText = processedText.replace(regex, (match) => {
         const currentDelay = delay;
-        delay += 0.2;
+        delay += 0.6;
         return `<span class="animated-underline underline-blue" style="animation-delay: ${currentDelay}s">${match}</span>`;
       });
     });
@@ -278,7 +278,7 @@ const App = () => {
       const regex = new RegExp(`(${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
       processedText = processedText.replace(regex, (match) => {
         const currentDelay = delay;
-        delay += 0.2;
+        delay += 0.6;
         return `<span class="animated-underline underline-purple" style="animation-delay: ${currentDelay}s">${match}</span>`;
       });
     });
@@ -288,7 +288,7 @@ const App = () => {
       const regex = new RegExp(`(${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
       processedText = processedText.replace(regex, (match) => {
         const currentDelay = delay;
-        delay += 0.2;
+        delay += 0.6;
         return `<span class="animated-underline underline-green" style="animation-delay: ${currentDelay}s">${match}</span>`;
       });
     });
@@ -325,7 +325,7 @@ const App = () => {
           background-repeat: no-repeat;
           background-position: left bottom;
           background-size: 0% 2px;
-          animation: underline 0.6s ease-out forwards;
+          animation: underline 1s ease-out forwards;
           padding-bottom: 2px;
         }
         .underline-blue {
