@@ -26,14 +26,13 @@ const App = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [lang, setLang] = useState('en');
   const [selectedProject, setSelectedProject] = useState(null);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
   // Translations
   const t = {
     en: {
       nav: { me: 'ME', works: 'PROJECTS', stack: 'STACK', timeline: 'EXPERIENCE', contact: 'CONTACT' },
       hero: {
-        badge: 'AVAILABLE FOR NEW VENTURES',
+        badge: 'SEEKING SUMMER INTERNSHIP 2026',
         title: 'Bridging Web3 and Artificial Intelligence.',
         sub: "I'm an international student from Bahrain studying CS at Cornell. I'm a full‑stack developer specializing in blockchain and AI‑powered applications.",
         cta1: 'View My Work',
@@ -47,7 +46,7 @@ const App = () => {
     ar: {
       nav: { me: 'أنا', works: 'المشاريع', stack: 'التقنيات', timeline: 'الخبرة', contact: 'اتصل' },
       hero: {
-        badge: 'متاح للمشاريع الجديدة',
+        badge: 'أبحث عن تدريب صيفي 2026',
         title: 'الربط بين Web3 والذكاء الاصطناعي.',
         sub: 'طالب دولي من البحرين أدرس علوم الحاسوب في كورنيل. أنا مطور واجهات متكاملة متخصص في البلوك تشين وتطبيقات الذكاء الاصطناعي.',
         cta1: 'مشاهدة أعمالي',
@@ -248,8 +247,54 @@ const App = () => {
     };
   }, []);
 
+
   const toggleLang = () => setLang(lang === 'en' ? 'ar' : 'en');
   const content = t[lang];
+
+  // Function to add animated underlines to keywords
+  const addAnimatedUnderlines = (text, lang) => {
+    // Group 1: Bahrain, Cornell - Blue color
+    const group1 = lang === 'en' ? ['Bahrain', 'Cornell'] : ['البحرين', 'كورنيل'];
+    // Group 2: full‑stack - Purple color
+    const group2 = lang === 'en' ? ['full‑stack'] : ['واجهات متكاملة'];
+    // Group 3: blockchain, AI - Green color
+    const group3 = lang === 'en' ? ['blockchain', 'AI'] : ['البلوك تشين', 'الذكاء الاصطناعي'];
+    
+    let processedText = text;
+    let delay = 0;
+    
+    // Process group 1 (Blue)
+    group1.forEach((keyword) => {
+      const regex = new RegExp(`(${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+      processedText = processedText.replace(regex, (match) => {
+        const currentDelay = delay;
+        delay += 0.2;
+        return `<span class="animated-underline underline-blue" style="animation-delay: ${currentDelay}s">${match}</span>`;
+      });
+    });
+    
+    // Process group 2 (Purple)
+    group2.forEach((keyword) => {
+      const regex = new RegExp(`(${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+      processedText = processedText.replace(regex, (match) => {
+        const currentDelay = delay;
+        delay += 0.2;
+        return `<span class="animated-underline underline-purple" style="animation-delay: ${currentDelay}s">${match}</span>`;
+      });
+    });
+    
+    // Process group 3 (Green)
+    group3.forEach((keyword) => {
+      const regex = new RegExp(`(${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+      processedText = processedText.replace(regex, (match) => {
+        const currentDelay = delay;
+        delay += 0.2;
+        return `<span class="animated-underline underline-green" style="animation-delay: ${currentDelay}s">${match}</span>`;
+      });
+    });
+    
+    return processedText;
+  };
 
   return (
     <div 
@@ -265,9 +310,33 @@ const App = () => {
           0% { transform: translateX(-50%); }
           100% { transform: translateX(0); }
         }
+        @keyframes underline {
+          0% {
+            background-size: 0% 2px;
+          }
+          100% {
+            background-size: 100% 2px;
+          }
+        }
         .animate-scroll { animation: scroll 30s linear infinite; }
         .animate-scroll-reverse { animation: scroll-reverse 30s linear infinite; }
         .pause-animation { animation-play-state: paused; }
+        .animated-underline {
+          background-repeat: no-repeat;
+          background-position: left bottom;
+          background-size: 0% 2px;
+          animation: underline 0.6s ease-out forwards;
+          padding-bottom: 2px;
+        }
+        .underline-blue {
+          background-image: linear-gradient(to right, rgba(251, 113, 133, 0.8), rgba(251, 113, 133, 0.8));
+        }
+        .underline-purple {
+          background-image: linear-gradient(to right, rgba(245, 158, 11, 0.8), rgba(245, 158, 11, 0.8));
+        }
+        .underline-green {
+          background-image: linear-gradient(to right, rgba(234, 88, 12, 0.8), rgba(234, 88, 12, 0.8));
+        }
       `}</style>
 
       {/* Navigation */}
@@ -313,45 +382,7 @@ const App = () => {
       <header 
         id="home" 
         className="min-h-[85vh] flex items-center px-6 pt-32 pb-16 max-w-7xl mx-auto relative"
-        onMouseMove={(e) => {
-          const rect = e.currentTarget.getBoundingClientRect();
-          setMousePosition({
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top
-          });
-        }}
-        onMouseLeave={() => {
-          setMousePosition({ x: 0, y: 0 });
-        }}
       >
-        {/* Mouse-following orange glow background with mask for smooth edges */}
-        <div 
-          className="absolute pointer-events-none transition-all duration-300 ease-out"
-          style={{
-            left: `${mousePosition.x}px`,
-            top: `${mousePosition.y}px`,
-            transform: 'translate(-50%, -50%)',
-            width: '600px',
-            height: '600px',
-            background: 'radial-gradient(circle, rgba(249, 115, 22, 0.35) 0%, rgba(249, 115, 22, 0.15) 40%, transparent 70%)',
-            filter: 'blur(80px)',
-            zIndex: 0,
-            opacity: mousePosition.x > 0 && mousePosition.y > 0 ? 1 : 0,
-            maskImage: `radial-gradient(ellipse 80% 80% at center, black 30%, transparent 85%)`,
-            WebkitMaskImage: `radial-gradient(ellipse 80% 80% at center, black 30%, transparent 85%)`,
-            maskRepeat: 'no-repeat',
-            WebkitMaskRepeat: 'no-repeat'
-          }}
-        />
-        
-        {/* Edge fade overlay for smoother transition */}
-        <div 
-          className="absolute inset-0 pointer-events-none z-10"
-          style={{
-            background: `radial-gradient(ellipse 85% 75% at center, transparent 0%, transparent 60%, ${isDarkMode ? 'rgba(5, 5, 5, 0.3)' : 'rgba(250, 250, 250, 0.3)'} 80%, ${isDarkMode ? '#050505' : '#fafafa'} 100%)`
-          }}
-        />
-        
         <div className="grid lg:grid-cols-2 gap-12 items-center w-full relative z-10">
           {/* Left: Picture Place */}
           <div className="relative">
@@ -368,9 +399,10 @@ const App = () => {
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-[0.95] lg:max-w-xl">
               {content.hero.title}
             </h1>
-            <p className={`text-lg max-w-lg mx-auto lg:mx-0 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-              {content.hero.sub}
-            </p>
+            <p 
+              className={`text-lg max-w-lg mx-auto lg:mx-0 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}
+              dangerouslySetInnerHTML={{ __html: addAnimatedUnderlines(content.hero.sub, lang) }}
+            />
             <div className={`flex items-center gap-2 justify-center lg:justify-start text-sm ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>
               <MapPin size={16} className="text-orange-500" />
               <span>Ithaca, NY</span>
