@@ -30,7 +30,7 @@ const App = () => {
   // Translations
   const t = {
     en: {
-      nav: { me: 'ME', works: 'PROJECTS', stack: 'STACK', timeline: 'EXPERIENCE', contact: 'CONTACT' },
+      nav: { me: 'ME', works: 'PROJECTS', stack: 'STACK', timeline: 'EXPERIENCE', contact: 'CONTACT', resume: 'RESUME' },
       hero: {
         badge: 'SEEKING SUMMER INTERNSHIP 2026',
         title: 'Bridging Web3 and Artificial Intelligence.',
@@ -44,7 +44,7 @@ const App = () => {
       contact: { title: 'LET\'S BUILD THE FUTURE.', sub: 'Currently open to innovative projects in the decentralized space and AI orchestration.' }
     },
     ar: {
-      nav: { me: 'أنا', works: 'المشاريع', stack: 'التقنيات', timeline: 'الخبرة', contact: 'اتصل' },
+      nav: { me: 'أنا', works: 'المشاريع', stack: 'التقنيات', timeline: 'الخبرة', contact: 'اتصل', resume: 'السيرة' },
       hero: {
         badge: 'أبحث عن تدريب صيفي 2026',
         title: 'الربط بين Web3 والذكاء الاصطناعي.',
@@ -353,6 +353,22 @@ const App = () => {
               else if (key === 'stack') targetId = 'skills';
               else if (key === 'timeline') targetId = 'career';
               else if (key === 'works') targetId = 'projects';
+              
+              // Handle resume link separately (opens PDF in new tab)
+              if (key === 'resume') {
+                return (
+                  <a 
+                    key={key} 
+                    href="/Rizvi_Asad_Resume.pdf"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="transition-colors hover:text-orange-500"
+                  >
+                    {label}
+                  </a>
+                );
+              }
+              
               return (
                 <a 
                   key={key} 
