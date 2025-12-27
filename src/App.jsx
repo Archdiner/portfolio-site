@@ -425,9 +425,6 @@ const App = () => {
       <section id="projects" className="py-20 px-6 max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-12">
           <h2 className="text-4xl font-bold tracking-tighter">{content.projects.title}</h2>
-          <a href="#" className="flex items-center gap-2 text-[10px] font-black tracking-widest uppercase hover:text-orange-500 transition-colors">
-            {content.projects.archive} <ArrowUpRight size={14} />
-          </a>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -547,7 +544,7 @@ const App = () => {
           <h2 className="text-center text-4xl font-bold tracking-tighter">{content.stack.title}</h2>
         </div>
 
-        <div className="relative mx-6 md:mx-12">
+        <div className="relative mx-6 md:mx-12" dir="ltr">
           {/* Fade gradients */}
           <div className={`absolute left-0 top-0 bottom-0 w-24 z-10 pointer-events-none ${isDarkMode ? 'bg-gradient-to-r from-[#050505] to-transparent' : 'bg-gradient-to-r from-[#fafafa] to-transparent'}`}></div>
           <div className={`absolute right-0 top-0 bottom-0 w-24 z-10 pointer-events-none ${isDarkMode ? 'bg-gradient-to-l from-[#050505] to-transparent' : 'bg-gradient-to-l from-[#fafafa] to-transparent'}`}></div>
