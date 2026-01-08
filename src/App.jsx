@@ -112,6 +112,16 @@ const App = () => {
 
   const projects = [
     {
+      title: 'ComputeSwarm',
+      stack: ['React', 'TypeScript', 'FastAPI', 'Python', 'Supabase', 'Docker', 'x402', 'Web3.py', 'PyTorch'],
+      image: '/compute-swarm-screenshot.png',
+      githubLink: 'https://github.com/Archdiner/compute-swarm',
+      screenshots: ['/compute-swarm-screenshot.png'],
+      description: lang === 'en' 
+        ? 'A decentralized GPU compute marketplace that connects idle GPUs with compute demand through trustless micropayments. Built with React and TypeScript for the frontend, FastAPI for the backend, and x402 SDK for USDC payments on Base. Features include Docker sandboxing for secure execution, multi-GPU support, job templates for PyTorch and HuggingFace, and real-time earnings tracking. Enables affordable AI compute access at 75-90% cost reduction compared to cloud providers by utilizing idle GPU capacity globally.'
+        : 'سوق GPU لامركزي للحوسبة يربط وحدات معالجة الرسومات الخاملة مع الطلب على الحوسبة من خلال المدفوعات الصغيرة الموثوقة. مبني بـ React وTypeScript للواجهة الأمامية وFastAPI للخلفية وx402 SDK للمدفوعات بـ USDC على Base. يتضمن عزل Docker للتنفيذ الآمن ودعم متعدد GPU وقوالب وظائف لـ PyTorch وHuggingFace وتتبع الأرباح في الوقت الفعلي.'
+    },
+    {
       title: 'CommitMint',
       stack: ['Solana', 'Anchor', 'Next.js', 'FastAPI', 'Supabase'],
       image: '/commitmint-screenshot.png',
