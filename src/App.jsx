@@ -1,17 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Github, 
-  Linkedin, 
-  Mail, 
-  ExternalLink, 
-  Sun, 
-  Moon, 
+import { useState, useEffect } from 'react';
+import {
+  Github,
+  Linkedin,
+  ExternalLink,
+  Sun,
+  Moon,
   Languages,
   ArrowUpRight,
   MoveRight,
   MoveLeft,
   Twitter,
-  GraduationCap,
   Briefcase,
   Code,
   Sparkles,
@@ -61,6 +59,18 @@ const App = () => {
 
   const careerTimeline = [
     {
+      year: 'Jan 2026 - Present',
+      role: lang === 'en' ? 'Student Ambassador' : 'سفير طلابي',
+      company: 'Akash Network',
+      companyUrl: 'https://akash.network',
+      icon: Code,
+      tags: ['Decentralized Cloud', 'Community'],
+      desc:
+        lang === 'en'
+          ? 'Representing Akash Network on campus, promoting decentralized cloud compute solutions and organizing educational workshops for developers.'
+          : 'تمثيل شبكة أكاش في الحرم الجامعي، وتعزيز حلول الحوسبة السحابية اللامركزية وتنظيم ورش عمل تعليمية للمطورين.',
+    },
+    {
       year: 'Oct 2025 - Present',
       role: lang === 'en' ? 'Accelerator Subteam Member' : 'عضو فريق التسريع',
       company: 'Cornell Blockchain',
@@ -74,15 +84,15 @@ const App = () => {
     },
     {
       year: 'Oct 2025 - Present',
-      role: lang === 'en' ? 'AI Engineer' : 'مهندس الذكاء الاصطناعي',
+      role: lang === 'en' ? 'Vice President (prev. AI Engineer)' : 'نائب الرئيس (سابقاً مهندس ذكاء اصطناعي)',
       company: 'Generative AI at Cornell',
       companyUrl: 'https://cornellgenai.com',
       icon: Sparkles,
-      tags: ['LLMs', 'AI Research'],
+      tags: ['LLMs', 'AI Research', 'Leadership'],
       desc:
         lang === 'en'
-          ? 'Building AI solutions with focus on Large Language Models (LLM) and artificial intelligence applications.'
-          : 'بناء حلول الذكاء الاصطناعي مع التركيز على نماذج اللغة الكبيرة وتطبيقات الذكاء الاصطناعي.',
+          ? 'Leading AI initiatives and building solutions with focus on Large Language Models (LLM) and artificial intelligence applications. Previously started as an AI Engineer before stepping up as VP.'
+          : 'قيادة مبادرات الذكاء الاصطناعي وبناء حلول مع التركيز على نماذج اللغة الكبيرة وتطبيقات الذكاء الاصطناعي. بدأت سابقاً كمهندس ذكاء اصطناعي قبل أن أصبح نائب الرئيس.',
     },
     {
       year: 'Jun 2024 - Present',
@@ -112,12 +122,32 @@ const App = () => {
 
   const projects = [
     {
+      title: 'Kite Credit',
+      stack: ['Next.js', 'React', 'Solana', 'Reclaim ZK', 'Gemini 2.0'],
+      image: '/kitecredit-screenshot.png',
+      githubLink: 'https://github.com/Archdiner/kite-credit',
+      projectLink: 'https://kitecredit.xyz',
+      xLink: 'https://x.com/kitecredit',
+      screenshots: ['/kitecredit-screenshot.png'],
+      description: lang === 'en'
+        ? 'A persistent, cross-border credit score that aggregates off-chain and on-chain identity data. Generates a dynamic credit score using Solana blockchain activity, GitHub developer history, and Zero-Knowledge (ZK) verified bank statements via Reclaim Protocol. Features natural language AI explanations powered by Gemini 2.0 Flash.'
+        : 'درجة ائتمانية دائمة عابرة للحدود تجمع بين بيانات الهوية داخل وخارج السلسلة. تنشئ درجة ائتمانية ديناميكية باستخدام نشاط بلوك تشين سولانا، وسجل مطور غيت هاب، وكشوفات بنكية تم التحقق منها بتقنية المعرفة الصفرية (ZK). تتميز بتفسيرات ذكاء اصطناعي باللغة الطبيعية.'
+    },
+    {
+      title: 'Jest',
+      stack: ['Python', 'MediaPipe', 'OpenCV', 'Google Gemini'],
+      githubLink: 'https://github.com/Archdiner/gest',
+      description: lang === 'en'
+        ? 'A multimodal AI system that enables ergonomic hand gesture control and voice interaction, replacing traditional mouse and keyboard inputs. Built with MediaPipe for 60fps zero-lag hand tracking and the Gemini 3 Multimodal Live API for screen awareness and voice reasoning.'
+        : 'نظام ذكاء اصطناعي متعدد الوسائط يتيح التحكم المريح بإيماءات اليد والتفاعل الصوتي، ليحل محل الماوس ولوحة المفاتيح. مبني باستخدام MediaPipe لتتبع اليد بدون تأخير وواجهة برمجة تطبيقات Gemini 3 للوعي بالشاشة والاستنتاج الصوتي.'
+    },
+    {
       title: 'ComputeSwarm',
       stack: ['React', 'TypeScript', 'FastAPI', 'Python', 'Supabase', 'Docker', 'x402', 'Web3.py', 'PyTorch'],
       image: '/compute-swarm-screenshot.png',
       githubLink: 'https://github.com/Archdiner/compute-swarm',
       screenshots: ['/compute-swarm-screenshot.png'],
-      description: lang === 'en' 
+      description: lang === 'en'
         ? 'A decentralized GPU compute marketplace that connects idle GPUs with compute demand through trustless micropayments. Built with React and TypeScript for the frontend, FastAPI for the backend, and x402 SDK for USDC payments on Base. Features include Docker sandboxing for secure execution, multi-GPU support, job templates for PyTorch and HuggingFace, and real-time earnings tracking. Enables affordable AI compute access at 75-90% cost reduction compared to cloud providers by utilizing idle GPU capacity globally.'
         : 'سوق GPU لامركزي للحوسبة يربط وحدات معالجة الرسومات الخاملة مع الطلب على الحوسبة من خلال المدفوعات الصغيرة الموثوقة. مبني بـ React وTypeScript للواجهة الأمامية وFastAPI للخلفية وx402 SDK للمدفوعات بـ USDC على Base. يتضمن عزل Docker للتنفيذ الآمن ودعم متعدد GPU وقوالب وظائف لـ PyTorch وHuggingFace وتتبع الأرباح في الوقت الفعلي.'
     },
@@ -128,8 +158,8 @@ const App = () => {
       githubLink: 'https://github.com/Archdiner/commitment-parties',
       projectLink: 'https://commitmint.app',
       screenshots: ['/commitmint-screenshot.png'],
-      description: lang === 'en' 
-        ? 'A Solana-based commitment pool platform that helps users maintain accountability and build positive habits. Built with Anchor for smart contracts, Next.js for the frontend, and FastAPI for backend services. Users can create commitment pools, stake tokens, and track their progress toward goals with blockchain-based verification.'
+      description: lang === 'en'
+        ? '🏆 3rd Place Global Solana Student Hackathon winner. A Solana-based commitment pool platform that helps users maintain accountability and build positive habits. Built with Anchor for smart contracts, Next.js for the frontend, and FastAPI for backend services. Users can create commitment pools, stake tokens, and track their progress toward goals with blockchain-based verification.'
         : 'منصة تجمع الالتزامات القائمة على Solana تساعد المستخدمين على الحفاظ على المساءلة وبناء عادات إيجابية. تم بناؤها باستخدام Anchor للعقود الذكية وNext.js للواجهة الأمامية وFastAPI لخدمات الخلفية.'
     },
     {
@@ -189,9 +219,10 @@ const App = () => {
   };
 
   // TechIcon component to render the icon
+  /* eslint-disable react/prop-types */
   const TechIcon = ({ techName }) => {
     const iconKey = techIconMap[techName];
-    
+
     if (!iconKey || !simpleIcons[iconKey]) {
       // Fallback to first two letters if icon not found
       return (
@@ -200,11 +231,11 @@ const App = () => {
         </div>
       );
     }
-    
+
     const icon = simpleIcons[iconKey];
     const svgPath = icon.path;
     const iconColor = `#${icon.hex}`;
-    
+
     return (
       <svg
         role="img"
@@ -248,10 +279,10 @@ const App = () => {
         }
       }
     };
-    
+
     window.addEventListener('scroll', handleScroll);
     handleScroll(); // Initial check
-    
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
@@ -269,10 +300,10 @@ const App = () => {
     const group2 = lang === 'en' ? ['full‑stack'] : ['واجهات متكاملة'];
     // Group 3: blockchain, AI - Green color
     const group3 = lang === 'en' ? ['blockchain', 'AI'] : ['البلوك تشين', 'الذكاء الاصطناعي'];
-    
+
     let processedText = text;
     let delay = 0;
-    
+
     // Process group 1 (Blue)
     group1.forEach((keyword) => {
       const regex = new RegExp(`(${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
@@ -282,7 +313,7 @@ const App = () => {
         return `<span class="animated-underline underline-blue" style="animation-delay: ${currentDelay}s">${match}</span>`;
       });
     });
-    
+
     // Process group 2 (Purple)
     group2.forEach((keyword) => {
       const regex = new RegExp(`(${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
@@ -292,7 +323,7 @@ const App = () => {
         return `<span class="animated-underline underline-purple" style="animation-delay: ${currentDelay}s">${match}</span>`;
       });
     });
-    
+
     // Process group 3 (Green)
     group3.forEach((keyword) => {
       const regex = new RegExp(`(${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
@@ -302,12 +333,12 @@ const App = () => {
         return `<span class="animated-underline underline-green" style="animation-delay: ${currentDelay}s">${match}</span>`;
       });
     });
-    
+
     return processedText;
   };
 
   return (
-    <div 
+    <div
       className={`${isDarkMode ? 'dark bg-[#050505] text-gray-100' : 'bg-[#fafafa] text-gray-900'} min-h-screen transition-colors duration-300 font-sans`}
       dir={lang === 'ar' ? 'rtl' : 'ltr'}
     >
@@ -363,12 +394,12 @@ const App = () => {
               else if (key === 'stack') targetId = 'skills';
               else if (key === 'timeline') targetId = 'career';
               else if (key === 'works') targetId = 'projects';
-              
+
               // Handle resume link separately (opens PDF in new tab)
               if (key === 'resume') {
                 return (
-                  <a 
-                    key={key} 
+                  <a
+                    key={key}
                     href="/Rizvi_Asad_Resume.pdf"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -378,10 +409,10 @@ const App = () => {
                   </a>
                 );
               }
-              
+
               return (
-                <a 
-                  key={key} 
+                <a
+                  key={key}
                   href={`#${targetId}`}
                   onClick={(e) => handleNavClick(e, targetId)}
                   className={`transition-colors hover:text-orange-500 ${activeSection === targetId ? 'text-orange-500' : ''}`}
@@ -405,15 +436,15 @@ const App = () => {
       </nav>
 
       {/* Hero Section */}
-      <header 
-        id="home" 
+      <header
+        id="home"
         className="min-h-[85vh] flex items-center px-6 pt-32 pb-16 max-w-7xl mx-auto relative"
       >
         <div className="grid lg:grid-cols-2 gap-12 items-center w-full relative z-10">
           {/* Left: Picture Place */}
           <div className="relative">
             <div className={`aspect-[4/5] w-full max-w-md mx-auto rounded-3xl overflow-hidden border ${isDarkMode ? 'border-white/10 bg-white/5' : 'border-black/5 bg-black/5'} relative transition-all duration-700`}>
-               <img src="/portrait.JPG" alt="Portrait" className="w-full h-full object-cover" />
+              <img src="/portrait.JPG" alt="Portrait" className="w-full h-full object-cover" />
             </div>
           </div>
 
@@ -425,7 +456,7 @@ const App = () => {
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-[0.95] lg:max-w-xl">
               {content.hero.title}
             </h1>
-            <p 
+            <p
               className={`text-lg max-w-lg mx-auto lg:mx-0 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}
               dangerouslySetInnerHTML={{ __html: addAnimatedUnderlines(content.hero.sub, lang) }}
             />
@@ -434,8 +465,8 @@ const App = () => {
               <span>Ithaca, NY</span>
             </div>
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4">
-              <a 
-                href="#projects" 
+              <a
+                href="#projects"
                 onClick={(e) => handleNavClick(e, 'projects')}
                 className="px-10 py-5 bg-orange-500 text-black font-black uppercase text-xs tracking-widest rounded-xl hover:bg-orange-400 transition-all flex items-center gap-3 group"
               >
@@ -456,12 +487,19 @@ const App = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
           {projects.map((project, idx) => (
             <div
-              key={idx} 
+              key={idx}
               onClick={() => setSelectedProject(project)}
               className="group cursor-pointer block"
             >
-              <div className="aspect-square rounded-3xl overflow-hidden mb-6 relative">
-                <img src={project.image} alt={project.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+              <div className="aspect-square rounded-3xl overflow-hidden mb-6 relative hover:scale-105 transition-transform duration-700">
+                {project.image ? (
+                  <img src={project.image} alt={project.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                ) : (
+                  <div className={`w-full h-full flex flex-col items-center justify-center transition-transform duration-700 group-hover:scale-110 ${isDarkMode ? 'bg-white/5' : 'bg-black/5'}`}>
+                    <Code size={48} className={`mb-4 ${isDarkMode ? 'text-white/20' : 'text-black/20'}`} />
+                    <span className={`font-bold tracking-widest uppercase text-xs ${isDarkMode ? 'text-white/30' : 'text-black/30'}`}>{project.title}</span>
+                  </div>
+                )}
                 <div className="absolute inset-0 bg-orange-500/90 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-center items-center p-8 text-center">
                   <p className="text-black text-xs font-black tracking-widest uppercase mb-4">Stack</p>
                   <div className="flex flex-wrap justify-center gap-2">
@@ -481,40 +519,40 @@ const App = () => {
 
         {/* Project Modal */}
         {selectedProject && (
-          <div 
+          <div
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
             onClick={() => setSelectedProject(null)}
           >
-            <div 
+            <div
               className={`max-w-6xl w-full max-h-[90vh] overflow-auto rounded-3xl ${isDarkMode ? 'bg-[#050505] border border-white/10' : 'bg-white border border-black/10'} shadow-2xl`}
               onClick={(e) => e.stopPropagation()}
             >
               <div className="sticky top-0 z-10 flex justify-between items-center p-6 border-b border-current/10">
                 <h2 className="text-3xl font-bold">{selectedProject.title}</h2>
-                <button 
+                <button
                   onClick={() => setSelectedProject(null)}
                   className="p-2 rounded-lg hover:bg-orange-500/10 transition-colors"
                 >
                   <X size={24} />
                 </button>
               </div>
-              
+
               <div className="grid md:grid-cols-2 gap-8 p-8">
                 {/* Left: Screenshots */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-bold uppercase tracking-wider">Screenshots</h3>
                   {selectedProject.screenshots?.map((screenshot, idx) => (
                     <div key={idx} className="rounded-2xl overflow-hidden border border-current/10">
-                      <img 
-                        src={screenshot} 
-                        alt={`${selectedProject.title} screenshot ${idx + 1}`} 
+                      <img
+                        src={screenshot}
+                        alt={`${selectedProject.title} screenshot ${idx + 1}`}
                         className="w-full h-auto object-contain"
                       />
                     </div>
                   ))}
                   <div className="flex flex-col gap-3">
                     {selectedProject.projectLink && (
-                      <a 
+                      <a
                         href={selectedProject.projectLink}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -523,7 +561,18 @@ const App = () => {
                         View Project <ExternalLink size={18} />
                       </a>
                     )}
-                    <a 
+                    {selectedProject.xLink && (
+                      <a
+                        href={selectedProject.xLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold transition-colors ${isDarkMode ? 'bg-white/10 text-white border border-white/20 hover:bg-white/20' : 'bg-black/10 text-black border border-black/20 hover:bg-black/20'}`}
+                      >
+                        <Twitter size={18} />
+                        X
+                      </a>
+                    )}
+                    <a
                       href={selectedProject.githubLink}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -543,13 +592,13 @@ const App = () => {
                       {selectedProject.description}
                     </p>
                   </div>
-                  
+
                   <div>
                     <h3 className="text-lg font-bold uppercase tracking-wider mb-4">Tech Stack</h3>
                     <div className="flex flex-wrap gap-2">
                       {selectedProject.stack.map((tech, idx) => (
-                        <span 
-                          key={idx} 
+                        <span
+                          key={idx}
                           className={`px-4 py-2 rounded-lg font-bold text-sm ${isDarkMode ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'bg-orange-500/10 text-orange-600 border border-orange-500/20'}`}
                         >
                           {tech}
@@ -612,16 +661,15 @@ const App = () => {
 
         <div className={`relative border-l-2 ${isDarkMode ? 'border-orange-500/20' : 'border-orange-500/10'} ml-6 space-y-8 rtl:border-l-0 rtl:border-r-2 rtl:mr-6`}>
           {careerTimeline.map((item, idx) => {
-            const Icon = item.icon || Briefcase;
             return (
-              <div 
-                key={idx} 
+              <div
+                key={idx}
                 className="relative pl-12 rtl:pl-0 rtl:pr-12 group cursor-default"
               >
                 {/* Animated dot */}
                 <div className={`absolute left-[-13px] rtl:left-auto rtl:right-[-13px] top-2 w-6 h-6 rounded-full bg-orange-500 border-4 ${isDarkMode ? 'border-[#050505]' : 'border-[#fafafa]'} transition-all duration-300 group-hover:scale-125 group-hover:bg-orange-400`}>
                 </div>
-                
+
                 {/* Card content */}
                 <div className={`rounded-2xl p-6 transition-all duration-300 group-hover:scale-[1.02] ${isDarkMode ? 'bg-white/5 hover:bg-white/10 border border-white/5' : 'bg-black/5 hover:bg-black/10 border border-black/5'}`}>
                   <div className="space-y-3">
@@ -644,8 +692,8 @@ const App = () => {
                     {item.tags && item.tags.length > 0 && (
                       <div className="flex flex-wrap gap-2 pt-1">
                         {item.tags.map((tag, tagIdx) => (
-                          <span 
-                            key={tagIdx} 
+                          <span
+                            key={tagIdx}
                             className={`text-[10px] font-bold px-2.5 py-1 rounded-md ${isDarkMode ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'bg-orange-500/10 text-orange-600 border border-orange-500/20'}`}
                           >
                             {tag}
@@ -654,9 +702,8 @@ const App = () => {
                       </div>
                     )}
                     <p
-                      className={`max-w-2xl leading-relaxed pt-1 ${
-                        isDarkMode ? 'text-gray-400' : 'text-gray-600'
-                      }`}
+                      className={`max-w-2xl leading-relaxed pt-1 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                        }`}
                     >
                       {item.desc}
                     </p>
@@ -683,7 +730,7 @@ const App = () => {
               <div className="flex items-center gap-4">
                 <a href="https://github.com/Archdiner" target="_blank" rel="noopener noreferrer" className="p-4 rounded-xl border border-current opacity-50 hover:opacity-100"><Github /></a>
                 <a href="https://www.linkedin.com/in/asad-rizvi-02a1782a2/" target="_blank" rel="noopener noreferrer" className="p-4 rounded-xl border border-current opacity-50 hover:opacity-100"><Linkedin /></a>
-                <a href="https://twitter.com/carne_asado" target="_blank" rel="noopener noreferrer" className="p-4 rounded-xl border border-current opacity-50 hover:opacity-100"><Twitter /></a>
+                <a href="https://x.com/carne_asado" target="_blank" rel="noopener noreferrer" className="p-4 rounded-xl border border-current opacity-50 hover:opacity-100"><Twitter /></a>
               </div>
             </div>
           </div>
