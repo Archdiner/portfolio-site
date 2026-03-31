@@ -28,32 +28,32 @@ const App = () => {
   // Translations
   const t = {
     en: {
-      nav: { me: 'ME', works: 'PROJECTS', stack: 'STACK', timeline: 'EXPERIENCE', contact: 'CONTACT', resume: 'RESUME' },
+      nav: { me: 'ME', works: 'PROJECTS', writing: 'WRITING', stack: 'STACK', timeline: 'EXPERIENCE', contact: 'CONTACT', resume: 'RESUME' },
       hero: {
-        badge: 'SEEKING SUMMER INTERNSHIP 2026',
-        title: 'Bridging Web3 and Artificial Intelligence.',
-        sub: "I'm an international student from Bahrain studying CS at Cornell. I'm a full‑stack developer specializing in blockchain and AI‑powered applications.",
-        cta1: 'View My Work',
-        cta2: 'Get In Touch'
+        badge: 'OPEN TO SUMMER 2026',
+        title: 'I build things that shouldn\'t exist yet.',
+        sub: "CS freshman at Cornell. Originally from Bahrain. I care about where AI meets human life — language, nature, the physical world. Blockchain believer. Trees are great.",
+        cta1: 'View my work',
+        cta2: 'Read my writing'
       },
       career: { title: 'EXPERIENCE', subtitle: 'Where I\'ve built, learned, and grown.' },
       projects: { title: 'FEATURED PROJECTS', archive: 'VIEW ARCHIVE' },
       stack: { title: 'TECH CORE' },
-      contact: { title: 'LET\'S BUILD THE FUTURE.', sub: 'Currently open to innovative projects in the decentralized space and AI orchestration.' }
+      contact: { title: 'Let\'s make something real.', sub: 'Open to research, builds, and conversations that matter.' }
     },
     ar: {
-      nav: { me: 'أنا', works: 'المشاريع', stack: 'التقنيات', timeline: 'الخبرة', contact: 'اتصل', resume: 'السيرة' },
+      nav: { me: 'أنا', works: 'المشاريع', writing: 'كتابات', stack: 'التقنيات', timeline: 'الخبرة', contact: 'اتصل', resume: 'السيرة' },
       hero: {
-        badge: 'أبحث عن تدريب صيفي 2026',
-        title: 'الربط بين Web3 والذكاء الاصطناعي.',
-        sub: 'طالب دولي من البحرين أدرس علوم الحاسوب في كورنيل. أنا مطور واجهات متكاملة متخصص في البلوك تشين وتطبيقات الذكاء الاصطناعي.',
-        cta1: 'مشاهدة أعمالي',
-        cta2: 'تواصل معي'
+        badge: 'متاح لصيف 2026',
+        title: 'أبني أشياء لا ينبغي أن تكون موجودة بعد.',
+        sub: 'طالب سنة أولى علوم حاسوب في كورنيل. أصلي من البحرين. أهتم بتقاطع الذكاء الاصطناعي مع حياة الإنسان — اللغة، الطبيعة، العالم المادي. مؤمن بالبلوك تشين. الأشجار رائعة.',
+        cta1: 'شاهد أعمالي',
+        cta2: 'اقرأ كتاباتي'
       },
       career: { title: 'الخبرة', subtitle: 'حيث بنيت وتعلمت ونمت.' },
       projects: { title: 'مشاريع مميزة', archive: 'الأرشيف' },
       stack: { title: 'التقنيات الأساسية' },
-      contact: { title: 'لنصنع المستقبل معاً.', sub: 'متاح حالياً للمشاريع المبتكرة في المجال اللامركزي وتنسيق الذكاء الاصطناعي.' }
+      contact: { title: 'لنصنع شيئًا ملموسًا.', sub: 'متاح للأبحاث والمشاريع البناءة والمحادثات الهامة.' }
     }
   };
 
@@ -132,6 +132,14 @@ const App = () => {
       description: lang === 'en'
         ? 'A persistent, cross-border credit score that aggregates off-chain and on-chain identity data. Generates a dynamic credit score using Solana blockchain activity, GitHub developer history, and Zero-Knowledge (ZK) verified bank statements via Reclaim Protocol. Features natural language AI explanations powered by Gemini 2.0 Flash.'
         : 'درجة ائتمانية دائمة عابرة للحدود تجمع بين بيانات الهوية داخل وخارج السلسلة. تنشئ درجة ائتمانية ديناميكية باستخدام نشاط بلوك تشين سولانا، وسجل مطور غيت هاب، وكشوفات بنكية تم التحقق منها بتقنية المعرفة الصفرية (ZK). تتميز بتفسيرات ذكاء اصطناعي باللغة الطبيعية.'
+    },
+    {
+      title: 'Forge Dashboard',
+      stack: ['React', 'TypeScript', 'FastAPI', 'Gemini 2.0 Flash'],
+      githubLink: 'https://github.com/Archdiner/forge-dashboard',
+      description: lang === 'en'
+        ? 'An autonomous A/B testing and optimization platform for growth teams. Runs thousands of experiments overnight using a multi-agent AI system. Features a React/TypeScript frontend, a FastAPI backend, and utilizes Google Gemini 2.0 Flash for generating and evaluating landing page, ad copy, and cold email variations.'
+        : 'منصة مستقلة لاختبارات A/B والتحسين لفرق النمو. تجري آلاف التجارب ليلاً باستخدام نظام ذكاء اصطناعي متعدد الوكلاء. تتميز بواجهة React/TypeScript وخلفية FastAPI وتستخدم Gemini 2.0 Flash لإنشاء وتقييم وتحديد أفضل خيارات صفحات الهبوط والإعلانات.'
     },
     {
       title: 'Jest',
@@ -265,7 +273,7 @@ const App = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      const sections = ['home', 'projects', 'skills', 'career', 'contact'];
+      const sections = ['home', 'projects', 'writing', 'skills', 'career', 'contact'];
       const scrollPos = window.scrollY + 150;
       for (const section of sections) {
         const element = document.getElementById(section);
@@ -292,45 +300,38 @@ const App = () => {
   const toggleLang = () => setLang(lang === 'en' ? 'ar' : 'en');
   const content = t[lang];
 
-  // Function to add animated underlines to keywords
   const addAnimatedUnderlines = (text, lang) => {
-    // Group 1: Bahrain, Cornell - Blue color
-    const group1 = lang === 'en' ? ['Bahrain', 'Cornell'] : ['البحرين', 'كورنيل'];
-    // Group 2: full‑stack - Purple color
-    const group2 = lang === 'en' ? ['full‑stack'] : ['واجهات متكاملة'];
-    // Group 3: blockchain, AI - Green color
-    const group3 = lang === 'en' ? ['blockchain', 'AI'] : ['البلوك تشين', 'الذكاء الاصطناعي'];
+    // Group 1: Bahrain, Cornell, Trees
+    const group1 = lang === 'en' ? ['Bahrain', 'Cornell', 'Trees'] : ['البحرين', 'كورنيل', 'الأشجار'];
+    // Group 2: language, nature, physical world
+    const group2 = lang === 'en' ? ['language', 'nature', 'physical world'] : ['اللغة', 'الطبيعة', 'العالم المادي'];
+    // Group 3: blockchain, AI
+    const group3 = lang === 'en' ? ['Blockchain', 'AI'] : ['البلوك تشين', 'الذكاء الاصطناعي'];
 
     let processedText = text;
     let delay = 0;
 
-    // Process group 1 (Blue)
     group1.forEach((keyword) => {
       const regex = new RegExp(`(${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
       processedText = processedText.replace(regex, (match) => {
-        const currentDelay = delay;
         delay += 0.6;
-        return `<span class="animated-underline underline-blue" style="animation-delay: ${currentDelay}s">${match}</span>`;
+        return `<span class="animated-underline underline-blue" style="animation-delay: ${delay}s">${match}</span>`;
       });
     });
 
-    // Process group 2 (Purple)
     group2.forEach((keyword) => {
       const regex = new RegExp(`(${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
       processedText = processedText.replace(regex, (match) => {
-        const currentDelay = delay;
         delay += 0.6;
-        return `<span class="animated-underline underline-purple" style="animation-delay: ${currentDelay}s">${match}</span>`;
+        return `<span class="animated-underline underline-purple" style="animation-delay: ${delay}s">${match}</span>`;
       });
     });
 
-    // Process group 3 (Green)
     group3.forEach((keyword) => {
       const regex = new RegExp(`(${keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
       processedText = processedText.replace(regex, (match) => {
-        const currentDelay = delay;
         delay += 0.6;
-        return `<span class="animated-underline underline-green" style="animation-delay: ${currentDelay}s">${match}</span>`;
+        return `<span class="animated-underline underline-green" style="animation-delay: ${delay}s">${match}</span>`;
       });
     });
 
@@ -394,6 +395,7 @@ const App = () => {
               else if (key === 'stack') targetId = 'skills';
               else if (key === 'timeline') targetId = 'career';
               else if (key === 'works') targetId = 'projects';
+              else if (key === 'writing') targetId = 'writing';
 
               // Handle resume link separately (opens PDF in new tab)
               if (key === 'resume') {
@@ -450,8 +452,11 @@ const App = () => {
 
           {/* Right: Title Thing */}
           <div className="space-y-6 text-center lg:text-start">
-            <div className="inline-block px-4 py-1 rounded-full border border-orange-500/30 text-orange-500 text-[10px] font-bold tracking-widest uppercase">
-              {content.hero.badge}
+            <div className={`inline-block px-4 py-1.5 rounded-full border text-[10px] font-bold tracking-widest uppercase ${isDarkMode ? 'border-orange-500/30 text-orange-500 bg-orange-500/5' : 'border-orange-500/30 text-orange-600 bg-orange-500/5'}`}>
+              <div className="flex items-center gap-2">
+                <span className={`w-2 h-2 rounded-full bg-orange-500`}></span>
+                {content.hero.badge}
+              </div>
             </div>
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-[0.95] lg:max-w-xl">
               {content.hero.title}
@@ -464,19 +469,29 @@ const App = () => {
               <MapPin size={16} className="text-orange-500" />
               <span>Ithaca, NY</span>
             </div>
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4">
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-4">
               <a
                 href="#projects"
                 onClick={(e) => handleNavClick(e, 'projects')}
-                className="px-10 py-5 bg-orange-500 text-black font-black uppercase text-xs tracking-widest rounded-xl hover:bg-orange-400 transition-all flex items-center gap-3 group"
+                className={`px-10 py-5 font-black uppercase text-xs tracking-widest rounded-xl transition-all flex items-center gap-3 group bg-orange-500 text-black hover:bg-orange-400`}
               >
                 {content.hero.cta1}
                 {lang === 'en' ? <MoveRight className="group-hover:translate-x-1 transition-transform" /> : <MoveLeft className="group-hover:-translate-x-1 transition-transform" />}
+              </a>
+              <a
+                href="#writing"
+                onClick={(e) => handleNavClick(e, 'writing')}
+                className={`px-10 py-5 font-black uppercase text-xs tracking-widest rounded-xl transition-all flex items-center gap-3 group border ${isDarkMode ? 'border-white/20 text-white hover:border-orange-500 hover:text-orange-500' : 'border-black/20 text-black hover:border-orange-500 hover:text-orange-500'}`}
+              >
+                {content.hero.cta2}
+                <div className="group-hover:translate-y-1 transition-transform">↓</div>
               </a>
             </div>
           </div>
         </div>
       </header>
+
+
 
       {/* Projects - Moved up to be more prominent */}
       <section id="projects" className="py-20 px-6 max-w-7xl mx-auto">
@@ -484,7 +499,7 @@ const App = () => {
           <h2 className="text-4xl font-bold tracking-tighter">{content.projects.title}</h2>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
           {projects.map((project, idx) => (
             <div
               key={idx}
@@ -611,6 +626,25 @@ const App = () => {
             </div>
           </div>
         )}
+      </section>
+
+      {/* Writing Section */}
+      <section id="writing" className="py-20 px-6 max-w-7xl mx-auto">
+        <div className="mb-12">
+          <h2 className="text-4xl font-bold tracking-tighter">{lang === 'en' ? 'WRITING & RESEARCH' : 'كتابات وأبحاث'}</h2>
+        </div>
+        <a href="/research/arteta_ball_post.html" className={`group block p-8 md:p-12 rounded-3xl border transition-colors ${isDarkMode ? 'bg-[#050505] border-white/10 hover:border-orange-500' : 'bg-white border-black/5 hover:border-orange-500 shadow-sm'}`}>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div>
+              <p className="text-[10px] font-black tracking-widest text-orange-500 uppercase mb-2">Latest Post • Mar 2025</p>
+              <h3 className={`text-2xl font-bold mb-2 transition-colors group-hover:text-orange-500`}>Arteta-Ball: Modeling Arsenal's Possession with Markov Chains</h3>
+              <p className={`max-w-2xl ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>A mathematical breakdown of Arsenal's 2024–25 open-play possession sequences using an absorbing Markov chain, complete with interactive Mermaid diagrams.</p>
+            </div>
+            <div className={`p-4 rounded-full transition-colors ${isDarkMode ? 'bg-white/5 group-hover:bg-orange-500 group-hover:text-black text-white' : 'bg-black/5 group-hover:bg-orange-500 group-hover:text-white text-black'}`}>
+              <ArrowUpRight size={24} />
+            </div>
+          </div>
+        </a>
       </section>
 
       {/* Rotating Tech Ticker with fade-out */}

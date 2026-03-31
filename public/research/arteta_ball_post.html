@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.36">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Asad Rizvi">
+<meta name="dcterms.date" content="2025-03-27">
+<meta name="description" content="We model Arsenal’s 2024–25 open-play possession sequences as an absorbing Markov chain, deriving that a possession starting in the defensive third has a 6.93% chance of eventually producing a goal.">
+
+<title>Arteta-Ball: Modeling Arsenal’s Possession with Markov Chains</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="arteta_ball_post_files/libs/clipboard/clipboard.min.js"></script>
+<script src="arteta_ball_post_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="arteta_ball_post_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="arteta_ball_post_files/libs/quarto-html/popper.min.js"></script>
+<script src="arteta_ball_post_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="arteta_ball_post_files/libs/quarto-html/anchor.min.js"></script>
+<link href="arteta_ball_post_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="arteta_ball_post_files/libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="arteta_ball_post_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="arteta_ball_post_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="arteta_ball_post_files/libs/bootstrap/bootstrap-bfa785828ccdd290f544dfa2e54e0acc.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<style>html{ scroll-behavior: smooth; }</style>
+<script src="arteta_ball_post_files/libs/quarto-diagram/mermaid.min.js"></script>
+<script src="arteta_ball_post_files/libs/quarto-diagram/mermaid-init.js"></script>
+<link href="arteta_ball_post_files/libs/quarto-diagram/mermaid.css" rel="stylesheet">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#the-idea" id="toc-the-idea" class="nav-link active" data-scroll-target="#the-idea">The Idea</a></li>
+  <li><a href="#football-background" id="toc-football-background" class="nav-link" data-scroll-target="#football-background">Football Background</a></li>
+  <li><a href="#the-markov-chain-model" id="toc-the-markov-chain-model" class="nav-link" data-scroll-target="#the-markov-chain-model">The Markov Chain Model</a>
+  <ul class="collapse">
+  <li><a href="#state-diagram" id="toc-state-diagram" class="nav-link" data-scroll-target="#state-diagram">State Diagram</a></li>
+  </ul></li>
+  <li><a href="#building-the-transition-matrix" id="toc-building-the-transition-matrix" class="nav-link" data-scroll-target="#building-the-transition-matrix">Building the Transition Matrix</a></li>
+  <li><a href="#results" id="toc-results" class="nav-link" data-scroll-target="#results">Results</a>
+  <ul class="collapse">
+  <li><a href="#initial-state-and-iterations" id="toc-initial-state-and-iterations" class="nav-link" data-scroll-target="#initial-state-and-iterations">Initial State and Iterations</a></li>
+  <li><a href="#steady-state-and-fundamental-matrix" id="toc-steady-state-and-fundamental-matrix" class="nav-link" data-scroll-target="#steady-state-and-fundamental-matrix">Steady State and Fundamental Matrix</a></li>
+  </ul></li>
+  <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion">Discussion</a>
+  <ul class="collapse">
+  <li><a href="#limitations" id="toc-limitations" class="nav-link" data-scroll-target="#limitations">Limitations</a></li>
+  </ul></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Arteta-Ball: Modeling Arsenal’s Possession with Markov Chains</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Linear Algebra</div>
+    <div class="quarto-category">Sports Analytics</div>
+    <div class="quarto-category">Python</div>
+    <div class="quarto-category">Markov Chains</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    We model Arsenal’s 2024–25 open-play possession sequences as an absorbing Markov chain, deriving that a possession starting in the defensive third has a 6.93% chance of eventually producing a goal.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Asad Rizvi </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">March 27, 2025</p>
+    </div>
+  </div>
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<style>
+  body { background-color: #fafafa; color: #18181b; }
+  h1, h2, h3, h4, h5, h6 { color: #09090b; font-weight: 800; letter-spacing: -0.02em; }
+  a { color: #ef4444; text-decoration: none; transition: color 0.2s; }
+  a:hover { color: #dc2626; text-decoration: underline; }
+  .quarto-title-block .quarto-title-meta { color: #71717a; }
+  .sourceCode { background-color: #f4f4f5 !important; border: 1px solid #e4e4e7 !important; }
+  summary { color: #ef4444; font-weight: 600; cursor: pointer; padding: 0.5rem 0; }
+  table { width: 100%; border-collapse: collapse; margin: 2rem 0; background-color: #ffffff; border: 1px solid #e4e4e7; border-radius: 8px; overflow: hidden; display: table !important; }
+  th, td { padding: 1rem; border-bottom: 1px solid #e4e4e7; text-align: left; }
+  th { background-color: #f4f4f5; color: #ef4444; font-weight: 800; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; border-bottom: 2px solid #e4e4e7; }
+  tr:last-child td { border-bottom: none; }
+  .cell-output-stdout { background-color: transparent !important; border: none !important; color: #71717a !important; padding: 0 !important; }
+  .cell-output-display { overflow-x: auto; }
+</style>
+<section id="the-idea" class="level2">
+<h2 class="anchored" data-anchor-id="the-idea">The Idea</h2>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="pitch_tactics.png" class="img-fluid figure-img"></p>
+<figcaption>Arsenal’s relentless possession structure visualized</figcaption>
+</figure>
+</div>
+<p>Arsenal under Mikel Arteta play a distinctive style — patient build-up, sustained pressure in the final third, and a relentless focus on getting the ball into dangerous positions. We wanted to put a number on it.</p>
+<p>This project (done with Charlie Xue and Schahmyr Siddiqui for MATH 2210 at Cornell) models Arsenal’s 2024–25 Premier League open-play possession sequences as an <strong>absorbing Markov chain</strong>. The key result: a possession starting outside the attacking third has a <strong>6.93%</strong> chance of eventually producing a goal, with an expected sequence length of <strong>5.44 actions</strong>.</p>
+<hr>
+</section>
+<section id="football-background" class="level2">
+<h2 class="anchored" data-anchor-id="football-background">Football Background</h2>
+<p>A <strong>possession sequence</strong> is a connected series of passes, carries, and shots by one team, ending when the ball is scored or lost. We model <strong>open play only</strong> — set pieces (corners, free kicks into the box) are excluded since they bypass the normal build-up structure.</p>
+<p>The pitch is divided into three zones relative to the attacking team:</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="soccer_zones.png" class="img-fluid figure-img"></p>
+<figcaption>Abstract representation of pitch zones</figcaption>
+</figure>
+</div>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Zone</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Everywhere Else (S1)</td>
+<td>Defensive/midfield zone — goalkeeper, centre-backs, deep mids</td>
+</tr>
+<tr class="even">
+<td>Attacking Third (S2)</td>
+<td>Ball has crossed into the final third</td>
+</tr>
+<tr class="odd">
+<td>Opposition Box (S3)</td>
+<td>Inside the 18-yard box</td>
+</tr>
+</tbody>
+</table>
+<p>Two absorbing states end the chain: <strong>Goal (S4)</strong> and <strong>Turnover (S5)</strong>.</p>
+<hr>
+</section>
+<section id="the-markov-chain-model" class="level2">
+<h2 class="anchored" data-anchor-id="the-markov-chain-model">The Markov Chain Model</h2>
+<p>A Markov chain models a system that moves between states where the next state depends only on the current one — not on history. Formally:</p>
+<p><span class="math display">\[P(S_{t+1} = j \mid S_t = i, S_{t-1}, \ldots) = P(S_{t+1} = j \mid S_t = i)\]</span></p>
+<p>Transition probabilities form a <span class="math inline">\(5 \times 5\)</span> stochastic matrix <span class="math inline">\(P\)</span> <span class="math inline">\(P_{44} = P_{55} = 1\)</span> and the chain cannot leave.</p>
+<section id="state-diagram" class="level3">
+<h3 class="anchored" data-anchor-id="state-diagram">State Diagram</h3>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'primaryTextColor': '#18181b', 'primaryBorderColor': '#e4e4e7', 'lineColor': '#a1a1aa', 'tertiaryColor': '#f4f4f5'}}}%%
+stateDiagram-v2
+    classDef default fill:#ffffff,stroke:#e4e4e7,stroke-width:2px,color:#18181b
+    classDef highlight fill:#ef4444,stroke:#ef0107,stroke-width:2px,color:#ffffff,font-weight:bold
+    
+    S1: EE (S1)
+    S2: ATK (S2)
+    S3: BOX (S3)
+    S4: Goal (S4)
+    S5: Turn (S5)
+
+    S1 --&gt; S1: P11
+    S1 --&gt; S2: P12
+    S1 --&gt; S5: Pi5
+    
+    S2 --&gt; S2: P22
+    S2 --&gt; S3: P23
+    S2 --&gt; S4: P24
+    S2 --&gt; S5: Pi5
+    
+    S3 --&gt; S3: P33
+    S3 --&gt; S4: P34
+    S3 --&gt; S5: Pi5
+    
+    class S4,S5 highlight
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="building-the-transition-matrix" class="level2">
+<h2 class="anchored" data-anchor-id="building-the-transition-matrix">Building the Transition Matrix</h2>
+<p>All data is from Arsenal’s full 2024–25 Premier League season (StatMuse, FBref, Premier League). Season aggregates give stable probability estimates — a single game would be too noisy.</p>
+<div id="63eaf918" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>Show raw data extraction</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> IPython.display <span class="im">import</span> display, Markdown</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Raw statistics from StatMuse [A,D], FBref [B], Premier League [C]</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>passes_completed   <span class="op">=</span> <span class="dv">16360</span>   <span class="co"># total passes completed</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>passes_final_third <span class="op">=</span> <span class="dv">6479</span>    <span class="co"># passes into the final third</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>total_touches      <span class="op">=</span> <span class="dv">25374</span>   <span class="co"># total touches</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>touches_box        <span class="op">=</span> <span class="dv">1364</span>    <span class="co"># touches inside the opposition box</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>goals_total        <span class="op">=</span> <span class="dv">69</span>      <span class="co"># total goals</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>goals_in_box       <span class="op">=</span> <span class="dv">67</span>      <span class="co"># goals scored inside the box</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>goals_outside_box  <span class="op">=</span> <span class="dv">2</span>       <span class="co"># goals scored outside the box</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>possessions_lost   <span class="op">=</span> <span class="dv">4343</span>    <span class="co"># possessions lost</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Derived probabilities</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>P12 <span class="op">=</span> passes_final_third <span class="op">/</span> passes_completed</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>touches_att_third <span class="op">=</span> total_touches <span class="op">*</span> P12</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>P23 <span class="op">=</span> touches_box <span class="op">/</span> touches_att_third</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>touches_att_not_box <span class="op">=</span> touches_att_third <span class="op">-</span> touches_box</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>P24 <span class="op">=</span> goals_outside_box <span class="op">/</span> touches_att_not_box</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>P34 <span class="op">=</span> goals_in_box <span class="op">/</span> touches_box</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>Pi5 <span class="op">=</span> possessions_lost <span class="op">/</span> total_touches  <span class="co"># uniform turnover rate</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> {</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Transition"</span>: [<span class="st">"EE (S1) → ATK (S2)"</span>, <span class="st">"ATK (S2) → BOX (S3)"</span>, <span class="st">"ATK (S2) → Goal (S4)"</span>, <span class="st">"BOX (S3) → Goal (S4)"</span>, <span class="st">"Any Zone → Turnover (S5)"</span>],</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Probability"</span>: [P12, P23, P24, P34, Pi5]</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>df_probs <span class="op">=</span> pd.DataFrame(data)</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>display(Markdown(<span class="st">"**Derived Probabilities:**"</span>))</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>display(Markdown(df_probs.to_markdown(index<span class="op">=</span><span class="va">False</span>, floatfmt<span class="op">=</span><span class="st">".4f"</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display cell-output-markdown">
+<p><strong>Derived Probabilities:</strong></p>
+</div>
+<div class="cell-output cell-output-display cell-output-markdown">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Transition</th>
+<th style="text-align: right;">Probability</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">EE (S1) → ATK (S2)</td>
+<td style="text-align: right;">0.3960</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ATK (S2) → BOX (S3)</td>
+<td style="text-align: right;">0.1357</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">ATK (S2) → Goal (S4)</td>
+<td style="text-align: right;">0.0002</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">BOX (S3) → Goal (S4)</td>
+<td style="text-align: right;">0.0491</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Any Zone → Turnover (S5)</td>
+<td style="text-align: right;">0.1712</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Self-loops follow as <span class="math inline">\(P_{ii} = 1 - \sum_{j \neq i} P_{ij}\)</span>.</p>
+<p>Three structural assumptions:</p>
+<ol type="1">
+<li><strong>No backward transitions</strong> — when a professional side advances, its shape and forward options persist even if the ball briefly drops.</li>
+<li><strong><span class="math inline">\(P_{13} = 0\)</span></strong> — a direct pass from outside the attacking third into the box is near-impossible at elite level.</li>
+<li><strong>Uniform turnover rate</strong> — higher risk in the final third is acknowledged but a uniform rate keeps the model data-driven.</li>
+</ol>
+<div id="9d652c22" class="cell" data-execution_count="2">
+<details class="code-fold">
+<summary>Show transition matrix construction</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Construct the full 5x5 transition matrix</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>P11 <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> P12 <span class="op">-</span> Pi5</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>P22 <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> P23 <span class="op">-</span> P24 <span class="op">-</span> Pi5</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>P33 <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> P34 <span class="op">-</span> Pi5</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>P <span class="op">=</span> np.array([</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    [P11,  P12,  <span class="dv">0</span>,    <span class="dv">0</span>,    Pi5 ],</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">0</span>,    P22,  P23,  P24,  Pi5 ],</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">0</span>,    <span class="dv">0</span>,    P33,  P34,  Pi5 ],</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">0</span>,    <span class="dv">0</span>,    <span class="dv">0</span>,    <span class="fl">1.0</span>,  <span class="dv">0</span>   ],</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    [<span class="dv">0</span>,    <span class="dv">0</span>,    <span class="dv">0</span>,    <span class="dv">0</span>,    <span class="fl">1.0</span> ],</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>])</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>states <span class="op">=</span> [<span class="st">"EE (S1)"</span>, <span class="st">"ATK (S2)"</span>, <span class="st">"BOX (S3)"</span>, <span class="st">"Goal (S4)"</span>, <span class="st">"Turn (S5)"</span>]</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>df_P <span class="op">=</span> pd.DataFrame(P, index<span class="op">=</span>states, columns<span class="op">=</span>states)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>display(Markdown(<span class="st">"**Transition Matrix P:**"</span>))</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>display(Markdown(df_P.to_markdown(floatfmt<span class="op">=</span><span class="st">".4f"</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display cell-output-markdown">
+<p><strong>Transition Matrix P:</strong></p>
+</div>
+<div class="cell-output cell-output-display cell-output-markdown">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 15%">
+<col style="width: 15%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 18%">
+<col style="width: 18%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">EE (S1)</th>
+<th style="text-align: right;">ATK (S2)</th>
+<th style="text-align: right;">BOX (S3)</th>
+<th style="text-align: right;">Goal (S4)</th>
+<th style="text-align: right;">Turn (S5)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">EE (S1)</td>
+<td style="text-align: right;">0.4328</td>
+<td style="text-align: right;">0.3960</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.1712</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ATK (S2)</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.6929</td>
+<td style="text-align: right;">0.1357</td>
+<td style="text-align: right;">0.0002</td>
+<td style="text-align: right;">0.1712</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">BOX (S3)</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.7797</td>
+<td style="text-align: right;">0.0491</td>
+<td style="text-align: right;">0.1712</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Goal (S4)</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">1.0000</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Turn (S5)</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">1.0000</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<hr>
+</section>
+<section id="results" class="level2">
+<h2 class="anchored" data-anchor-id="results">Results</h2>
+<section id="initial-state-and-iterations" class="level3">
+<h3 class="anchored" data-anchor-id="initial-state-and-iterations">Initial State and Iterations</h3>
+<p>We start from S1 with <span class="math inline">\(S_0 = (1, 0, 0, 0, 0)^T\)</span> — possession begins outside the attacking third.</p>
+<div id="5d75af3f" class="cell" data-execution_count="3">
+<details class="code-fold">
+<summary>Show sequence iterations logic</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.patches <span class="im">as</span> mpatches</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>s0 <span class="op">=</span> np.array([<span class="fl">1.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>, <span class="fl">0.0</span>])</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute S1 and S2 by hand (matrix multiplication)</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>s1 <span class="op">=</span> s0 <span class="op">@</span> P</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>s2 <span class="op">=</span> s1 <span class="op">@</span> P</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co"># S10 via matrix power</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>s10 <span class="op">=</span> s0 <span class="op">@</span> np.linalg.matrix_power(P, <span class="dv">10</span>)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>df_iters <span class="op">=</span> pd.DataFrame([s0, s1, s2, s10], index<span class="op">=</span>[<span class="st">'S0'</span>, <span class="st">'S1'</span>, <span class="st">'S2'</span>, <span class="st">'S10'</span>], columns<span class="op">=</span>states)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>display(Markdown(<span class="st">"**State evolution over initial iterations:**"</span>))</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>display(Markdown(df_iters.to_markdown(floatfmt<span class="op">=</span><span class="st">".4f"</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display cell-output-markdown">
+<p><strong>State evolution over initial iterations:</strong></p>
+</div>
+<div class="cell-output cell-output-display cell-output-markdown">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 7%">
+<col style="width: 16%">
+<col style="width: 18%">
+<col style="width: 18%">
+<col style="width: 19%">
+<col style="width: 19%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">EE (S1)</th>
+<th style="text-align: right;">ATK (S2)</th>
+<th style="text-align: right;">BOX (S3)</th>
+<th style="text-align: right;">Goal (S4)</th>
+<th style="text-align: right;">Turn (S5)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">S0</td>
+<td style="text-align: right;">1.0000</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">S1</td>
+<td style="text-align: right;">0.4328</td>
+<td style="text-align: right;">0.3960</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.1712</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">S2</td>
+<td style="text-align: right;">0.1873</td>
+<td style="text-align: right;">0.4458</td>
+<td style="text-align: right;">0.0538</td>
+<td style="text-align: right;">0.0001</td>
+<td style="text-align: right;">0.3130</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">S10</td>
+<td style="text-align: right;">0.0002</td>
+<td style="text-align: right;">0.0385</td>
+<td style="text-align: right;">0.0876</td>
+<td style="text-align: right;">0.0460</td>
+<td style="text-align: right;">0.8277</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="3cb1b25c" class="cell" data-execution_count="4">
+<details class="code-fold">
+<summary>Show convergence scatterplot logic</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualise convergence across iterations</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>iterations <span class="op">=</span> <span class="bu">range</span>(<span class="dv">0</span>, <span class="dv">31</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>state_probs <span class="op">=</span> {name: [] <span class="cf">for</span> name <span class="kw">in</span> states}</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>sv <span class="op">=</span> s0.copy()</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> n <span class="kw">in</span> iterations:</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i, name <span class="kw">in</span> <span class="bu">enumerate</span>(states):</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>        state_probs[name].append(sv[i])</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    sv <span class="op">=</span> sv <span class="op">@</span> P</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>plt.style.use(<span class="st">'default'</span>)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">5</span>))</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>fig.patch.set_facecolor(<span class="st">'#fafafa'</span>)</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>ax.set_facecolor(<span class="st">'#ffffff'</span>)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Arsenal specific palette</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>colors <span class="op">=</span> [<span class="st">"#1e3a8a"</span>, <span class="st">"#eab308"</span>, <span class="st">"#14b8a6"</span>, <span class="st">"#ef4444"</span>, <span class="st">"#3f3f46"</span>]</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (name, color) <span class="kw">in</span> <span class="bu">zip</span>(states, colors):</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>    ax.plot(<span class="bu">list</span>(iterations), state_probs[name],</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>            label<span class="op">=</span>name, color<span class="op">=</span>color, linewidth<span class="op">=</span><span class="fl">2.5</span>)</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>ax.set_xlabel(<span class="st">"Step $n$"</span>, fontsize<span class="op">=</span><span class="dv">12</span>, fontweight<span class="op">=</span><span class="st">'bold'</span>, color<span class="op">=</span><span class="st">'#52525b'</span>)</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>ax.set_ylabel(<span class="st">"Probability"</span>, fontsize<span class="op">=</span><span class="dv">12</span>, fontweight<span class="op">=</span><span class="st">'bold'</span>, color<span class="op">=</span><span class="st">'#52525b'</span>)</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Convergence of Arsenal's Markov Chain toward the steady state"</span>, fontsize<span class="op">=</span><span class="dv">14</span>, fontweight<span class="op">=</span><span class="st">'900'</span>, color<span class="op">=</span><span class="st">'#09090b'</span>, pad<span class="op">=</span><span class="dv">15</span>)</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>ax.spines[<span class="st">'top'</span>].set_visible(<span class="va">False</span>)</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>ax.spines[<span class="st">'right'</span>].set_visible(<span class="va">False</span>)</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>ax.spines[<span class="st">'bottom'</span>].set_color(<span class="st">'#e4e4e7'</span>)</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>ax.spines[<span class="st">'left'</span>].set_color(<span class="st">'#e4e4e7'</span>)</span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>ax.grid(color<span class="op">=</span><span class="st">'#f4f4f5'</span>, linestyle<span class="op">=</span><span class="st">'-'</span>, linewidth<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>ax.legend(fontsize<span class="op">=</span><span class="dv">10</span>, loc<span class="op">=</span><span class="st">"center right"</span>, frameon<span class="op">=</span><span class="va">True</span>, facecolor<span class="op">=</span><span class="st">'#ffffff'</span>, edgecolor<span class="op">=</span><span class="st">'#e4e4e7'</span>)</span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>plt.savefig(<span class="st">"convergence.png"</span>, dpi<span class="op">=</span><span class="dv">300</span>, bbox_inches<span class="op">=</span><span class="st">"tight"</span>)</span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>display(Markdown(<span class="ss">f"&gt; *By step 10, the chain is heavily absorbed. Probability of Goal: **</span><span class="sc">{</span>s10[<span class="dv">3</span>]<span class="sc">:.4f}</span><span class="ss">** | Turnover: **</span><span class="sc">{</span>s10[<span class="dv">4</span>]<span class="sc">:.4f}</span><span class="ss">***"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="arteta_ball_post_files/figure-html/cell-5-output-1.png" width="988" height="487" class="figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display cell-output-markdown">
+<blockquote class="blockquote">
+<p><em>By step 10, the chain is heavily absorbed. Probability of Goal: <strong>0.0460</strong> | Turnover: <strong>0.8277</strong></em></p>
+</blockquote>
+</div>
+</div>
+</section>
+<section id="steady-state-and-fundamental-matrix" class="level3">
+<h3 class="anchored" data-anchor-id="steady-state-and-fundamental-matrix">Steady State and Fundamental Matrix</h3>
+<p>Because S4 and S5 are absorbing and every transient state can reach both in finitely many steps, a unique steady-state <span class="math inline">\(\bar{S}\)</span> exists, supported entirely on {S4, S5}.</p>
+<p>The <strong>fundamental matrix</strong> <span class="math inline">\(N = (I - Q)^{-1}\)</span> gives the expected number of steps spent in each transient state before absorption:</p>
+<div id="a135f708" class="cell" data-execution_count="5">
+<details class="code-fold">
+<summary>Show Python matrix inversion code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract Q (transient-to-transient) and R (transient-to-absorbing)</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>Q <span class="op">=</span> P[:<span class="dv">3</span>, :<span class="dv">3</span>]</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>R <span class="op">=</span> P[:<span class="dv">3</span>, <span class="dv">3</span>:]</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Fundamental matrix</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>I3 <span class="op">=</span> np.eye(<span class="dv">3</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> np.linalg.inv(I3 <span class="op">-</span> Q)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>df_Q <span class="op">=</span> pd.DataFrame(Q, index<span class="op">=</span>states[:<span class="dv">3</span>], columns<span class="op">=</span>states[:<span class="dv">3</span>])</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>df_R <span class="op">=</span> pd.DataFrame(R, index<span class="op">=</span>states[:<span class="dv">3</span>], columns<span class="op">=</span>states[<span class="dv">3</span>:])</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>df_N <span class="op">=</span> pd.DataFrame(N, index<span class="op">=</span>states[:<span class="dv">3</span>], columns<span class="op">=</span>states[:<span class="dv">3</span>])</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>display(Markdown(<span class="st">"**Q (Transient to Transient):**"</span>))</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>display(Markdown(df_Q.to_markdown(floatfmt<span class="op">=</span><span class="st">".4f"</span>)))</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>display(Markdown(<span class="st">"**R (Transient to Absorbing):**"</span>))</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>display(Markdown(df_R.to_markdown(floatfmt<span class="op">=</span><span class="st">".6f"</span>)))</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>display(Markdown(<span class="st">"**Fundamental Matrix N = (I - Q)⁻¹:**"</span>))</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>display(Markdown(df_N.to_markdown(floatfmt<span class="op">=</span><span class="st">".4f"</span>)))</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>expected_steps <span class="op">=</span> pd.DataFrame(N.<span class="bu">sum</span>(axis<span class="op">=</span><span class="dv">1</span>), index<span class="op">=</span>states[:<span class="dv">3</span>], columns<span class="op">=</span>[<span class="st">"Expected Actions"</span>])</span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>display(Markdown(<span class="st">"**Expected actions before absorption:**"</span>))</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>display(Markdown(expected_steps.to_markdown(floatfmt<span class="op">=</span><span class="st">".4f"</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display cell-output-markdown">
+<p><strong>Q (Transient to Transient):</strong></p>
+</div>
+<div class="cell-output cell-output-display cell-output-markdown">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">EE (S1)</th>
+<th style="text-align: right;">ATK (S2)</th>
+<th style="text-align: right;">BOX (S3)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">EE (S1)</td>
+<td style="text-align: right;">0.4328</td>
+<td style="text-align: right;">0.3960</td>
+<td style="text-align: right;">0.0000</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ATK (S2)</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.6929</td>
+<td style="text-align: right;">0.1357</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">BOX (S3)</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.7797</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="cell-output cell-output-display cell-output-markdown">
+<p><strong>R (Transient to Absorbing):</strong></p>
+</div>
+<div class="cell-output cell-output-display cell-output-markdown">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">Goal (S4)</th>
+<th style="text-align: right;">Turn (S5)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">EE (S1)</td>
+<td style="text-align: right;">0.000000</td>
+<td style="text-align: right;">0.171159</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ATK (S2)</td>
+<td style="text-align: right;">0.000230</td>
+<td style="text-align: right;">0.171159</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">BOX (S3)</td>
+<td style="text-align: right;">0.049120</td>
+<td style="text-align: right;">0.171159</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="cell-output cell-output-display cell-output-markdown">
+<p><strong>Fundamental Matrix N = (I - Q)⁻¹:</strong></p>
+</div>
+<div class="cell-output cell-output-display cell-output-markdown">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">EE (S1)</th>
+<th style="text-align: right;">ATK (S2)</th>
+<th style="text-align: right;">BOX (S3)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">EE (S1)</td>
+<td style="text-align: right;">1.7631</td>
+<td style="text-align: right;">2.2734</td>
+<td style="text-align: right;">1.4009</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ATK (S2)</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">3.2560</td>
+<td style="text-align: right;">2.0064</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">BOX (S3)</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">4.5397</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="cell-output cell-output-display cell-output-markdown">
+<p><strong>Expected actions before absorption:</strong></p>
+</div>
+<div class="cell-output cell-output-display cell-output-markdown">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">Expected Actions</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">EE (S1)</td>
+<td style="text-align: right;">5.4374</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ATK (S2)</td>
+<td style="text-align: right;">5.2623</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">BOX (S3)</td>
+<td style="text-align: right;">4.5397</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="6161ab15" class="cell" data-execution_count="6">
+<details class="code-fold">
+<summary>Show steady state derivation logic</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Absorption probabilities B = NR</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>B <span class="op">=</span> N <span class="op">@</span> R</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>df_B <span class="op">=</span> pd.DataFrame(B, index<span class="op">=</span>states[:<span class="dv">3</span>], columns<span class="op">=</span>states[<span class="dv">3</span>:])</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>display(Markdown(<span class="st">"**Absorption Probabilities (B = NR):**"</span>))</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>display(Markdown(df_B.to_markdown(floatfmt<span class="op">=</span><span class="st">".4f"</span>)))</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Steady state from S0 = e1</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>s_bar <span class="op">=</span> np.array([<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>, B[<span class="dv">0</span>, <span class="dv">0</span>], B[<span class="dv">0</span>, <span class="dv">1</span>]])</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Confirm via matrix power</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>s100 <span class="op">=</span> s0 <span class="op">@</span> np.linalg.matrix_power(P, <span class="dv">100</span>)</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>summary_df <span class="op">=</span> pd.DataFrame([s_bar, s100], index<span class="op">=</span>[<span class="st">"Steady state (Analytical)"</span>, <span class="st">"Confirmed via P^100"</span>], columns<span class="op">=</span>states)</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>display(Markdown(<span class="st">"**Verification of Steady State:**"</span>))</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>display(Markdown(summary_df.to_markdown(floatfmt<span class="op">=</span><span class="st">".4f"</span>)))</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Possessions per goal</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>poss_per_goal <span class="op">=</span> <span class="dv">1</span> <span class="op">/</span> B[<span class="dv">0</span>, <span class="dv">0</span>]</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>display(Markdown(<span class="ss">f"&gt; *Expected possessions per goal from S1 (Defensive Third): **</span><span class="sc">{</span>poss_per_goal<span class="sc">:.1f}</span><span class="ss">***"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display cell-output-markdown">
+<p><strong>Absorption Probabilities (B = NR):</strong></p>
+</div>
+<div class="cell-output cell-output-display cell-output-markdown">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">Goal (S4)</th>
+<th style="text-align: right;">Turn (S5)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">EE (S1)</td>
+<td style="text-align: right;">0.0693</td>
+<td style="text-align: right;">0.9307</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ATK (S2)</td>
+<td style="text-align: right;">0.0993</td>
+<td style="text-align: right;">0.9007</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">BOX (S3)</td>
+<td style="text-align: right;">0.2230</td>
+<td style="text-align: right;">0.7770</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="cell-output cell-output-display cell-output-markdown">
+<p><strong>Verification of Steady State:</strong></p>
+</div>
+<div class="cell-output cell-output-display cell-output-markdown">
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 30%">
+<col style="width: 12%">
+<col style="width: 13%">
+<col style="width: 13%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">EE (S1)</th>
+<th style="text-align: right;">ATK (S2)</th>
+<th style="text-align: right;">BOX (S3)</th>
+<th style="text-align: right;">Goal (S4)</th>
+<th style="text-align: right;">Turn (S5)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Steady state (Analytical)</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.0693</td>
+<td style="text-align: right;">0.9307</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Confirmed via P^100</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.0000</td>
+<td style="text-align: right;">0.0693</td>
+<td style="text-align: right;">0.9307</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="cell-output cell-output-display cell-output-markdown">
+<blockquote class="blockquote">
+<p><em>Expected possessions per goal from S1 (Defensive Third): <strong>14.4</strong></em></p>
+</blockquote>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="discussion" class="level2">
+<h2 class="anchored" data-anchor-id="discussion">Discussion</h2>
+<p>The numbers tell a clear story about Arteta-ball.</p>
+<p><strong>The bottleneck is progression, not finishing.</strong> Entry from the attacking third to the box occurs at only <span class="math inline">\(P_{23} = 0.136\)</span> per step. Once inside, Arsenal are efficient: <span class="math inline">\(P_{34} = 0.049\)</span> means roughly one goal per 20 box touches, consistent with 69 league goals.</p>
+<p><strong>The box self-loop is the model’s most interesting number.</strong> <span class="math inline">\(P_{33} = 0.780\)</span> means that on any given step inside the box, there is a 78% chance the ball stays there. The fundamental matrix confirms this: a possession starting in S3 spends <strong>4.54 steps</strong> in the box before resolving. That is the numerical signature of Arteta’s positional system.</p>
+<p><strong>External validity check.</strong> Arsenal need ~14.4 S1 possessions to score once. With ~25–30 open-play possessions per game and 69 goals across 38 matches, the model’s conversion rate of ~7% is a plausible order of magnitude.</p>
+<section id="limitations" class="level3">
+<h3 class="anchored" data-anchor-id="limitations">Limitations</h3>
+<ul>
+<li><strong>Stationarity</strong> — probabilities are constant across all opponents and game states. Arsenal vs.&nbsp;City is not Arsenal vs.&nbsp;Sheffield United.</li>
+<li><strong>Uniform turnover rate</strong> — one rate across all zones underestimates risk in the final third under pressing.</li>
+<li><strong>No backward transitions</strong> — the model cannot represent a possession that regresses from the attacking third mid-sequence.</li>
+<li><strong>Open play only</strong> — set pieces place the ball directly in S3, bypassing S1 and S2. Arsenal are one of the league’s top set-piece teams and this is a real gap.</li>
+<li><strong>Source (C)</strong> — goals outside the box (= 2) came from a video compilation rather than a formal statistics database.</li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+<p>[A] StatMuse — Arsenal 2024–25 PL Passing Stats. <a href="https://www.statmuse.com/fc/club/2024-25-arsenal-6/stats/2025?statCategory=passing" class="uri">https://www.statmuse.com/fc/club/2024-25-arsenal-6/stats/2025?statCategory=passing</a></p>
+<p>[B] FBref — Arsenal 2024–25 PL Squad Stats. <a href="https://fbref.com/en/squads/18bb7c10/2024-2025/c9/Arsenal-Stats-Premier-League" class="uri">https://fbref.com/en/squads/18bb7c10/2024-2025/c9/Arsenal-Stats-Premier-League</a></p>
+<p>[C] Premier League — Goals Outside the Box, September 2024. <a href="https://www.premierleague.com/en/video/4120700" class="uri">https://www.premierleague.com/en/video/4120700</a></p>
+<p>[D] StatMuse — Arsenal Possession Lost 2024–25 PL. <a href="https://www.statmuse.com/fc/ask?q=possession+lost+by+arsenal+players+24-25&amp;l=pl" class="uri">https://www.statmuse.com/fc/ask?q=possession+lost+by+arsenal+players+24-25&amp;l=pl</a></p>
+
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+<script src="arteta_ball_post_files/libs/quarto-html/zenscroll-min.js"></script>
+</body></html>
