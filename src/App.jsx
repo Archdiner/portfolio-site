@@ -136,18 +136,12 @@ const App = () => {
     {
       title: 'Forge Dashboard',
       stack: ['React', 'TypeScript', 'FastAPI', 'Gemini 2.0 Flash'],
+      image: '/forge-screenshot.png',
       githubLink: 'https://github.com/Archdiner/forge-dashboard',
+      screenshots: ['/forge-screenshot.png'],
       description: lang === 'en'
         ? 'An autonomous A/B testing and optimization platform for growth teams. Runs thousands of experiments overnight using a multi-agent AI system. Features a React/TypeScript frontend, a FastAPI backend, and utilizes Google Gemini 2.0 Flash for generating and evaluating landing page, ad copy, and cold email variations.'
         : 'منصة مستقلة لاختبارات A/B والتحسين لفرق النمو. تجري آلاف التجارب ليلاً باستخدام نظام ذكاء اصطناعي متعدد الوكلاء. تتميز بواجهة React/TypeScript وخلفية FastAPI وتستخدم Gemini 2.0 Flash لإنشاء وتقييم وتحديد أفضل خيارات صفحات الهبوط والإعلانات.'
-    },
-    {
-      title: 'Jest',
-      stack: ['Python', 'MediaPipe', 'OpenCV', 'Google Gemini'],
-      githubLink: 'https://github.com/Archdiner/gest',
-      description: lang === 'en'
-        ? 'A multimodal AI system that enables ergonomic hand gesture control and voice interaction, replacing traditional mouse and keyboard inputs. Built with MediaPipe for 60fps zero-lag hand tracking and the Gemini 3 Multimodal Live API for screen awareness and voice reasoning.'
-        : 'نظام ذكاء اصطناعي متعدد الوسائط يتيح التحكم المريح بإيماءات اليد والتفاعل الصوتي، ليحل محل الماوس ولوحة المفاتيح. مبني باستخدام MediaPipe لتتبع اليد بدون تأخير وواجهة برمجة تطبيقات Gemini 3 للوعي بالشاشة والاستنتاج الصوتي.'
     },
     {
       title: 'ComputeSwarm',
