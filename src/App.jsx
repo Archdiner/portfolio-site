@@ -134,14 +134,15 @@ const App = () => {
         : 'درجة ائتمانية دائمة عابرة للحدود تجمع بين بيانات الهوية داخل وخارج السلسلة. تنشئ درجة ائتمانية ديناميكية باستخدام نشاط بلوك تشين سولانا، وسجل مطور غيت هاب، وكشوفات بنكية تم التحقق منها بتقنية المعرفة الصفرية (ZK). تتميز بتفسيرات ذكاء اصطناعي باللغة الطبيعية.'
     },
     {
-      title: 'Forge Dashboard',
-      stack: ['React', 'TypeScript', 'FastAPI', 'Gemini 2.0 Flash'],
-      image: '/forge-screenshot.png',
-      githubLink: 'https://github.com/Archdiner/forge-dashboard',
-      screenshots: ['/forge-screenshot.png'],
+      title: 'Zybit',
+      stack: ['Next.js', 'TypeScript', 'Clerk', 'Neon', 'PostHog', 'Three.js'],
+      image: '/zybit-screenshot.png',
+      githubLink: 'https://github.com/Archdiner/rook',
+      projectLink: 'https://getzybit.com',
+      screenshots: ['/zybit-screenshot.png'],
       description: lang === 'en'
-        ? 'An autonomous A/B testing and optimization platform for growth teams. Runs thousands of experiments overnight using a multi-agent AI system. Features a React/TypeScript frontend, a FastAPI backend, and utilizes Google Gemini 2.0 Flash for generating and evaluating landing page, ad copy, and cold email variations.'
-        : 'منصة مستقلة لاختبارات A/B والتحسين لفرق النمو. تجري آلاف التجارب ليلاً باستخدام نظام ذكاء اصطناعي متعدد الوكلاء. تتميز بواجهة React/TypeScript وخلفية FastAPI وتستخدم Gemini 2.0 Flash لإنشاء وتقييم وتحديد أفضل خيارات صفحات الهبوط والإعلانات.'
+        ? 'Conversion intelligence for product managers. Zybit audits your website, watches real user behavior, surfaces exactly what\'s blocking conversions, and runs A/B tests on your behalf. Features full-site design audits via static page snapshots, PostHog and Segment behavioral data ingestion, 12 audit rules producing specific evidence-backed findings, and A/B test prescriptions with revenue impact estimates.'
+        : 'ذكاء التحويل لمديري المنتجات. يقوم Zybit بمراجعة موقعك الإلكتروني، ومراقبة سلوك المستخدمين الحقيقي، واكتشاف ما يعيق التحويلات تحديداً، وتشغيل اختبارات A/B نيابةً عنك.'
     },
     {
       title: 'ComputeSwarm',
@@ -155,13 +156,14 @@ const App = () => {
     },
     {
       title: 'CommitMint',
+      hackathonWinner: '🏆 3rd Place — Global Solana Hackathon',
       stack: ['Solana', 'Anchor', 'Next.js', 'FastAPI', 'Supabase'],
       image: '/commitmint-screenshot.png',
       githubLink: 'https://github.com/Archdiner/commitment-parties',
       projectLink: 'https://commitmint.app',
       screenshots: ['/commitmint-screenshot.png'],
       description: lang === 'en'
-        ? '🏆 3rd Place Global Solana Student Hackathon winner. A Solana-based commitment pool platform that helps users maintain accountability and build positive habits. Built with Anchor for smart contracts, Next.js for the frontend, and FastAPI for backend services. Users can create commitment pools, stake tokens, and track their progress toward goals with blockchain-based verification.'
+        ? 'A Solana-based commitment pool platform that helps users maintain accountability and build positive habits. Built with Anchor for smart contracts, Next.js for the frontend, and FastAPI for backend services. Users can create commitment pools, stake tokens, and track their progress toward goals with blockchain-based verification.'
         : 'منصة تجمع الالتزامات القائمة على Solana تساعد المستخدمين على الحفاظ على المساءلة وبناء عادات إيجابية. تم بناؤها باستخدام Anchor للعقود الذكية وNext.js للواجهة الأمامية وFastAPI لخدمات الخلفية.'
     },
     {
@@ -500,13 +502,18 @@ const App = () => {
               onClick={() => setSelectedProject(project)}
               className="group cursor-pointer block"
             >
-              <div className="aspect-square rounded-3xl overflow-hidden mb-6 relative hover:scale-105 transition-transform duration-700">
+              <div className={`aspect-square rounded-3xl overflow-hidden mb-6 relative hover:scale-105 transition-transform duration-700 ${project.hackathonWinner ? 'ring-2 ring-yellow-400 ring-offset-2 ring-offset-transparent' : ''}`}>
                 {project.image ? (
                   <img src={project.image} alt={project.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                 ) : (
                   <div className={`w-full h-full flex flex-col items-center justify-center transition-transform duration-700 group-hover:scale-110 ${isDarkMode ? 'bg-white/5' : 'bg-black/5'}`}>
                     <Code size={48} className={`mb-4 ${isDarkMode ? 'text-white/20' : 'text-black/20'}`} />
                     <span className={`font-bold tracking-widest uppercase text-xs ${isDarkMode ? 'text-white/30' : 'text-black/30'}`}>{project.title}</span>
+                  </div>
+                )}
+                {project.hackathonWinner && (
+                  <div className="absolute top-3 left-3 z-10 bg-yellow-400 text-black text-[10px] font-black px-2.5 py-1 rounded-full tracking-wide shadow-lg">
+                    {project.hackathonWinner}
                   </div>
                 )}
                 <div className="absolute inset-0 bg-orange-500/90 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-center items-center p-8 text-center">
@@ -522,6 +529,9 @@ const App = () => {
                 <h3 className="text-xl font-bold">{project.title}</h3>
                 <ArrowUpRight className="text-orange-500 opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
+              {project.hackathonWinner && (
+                <p className="text-yellow-500 text-[10px] font-black tracking-widest uppercase mt-1">{project.hackathonWinner}</p>
+              )}
             </div>
           ))}
         </div>
@@ -537,7 +547,14 @@ const App = () => {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="sticky top-0 z-10 flex justify-between items-center p-6 border-b border-current/10">
-                <h2 className="text-3xl font-bold">{selectedProject.title}</h2>
+                <div className="flex items-center gap-4 flex-wrap">
+                  <h2 className="text-3xl font-bold">{selectedProject.title}</h2>
+                  {selectedProject.hackathonWinner && (
+                    <span className="bg-yellow-400 text-black text-[10px] font-black px-3 py-1.5 rounded-full tracking-wide">
+                      {selectedProject.hackathonWinner}
+                    </span>
+                  )}
+                </div>
                 <button
                   onClick={() => setSelectedProject(null)}
                   className="p-2 rounded-lg hover:bg-orange-500/10 transition-colors"
@@ -627,18 +644,32 @@ const App = () => {
         <div className="mb-12">
           <h2 className="text-4xl font-bold tracking-tighter">{lang === 'en' ? 'WRITING & RESEARCH' : 'كتابات وأبحاث'}</h2>
         </div>
-        <a href="/research/arteta_ball_post.html" className={`group block p-8 md:p-12 rounded-3xl border transition-colors ${isDarkMode ? 'bg-[#050505] border-white/10 hover:border-orange-500' : 'bg-white border-black/5 hover:border-orange-500 shadow-sm'}`}>
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-            <div>
-              <p className="text-[10px] font-black tracking-widest text-orange-500 uppercase mb-2">Latest Post • Mar 2025</p>
-              <h3 className={`text-2xl font-bold mb-2 transition-colors group-hover:text-orange-500`}>Arteta-Ball: Modeling Arsenal's Possession with Markov Chains</h3>
-              <p className={`max-w-2xl ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>A mathematical breakdown of Arsenal's 2024–25 open-play possession sequences using an absorbing Markov chain, complete with interactive Mermaid diagrams.</p>
+        <div className="space-y-4">
+          <a href="/research/arteta_wharton-2.pdf" target="_blank" rel="noopener noreferrer" className={`group block p-8 md:p-12 rounded-3xl border transition-colors ${isDarkMode ? 'bg-[#050505] border-white/10 hover:border-orange-500' : 'bg-white border-black/5 hover:border-orange-500 shadow-sm'}`}>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+              <div>
+                <p className="text-[10px] font-black tracking-widest text-orange-500 uppercase mb-2">Research Paper • Mar 2025</p>
+                <h3 className={`text-2xl font-bold mb-2 transition-colors group-hover:text-orange-500`}>Arteta-Ball: Modeling Arsenal's Possession with Markov Chains</h3>
+                <p className={`max-w-2xl ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>A mathematical breakdown of Arsenal's 2024–25 open-play possession sequences using an absorbing Markov chain, complete with interactive Mermaid diagrams.</p>
+              </div>
+              <div className={`p-4 rounded-full transition-colors flex-shrink-0 ${isDarkMode ? 'bg-white/5 group-hover:bg-orange-500 group-hover:text-black text-white' : 'bg-black/5 group-hover:bg-orange-500 group-hover:text-white text-black'}`}>
+                <ArrowUpRight size={24} />
+              </div>
             </div>
-            <div className={`p-4 rounded-full transition-colors ${isDarkMode ? 'bg-white/5 group-hover:bg-orange-500 group-hover:text-black text-white' : 'bg-black/5 group-hover:bg-orange-500 group-hover:text-white text-black'}`}>
-              <ArrowUpRight size={24} />
+          </a>
+          <a href="/research/gradient-integrity.pdf" target="_blank" rel="noopener noreferrer" className={`group block p-8 md:p-12 rounded-3xl border transition-colors ${isDarkMode ? 'bg-[#050505] border-white/10 hover:border-orange-500' : 'bg-white border-black/5 hover:border-orange-500 shadow-sm'}`}>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+              <div>
+                <p className="text-[10px] font-black tracking-widest text-orange-500 uppercase mb-2">Research Paper • 2025</p>
+                <h3 className={`text-2xl font-bold mb-2 transition-colors group-hover:text-orange-500`}>Gradient Integrity: Verifying Honest Computation on Decentralized GPU Networks</h3>
+                <p className={`max-w-2xl ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>A research paper investigating methods to verify that decentralized GPU providers on the Akash Network are performing honest computation — ensuring gradient integrity in distributed AI training workloads.</p>
+              </div>
+              <div className={`p-4 rounded-full transition-colors flex-shrink-0 ${isDarkMode ? 'bg-white/5 group-hover:bg-orange-500 group-hover:text-black text-white' : 'bg-black/5 group-hover:bg-orange-500 group-hover:text-white text-black'}`}>
+                <ArrowUpRight size={24} />
+              </div>
             </div>
-          </div>
-        </a>
+          </a>
+        </div>
       </section>
 
       {/* Rotating Tech Ticker with fade-out */}
