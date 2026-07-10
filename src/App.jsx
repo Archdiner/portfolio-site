@@ -14,8 +14,6 @@ import {
   MapPin,
   Star,
   BookOpen,
-  Music,
-  Trophy,
 } from 'lucide-react';
 import {
   siPython,
@@ -120,13 +118,6 @@ const writing = [
     desc: 'A hands-on experiment building a blockchain trading-volume generator — and what it reveals about how easily on-chain "activity" metrics can be manufactured.',
     href: 'https://github.com/Archdiner/blockchain_trading_volume_generator',
   },
-];
-
-const interests = [
-  { icon: MapPin, label: 'Bahrain → Ithaca', note: 'Grew up in Bahrain; building at Cornell.' },
-  { icon: Music, label: 'Jazz bass', note: 'I play bass guitar in a jazz band.' },
-  { icon: Trophy, label: 'Boxing (3-0)', note: 'Amateur record, and counting.' },
-  { icon: Sparkles, label: 'Competitive Pokémon', note: 'Ranked top 20 globally.' },
 ];
 
 // --- helpers --------------------------------------------------------------
@@ -571,20 +562,6 @@ const App = () => {
                   <p className="max-w-2xl leading-relaxed pt-1 text-gray-600">{item.desc}</p>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Off the clock */}
-      <section id="interests" className="py-20 px-6 max-w-5xl mx-auto">
-        <h2 className="text-4xl font-bold tracking-tighter mb-12">OFF THE CLOCK</h2>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-          {interests.map(({ icon: Icon, label, note }, i) => (
-            <div key={i} className="p-6 rounded-2xl border border-black/5 bg-white shadow-sm">
-              <Icon className="text-orange-500 mb-4" />
-              <h3 className="text-lg font-bold">{label}</h3>
-              <p className="text-gray-600 mt-1 text-sm leading-relaxed">{note}</p>
             </div>
           ))}
         </div>
