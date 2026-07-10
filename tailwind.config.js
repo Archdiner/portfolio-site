@@ -7,17 +7,13 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        serif: ['"Fraunces Variable"', 'Georgia', 'serif'],
-        sans: ['"Inter Variable"', 'system-ui', 'sans-serif'],
-        mono: ['"Geist Mono"', 'ui-monospace', 'monospace'],
+        serif: ['"EB Garamond Variable"', 'Georgia', 'serif'],
       },
       colors: {
-        ivory: '#f4f1e9',
-        paper: '#faf8f2',
-        ink: '#1c1a17',
-        muted: '#6f695d',
-        faint: '#8a8474',
-        accent: '#a2432a',
+        paper: '#f1ebdd',
+        ink: '#191510',
+        muted: '#6f6858',
+        faint: '#a09883',
       },
     },
   },

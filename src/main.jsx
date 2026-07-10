@@ -1,9 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import '@fontsource-variable/fraunces'
-import '@fontsource-variable/inter'
-import '@fontsource/geist-mono/400.css'
-import '@fontsource/geist-mono/500.css'
+import '@fontsource-variable/eb-garamond'
 import App from './App.jsx'
 import './index.css'
 
