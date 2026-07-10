@@ -492,16 +492,26 @@ const App = () => {
       {/* Reading (only renders once you fill reading.json) */}
       {reading.length > 0 && (
         <section id="reading" className="py-20 px-6 max-w-7xl mx-auto">
-          <div className="flex items-center gap-3 mb-12">
+          <div className="flex items-center gap-3 mb-2">
             <BookOpen className="text-orange-500" />
             <h2 className="text-4xl font-bold tracking-tighter">ON MY SHELF</h2>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <p className="text-gray-500 mb-12">A few all-time favorites.</p>
+          <div className="flex flex-wrap justify-center sm:justify-start gap-x-10 gap-y-12">
             {reading.map((r, i) => (
-              <div key={i} className="p-6 rounded-2xl border border-black/5 bg-white shadow-sm">
-                <h3 className="text-lg font-bold leading-snug">{r.title}</h3>
-                {r.author && <p className="text-sm text-gray-500 font-semibold mt-1">{r.author}</p>}
-                {r.note && <p className="text-gray-600 mt-3 leading-relaxed">{r.note}</p>}
+              <div key={i} className="group w-36 sm:w-44">
+                <div className="aspect-[2/3] rounded-lg overflow-hidden bg-black/5 ring-1 ring-black/10 shadow-md shadow-black/20 transition-all duration-300 group-hover:-translate-y-2 group-hover:shadow-xl group-hover:shadow-black/30">
+                  {r.cover ? (
+                    <img src={r.cover} alt={`${r.title} cover`} className="w-full h-full object-cover" loading="lazy" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center p-4 text-center">
+                      <span className="font-bold text-sm text-black/40">{r.title}</span>
+                    </div>
+                  )}
+                </div>
+                <h3 className="mt-4 text-base font-bold leading-snug">{r.title}</h3>
+                {r.author && <p className="text-sm text-gray-500">{r.author}</p>}
+                {r.note && <p className="text-gray-600 text-sm mt-2 leading-relaxed">{r.note}</p>}
               </div>
             ))}
           </div>

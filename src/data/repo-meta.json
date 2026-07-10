@@ -1,7 +1,7 @@
 {
   "rwa-analyzer": {
     "stars": 0,
-    "pushedAt": "2026-07-09T22:32:26Z",
+    "pushedAt": "2026-07-10T19:07:09Z",
     "description": "An honest, agent-first backing-verification primitive for tokenized real-world assets (MCP/CLI/HTTP). Refuses to fake a green.",
     "language": "TypeScript"
   },
@@ -28,5 +28,11 @@
     "pushedAt": "2025-09-26T01:46:00Z",
     "description": "Knowledge-graph RAG over the 800-page Dodd-Frank Act (Microsoft GraphRAG + Neo4j) for regulatory Q&A.",
     "language": "Python"
+  },
+  "texas-holdem-ocaml": {
+    "stars": 0,
+    "pushedAt": "2026-07-10T16:06:10Z",
+    "description": "Networked multiplayer Texas Hold'em in OCaml. TCP server, 2-6 terminal clients with ASCII rendering, a hand evaluator, and an interactive rulebook. CS 3110 team project.",
+    "language": "OCaml"
   }
 }

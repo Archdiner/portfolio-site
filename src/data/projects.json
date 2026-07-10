@@ -55,5 +55,14 @@
     "image": "/graphrag_ss.png",
     "projectLink": null,
     "githubLink": "https://github.com/Archdiner/GraphRAG-Dodd-Frank"
+  },
+  {
+    "repo": "texas-holdem-ocaml",
+    "title": "Texas Hold'em (OCaml)",
+    "blurb": "Networked multiplayer Texas Hold'em, built from scratch in OCaml. A TCP server hosts a 2 to 6 player table, and each player runs a terminal client with ASCII-rendered cards, backed by a real hand evaluator and an interactive rulebook. CS 3110 team project.",
+    "stack": ["OCaml", "Lwt", "TCP", "OUnit"],
+    "image": null,
+    "projectLink": null,
+    "githubLink": "https://github.com/archdiner/texas-holdem-ocaml"
   }
 ]

@@ -1,5 +1,5 @@
 [
-  { "title": "The Picture of Dorian Gray", "author": "Oscar Wilde", "note": "" },
-  { "title": "Life 3.0", "author": "Max Tegmark", "note": "" },
-  { "title": "Twenty Thousand Leagues Under the Sea", "author": "Jules Verne", "note": "" }
+  { "title": "The Picture of Dorian Gray", "author": "Oscar Wilde", "cover": "/books/dorian-gray.jpg", "note": "" },
+  { "title": "Life 3.0", "author": "Max Tegmark", "cover": "/books/life-3-0.jpg", "note": "" },
+  { "title": "Twenty Thousand Leagues Under the Sea", "author": "Jules Verne", "cover": "/books/20000-leagues.jpg", "note": "" }
 ]
