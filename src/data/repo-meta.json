@@ -1,0 +1,32 @@
+{
+  "rwa-analyzer": {
+    "stars": 0,
+    "pushedAt": "2026-07-09T22:32:26Z",
+    "description": "An honest, agent-first backing-verification primitive for tokenized real-world assets (MCP/CLI/HTTP). Refuses to fake a green.",
+    "language": "TypeScript"
+  },
+  "kite-credit": {
+    "stars": 1,
+    "pushedAt": "2026-06-01T15:38:05Z",
+    "description": "Cross-border credit scoring fusing on-chain (Solana) + off-chain identity with ZK-verified bank statements (Reclaim) and LLM explanations.",
+    "language": "TypeScript"
+  },
+  "compute-swarm": {
+    "stars": 1,
+    "pushedAt": "2026-01-08T21:55:15Z",
+    "description": "Decentralized GPU compute marketplace — trustless x402/USDC micropayments on Base, Docker-sandboxed PyTorch/HF jobs.",
+    "language": "Python"
+  },
+  "commitment-parties": {
+    "stars": 1,
+    "pushedAt": "2026-03-23T15:45:52Z",
+    "description": "CommitMint — Solana commitment-pool platform for accountability & habit-building (Anchor). 3rd place, Global Solana Hackathon.",
+    "language": "Python"
+  },
+  "GraphRAG-Dodd-Frank": {
+    "stars": 1,
+    "pushedAt": "2025-09-26T01:46:00Z",
+    "description": "Knowledge-graph RAG over the 800-page Dodd-Frank Act (Microsoft GraphRAG + Neo4j) for regulatory Q&A.",
+    "language": "Python"
+  }
+}

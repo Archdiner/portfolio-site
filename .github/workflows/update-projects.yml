@@ -1,0 +1,46 @@
+name: Refresh project metadata
+
+# Keeps stars / last-pushed / language on the site fresh for the CURATED repos
+# in src/data/projects.json — without ever auto-adding new projects.
+
+on:
+  schedule:
+    - cron: '17 6 * * *' # nightly ~06:17 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Refresh repo metadata
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/refresh-repo-meta.mjs
+
+      - name: Commit if changed
+        run: |
+          if [[ -n "$(git status --porcelain src/data/repo-meta.json)" ]]; then
+            git config user.name  "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add src/data/repo-meta.json
+            git commit -m "chore: refresh project metadata"
+            git push
+          else
+            echo "No metadata changes."
+          fi
+
+      # Optional: if your host does NOT auto-deploy on push, add a deploy hook
+      # URL as the DEPLOY_HOOK_URL secret (Vercel/Netlify both provide one) and
+      # this will trigger a rebuild after the metadata refresh.
+      - name: Trigger redeploy (optional)
+        if: ${{ secrets.DEPLOY_HOOK_URL != '' }}
+        run: curl -fsSL -X POST "${{ secrets.DEPLOY_HOOK_URL }}"
