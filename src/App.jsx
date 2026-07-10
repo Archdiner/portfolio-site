@@ -160,7 +160,7 @@ const NAV = [
 ];
 
 const HERO_SUB =
-  "CS student at Cornell, originally from Bahrain. Right now I'm founding Zybit, voice AI that charts for dentists. Before that, I built credit scoring, GPU marketplaces, and regulatory RAG systems.";
+  "CS student at Cornell, from Bahrain. Right now I'm founding Zybit, voice AI that charts for dentists. Before that: credit scoring, GPU marketplaces, and regulatory RAG.";
 
 const App = () => {
   const [activeSection, setActiveSection] = useState('home');
@@ -267,7 +267,7 @@ const App = () => {
               </div>
             </div>
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight leading-[0.95] lg:max-w-xl">
-              I build AI systems for high-stakes, messy problems.
+              I build AI for health, finance, and compute.
             </h1>
             <p
               className="text-lg max-w-lg mx-auto lg:mx-0 text-gray-600"
