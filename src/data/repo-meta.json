@@ -1,7 +1,7 @@
 {
   "rwa-analyzer": {
     "stars": 0,
-    "pushedAt": "2026-07-10T23:55:00Z",
+    "pushedAt": "2026-07-11T00:21:50Z",
     "description": "An honest, agent-first backing-verification primitive for tokenized real-world assets (MCP/CLI/HTTP). Refuses to fake a green.",
     "language": "TypeScript"
   },
