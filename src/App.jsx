@@ -9,9 +9,9 @@ const STACK = ['Python', 'TypeScript', 'Java', 'OCaml', 'React', 'Next.js', 'Fas
 
 const careerTimeline = [
   { year: '2025', role: 'Founder & CTO', company: 'Zybit', logo: '/logos/zybit.png', mark: 'Z', companyUrl: 'https://getzybit.com', desc: 'Voice AI that charts for dentists. Live in 3 dental clinics today, onboarding more by hand.' },
-  { year: '2026', role: 'Student Ambassador', company: 'Akash Network', logo: '/logos/akash.ico', mark: 'AK', companyUrl: 'https://akash.network', desc: 'Running campus workshops on decentralized compute.' },
-  { year: '2025', role: 'Vice President, prev. AI Engineer', company: 'Generative AI at Cornell', logo: '/logos/genai.ico', mark: 'GA', companyUrl: 'https://cornellgenai.dev', desc: 'Leading LLM initiatives after starting as an engineer.' },
-  { year: '2025', role: 'Accelerator Subteam', company: 'Cornell Blockchain', logo: '/logos/cornellblockchain.png', mark: 'CB', companyUrl: 'https://cornellblockchain.org', desc: 'Working on accelerator initiatives and early-stage ventures.' },
+  { year: '2026 – Present', role: 'Student Ambassador', company: 'Akash Network', logo: '/logos/akash.ico', mark: 'AK', companyUrl: 'https://akash.network', desc: 'Running campus workshops on decentralized compute.' },
+  { year: '2025 – Present', role: 'Vice President, prev. AI Engineer', company: 'Generative AI at Cornell', logo: '/logos/genai.ico', mark: 'GA', companyUrl: 'https://cornellgenai.dev', desc: 'Leading LLM initiatives after starting as an engineer.' },
+  { year: '2025 – Present', role: 'Blockchain Engineering Subteam', company: 'Cornell Blockchain', logo: '/logos/cornellblockchain.png', mark: 'CB', companyUrl: 'https://cornellblockchain.org', desc: 'Building on-chain projects with the engineering subteam.' },
   { year: '2024', role: 'LLM Application Developer Intern', company: 'RIIG / HOOTL', logo: '/logos/riig.png', mark: 'R', companyUrl: 'https://www.riigtech.com', desc: 'Built an AI pipeline for financial regulatory analysis.' },
 ];
 
@@ -137,7 +137,7 @@ const App = () => (
           <p className="mt-4 text-[16px] leading-relaxed text-ink/75 max-w-xl">
             I build AI products and ship them. Right now that&apos;s Zybit, voice AI that charts for dentists, live
             in 3 practices. Before it: an agent that audits whether tokenized real-world assets are actually
-            backed, a GPU marketplace, and an app that makes you stake money on your screen-time goals.
+            backed, a GPU marketplace, and an app that lets you stake money on your screen-time goals.
           </p>
           <div className="mt-6 flex flex-wrap gap-2.5">
             <a href="mailto:sar367@cornell.edu" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-orange text-cream font-medium text-sm hover:bg-rust transition-colors">
