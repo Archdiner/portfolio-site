@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Github, Linkedin, Twitter, FileText, Mail, ChevronLeft, ChevronRight } from 'lucide-react';
 import projectsData from './data/projects.json';
 import repoMeta from './data/repo-meta.json';
@@ -78,6 +78,10 @@ const Eyebrow = ({ children }) => (
 const ReadingCarousel = () => {
   const [idx, setIdx] = useState(0);
   const n = reading.length;
+  // warm the browser cache with every cover so paging never hits the network cold
+  useEffect(() => {
+    reading.forEach((b) => { const im = new Image(); im.src = b.cover; });
+  }, []);
   const at = (o) => reading[((idx + o) % n + n) % n];
   const go = (d) => setIdx((i) => ((i + d) % n + n) % n);
   const center = at(0);
