@@ -88,8 +88,8 @@ const ReadingCarousel = () => {
         <span className="font-mono text-[11px] text-muted">{String(idx + 1).padStart(2, '0')} / {n}</span>
       </div>
       {/* fixed-height book row so the caption below never shifts the arrows */}
-      <div className="flex items-center justify-center gap-3 sm:gap-6 h-[264px] sm:h-[288px]">
-        <button aria-label="Previous" onClick={() => go(-1)} className="p-2 rounded-md border border-line hover:border-orange hover:text-orange transition-colors shrink-0"><ChevronLeft size={18} /></button>
+      <div className="flex items-center justify-center gap-2 sm:gap-6 h-[220px] sm:h-[268px]">
+        <button aria-label="Previous" onClick={() => go(-1)} className="p-1.5 sm:p-2 rounded-md border border-line hover:border-orange hover:text-orange transition-colors shrink-0"><ChevronLeft size={18} /></button>
         {[-1, 0, 1].map((o) => {
           const b = at(o);
           const isCenter = o === 0;
@@ -100,11 +100,11 @@ const ReadingCarousel = () => {
               onClick={() => !isCenter && go(o)}
               className={`shrink-0 transition-opacity duration-300 ${isCenter ? '' : 'opacity-40 hover:opacity-75 cursor-pointer'}`}
             >
-              <img src={b.cover} alt={b.title} draggable="false" className={`${isCenter ? 'w-32 sm:w-40' : 'w-20 sm:w-24'} aspect-[2/3] object-cover rounded-md border border-line shadow-[0_6px_24px_rgba(28,26,20,0.16)]`} />
+              <img src={b.cover} alt={b.title} draggable="false" className={`${isCenter ? 'w-28 sm:w-40' : 'w-16 sm:w-24'} aspect-[2/3] object-cover rounded-md border border-line shadow-[0_6px_24px_rgba(28,26,20,0.16)]`} />
             </button>
           );
         })}
-        <button aria-label="Next" onClick={() => go(1)} className="p-2 rounded-md border border-line hover:border-orange hover:text-orange transition-colors shrink-0"><ChevronRight size={18} /></button>
+        <button aria-label="Next" onClick={() => go(1)} className="p-1.5 sm:p-2 rounded-md border border-line hover:border-orange hover:text-orange transition-colors shrink-0"><ChevronRight size={18} /></button>
       </div>
       {/* caption lives in its own fixed-height block, out of the flex row */}
       <div className="h-14 mt-4 flex flex-col items-center justify-start text-center px-4">
@@ -134,6 +134,13 @@ const App = () => (
             I build AI products and ship them. Right now that&apos;s Zybit, voice AI that charts for dentists, live
             in 3 practices. Before it: cross-border credit scoring, a GPU marketplace, and a knowledge-graph
             system over financial regulation.
+          </p>
+          <p className="mt-5 font-mono text-[12px] text-muted flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span>Bass in a jazz band</span>
+            <span className="text-orange">·</span>
+            <span>amateur boxing</span>
+            <span className="text-orange">·</span>
+            <span>top-20 competitive Pok&eacute;mon</span>
           </p>
           <div className="mt-6 flex flex-wrap gap-2.5">
             <a href="mailto:sar367@cornell.edu" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-orange text-cream font-medium text-sm hover:bg-rust transition-colors">
@@ -242,7 +249,7 @@ const App = () => (
             </a>
           ))}
         </div>
-        <p className="mt-9 font-mono text-[11px] text-cream/45">Ithaca, NY. Bass in a jazz band, amateur boxing, top-20 competitive Pokémon.</p>
+        <p className="mt-9 font-mono text-[11px] text-cream/45">Ithaca, NY.</p>
       </footer>
     </div>
   </div>
