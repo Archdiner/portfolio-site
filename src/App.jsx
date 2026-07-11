@@ -132,15 +132,8 @@ const App = () => (
           </p>
           <p className="mt-4 text-[16px] leading-relaxed text-ink/75 max-w-xl">
             I build AI products and ship them. Right now that&apos;s Zybit, voice AI that charts for dentists, live
-            in 3 practices. Before it: cross-border credit scoring, a GPU marketplace, and a knowledge-graph
-            system over financial regulation.
-          </p>
-          <p className="mt-5 font-mono text-[12px] text-muted flex flex-wrap items-center gap-x-2 gap-y-1">
-            <span>Bass in a jazz band</span>
-            <span className="text-orange">·</span>
-            <span>amateur boxing</span>
-            <span className="text-orange">·</span>
-            <span>top-20 competitive Pok&eacute;mon</span>
+            in 3 practices. Before it: an agent that audits whether tokenized real-world assets are actually
+            backed, a GPU marketplace, and an app that makes you stake money on your screen-time goals.
           </p>
           <div className="mt-6 flex flex-wrap gap-2.5">
             <a href="mailto:sar367@cornell.edu" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-orange text-cream font-medium text-sm hover:bg-rust transition-colors">
@@ -153,6 +146,13 @@ const App = () => (
               </a>
             ))}
           </div>
+          <p className="mt-6 font-mono text-[12px] text-muted flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span>Bass in a jazz band</span>
+            <span className="text-orange">·</span>
+            <span>amateur boxing</span>
+            <span className="text-orange">·</span>
+            <span>once top-20 at competitive Pok&eacute;mon</span>
+          </p>
         </div>
       </section>
 
