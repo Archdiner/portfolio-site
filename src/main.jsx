@@ -1,6 +1,9 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import '@fontsource-variable/eb-garamond'
+import '@fontsource-variable/playfair-display'
+import '@fontsource-variable/space-grotesk'
+import '@fontsource/space-mono/400.css'
+import '@fontsource/space-mono/700.css'
 import App from './App.jsx'
 import './index.css'
 

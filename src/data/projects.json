@@ -3,55 +3,54 @@
     "repo": null,
     "title": "Zybit",
     "tag": "Founding now · live in 3 dental practices",
-    "blurb": "Voice AI that charts for dentists. Zybit listens while you work and writes your findings into Open Dental: on the right tooth, in your own codes, exactly as you said them. No retyping, no miscoding. Live in 3 practices and onboarding more by hand.",
+    "blurb": "Voice AI that charts for dentists. Zybit listens while you work and writes findings into Open Dental — on the right tooth, in your own codes, exactly as you said them.",
     "stack": ["Next.js", "TypeScript", "Realtime Voice", "Open Dental"],
-    "image": "/zybit-screenshot.png",
+    "image": "/shots/zybit.png",
     "projectLink": "https://getzybit.com",
     "githubLink": null
   },
   {
     "repo": "rwa-analyzer",
     "title": "RWA Analyzer",
-    "blurb": "Agent-first backing-verification for tokenized real-world assets, exposed over MCP, CLI, and HTTP. Checks whether a token's real-world backing actually holds up instead of rubber-stamping it.",
-    "stack": ["TypeScript", "MCP", "Node.js", "Agents"],
-    "image": null,
-    "projectLink": "https://rwa-analyzer.vercel.app/",
+    "blurb": "Agent-first backing-verification for tokenized real-world assets, over MCP, CLI, and HTTP. Checks whether a token's real-world backing actually holds up instead of rubber-stamping it.",
+    "stack": ["TypeScript", "MCP", "Agents"],
+    "image": "/shots/rwa.png",
+    "projectLink": "https://rwa-analyzer.vercel.app",
     "githubLink": "https://github.com/Archdiner/rwa-analyzer"
   },
   {
     "repo": "kite-credit",
     "title": "Kite Credit",
-    "blurb": "A persistent, cross-border credit score that fuses off-chain and on-chain identity. Pulls Solana activity, GitHub history, and ZK-verified bank statements (Reclaim Protocol) into one dynamic score, with plain-English explanations from Gemini 2.0 Flash.",
-    "stack": ["Next.js", "React", "Solana", "Reclaim ZK", "Gemini 2.0"],
+    "blurb": "A persistent, cross-border credit score fusing on-chain Solana activity, GitHub history, and ZK-verified bank statements (Reclaim), with plain-English explanations from Gemini 2.0.",
+    "stack": ["Next.js", "Solana", "Reclaim ZK", "Gemini 2.0"],
     "image": "/kitecredit-screenshot.png",
     "projectLink": "https://kitecredit.xyz",
-    "xLink": "https://x.com/kitecredit",
     "githubLink": "https://github.com/Archdiner/kite-credit"
-  },
-  {
-    "repo": "compute-swarm",
-    "title": "ComputeSwarm",
-    "blurb": "A decentralized GPU compute marketplace that matches idle GPUs with demand through trustless micropayments. x402 USDC settlement on Base, Docker-sandboxed execution, PyTorch and HuggingFace job templates, built to undercut cloud by using idle capacity.",
-    "stack": ["React", "FastAPI", "Python", "x402", "Web3.py", "PyTorch", "Docker"],
-    "image": "/compute-swarm-screenshot.png",
-    "projectLink": null,
-    "githubLink": "https://github.com/Archdiner/compute-swarm"
   },
   {
     "repo": "commitment-parties",
     "title": "CommitMint",
-    "hackathonWinner": "🏆 3rd — Global Solana Hackathon",
-    "blurb": "A Solana commitment-pool platform for accountability and habit-building. Anchor smart contracts let users stake into pools and track progress toward goals with on-chain verification. Built the commitment-escrow contracts and backend.",
-    "stack": ["Solana", "Anchor", "Next.js", "FastAPI", "Supabase"],
+    "hackathonWinner": "3rd — Global Solana Hackathon",
+    "blurb": "A Solana commitment-pool platform for accountability and habit-building on Anchor smart contracts. Built the commitment-escrow contracts and backend.",
+    "stack": ["Solana", "Anchor", "Next.js", "FastAPI"],
     "image": "/commitmint-screenshot.png",
     "projectLink": "https://commitmint.app",
     "githubLink": "https://github.com/Archdiner/commitment-parties"
   },
   {
+    "repo": "compute-swarm",
+    "title": "ComputeSwarm",
+    "blurb": "A decentralized GPU compute marketplace matching idle GPUs with demand through trustless x402/USDC micropayments on Base, with Docker-sandboxed execution.",
+    "stack": ["React", "FastAPI", "x402", "PyTorch"],
+    "image": "/compute-swarm-screenshot.png",
+    "projectLink": null,
+    "githubLink": "https://github.com/Archdiner/compute-swarm"
+  },
+  {
     "repo": "GraphRAG-Dodd-Frank",
     "title": "GraphRAG Dodd-Frank",
-    "blurb": "A research project applying Microsoft's GraphRAG to the 800-page Dodd-Frank Act. Extracts entities and relationships into a knowledge graph, then does hybrid graph plus vector retrieval to answer regulatory questions a flat vector store misses.",
-    "stack": ["Python", "GraphRAG", "LangChain", "Neo4j"],
+    "blurb": "A knowledge-graph RAG system over the 800-page Dodd-Frank Act. Extracts entities and relationships, then does hybrid graph + vector retrieval to answer questions a flat vector store misses.",
+    "stack": ["Python", "GraphRAG", "Neo4j"],
     "image": "/graphrag_ss.png",
     "projectLink": null,
     "githubLink": "https://github.com/Archdiner/GraphRAG-Dodd-Frank"
@@ -59,8 +58,8 @@
   {
     "repo": "texas-holdem-ocaml",
     "title": "Texas Hold'em (OCaml)",
-    "blurb": "Networked multiplayer Texas Hold'em, built from scratch in OCaml. A TCP server hosts a 2 to 6 player table, and each player runs a terminal client with ASCII-rendered cards, backed by a real hand evaluator and an interactive rulebook. CS 3110 team project.",
-    "stack": ["OCaml", "Lwt", "TCP", "OUnit"],
+    "blurb": "Networked multiplayer Texas Hold'em built from scratch in OCaml — a TCP server, terminal clients with ASCII-rendered cards, a hand evaluator, and an interactive rulebook.",
+    "stack": ["OCaml", "Lwt", "TCP"],
     "image": null,
     "projectLink": null,
     "githubLink": "https://github.com/archdiner/texas-holdem-ocaml"

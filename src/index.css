@@ -7,33 +7,12 @@ html {
 }
 
 body {
-  font-family: "EB Garamond Variable", Georgia, serif;
+  font-family: "Space Grotesk Variable", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  font-feature-settings: "liga" 1, "kern" 1;
-}
-
-/* subtle paper grain */
-.grain::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  opacity: 0.035;
-  mix-blend-mode: multiply;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 ::selection {
-  background: #191510;
-  color: #f1ebdd;
-}
-
-/* small-caps-style label */
-.eyebrow {
-  text-transform: uppercase;
-  letter-spacing: 0.26em;
-  font-size: 12px;
-  font-weight: 500;
+  background: #235c34;
+  color: #f2f0e7;
 }
