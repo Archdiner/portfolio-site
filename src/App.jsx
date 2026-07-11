@@ -24,7 +24,8 @@ const writing = [
 const reading = [
   { title: 'Six of Crows', author: 'Leigh Bardugo', cover: '/books/six-of-crows.jpg' },
   { title: 'Kafka on the Shore', author: 'Haruki Murakami', cover: '/books/kafka-shore.jpg' },
-  { title: 'The Metamorphosis', author: 'Franz Kafka', cover: '/books/metamorphosis.jpg' },
+  { title: 'The Secret History', author: 'Donna Tartt', cover: '/books/secret-history.jpg' },
+  { title: 'The Kite Runner', author: 'Khaled Hosseini', cover: '/books/kite-runner.jpg' },
   { title: 'Down and Out in Paris and London', author: 'George Orwell', cover: '/books/down-and-out.jpg' },
   { title: 'Dear Evan Hansen', author: 'Val Emmich', cover: '/books/dear-evan-hansen.jpg' },
   { title: 'The Picture of Dorian Gray', author: 'Oscar Wilde', cover: '/books/dorian-gray.jpg' },
@@ -79,30 +80,36 @@ const ReadingCarousel = () => {
   const n = reading.length;
   const at = (o) => reading[((idx + o) % n + n) % n];
   const go = (d) => setIdx((i) => ((i + d) % n + n) % n);
+  const center = at(0);
   return (
-    <section className="py-12 border-t border-line">
+    <section className="py-12 border-t border-line select-none">
       <div className="flex items-center justify-between mb-8">
         <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted">Reading List</p>
         <span className="font-mono text-[11px] text-muted">{String(idx + 1).padStart(2, '0')} / {n}</span>
       </div>
-      <div className="flex items-center justify-center gap-3 sm:gap-6">
+      {/* fixed-height book row so the caption below never shifts the arrows */}
+      <div className="flex items-center justify-center gap-3 sm:gap-6 h-[264px] sm:h-[288px]">
         <button aria-label="Previous" onClick={() => go(-1)} className="p-2 rounded-md border border-line hover:border-orange hover:text-orange transition-colors shrink-0"><ChevronLeft size={18} /></button>
         {[-1, 0, 1].map((o) => {
           const b = at(o);
-          const center = o === 0;
+          const isCenter = o === 0;
           return (
-            <button key={o} onClick={() => !center && go(o)} className={`flex flex-col items-center shrink-0 transition-all duration-300 ${center ? '' : 'opacity-40 hover:opacity-75'}`}>
-              <img src={b.cover} alt={b.title} className={`${center ? 'w-36 sm:w-44' : 'w-20 sm:w-28'} aspect-[2/3] object-cover rounded-md border border-line shadow-[0_6px_24px_rgba(28,26,20,0.16)]`} />
-              {center && (
-                <div className="mt-4 text-center max-w-[220px]">
-                  <p className="font-display font-bold text-[15px] leading-tight">{b.title}</p>
-                  <p className="font-mono text-xs text-muted mt-1">{b.author}</p>
-                </div>
-              )}
+            <button
+              key={o}
+              aria-label={isCenter ? b.title : `Go to ${b.title}`}
+              onClick={() => !isCenter && go(o)}
+              className={`shrink-0 transition-opacity duration-300 ${isCenter ? '' : 'opacity-40 hover:opacity-75 cursor-pointer'}`}
+            >
+              <img src={b.cover} alt={b.title} draggable="false" className={`${isCenter ? 'w-32 sm:w-40' : 'w-20 sm:w-24'} aspect-[2/3] object-cover rounded-md border border-line shadow-[0_6px_24px_rgba(28,26,20,0.16)]`} />
             </button>
           );
         })}
         <button aria-label="Next" onClick={() => go(1)} className="p-2 rounded-md border border-line hover:border-orange hover:text-orange transition-colors shrink-0"><ChevronRight size={18} /></button>
+      </div>
+      {/* caption lives in its own fixed-height block, out of the flex row */}
+      <div className="h-14 mt-4 flex flex-col items-center justify-start text-center px-4">
+        <p className="font-display font-bold text-[15px] leading-tight">{center.title}</p>
+        <p className="font-mono text-xs text-muted mt-1">{center.author}</p>
       </div>
     </section>
   );
