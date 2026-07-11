@@ -8,10 +8,10 @@ import repoMeta from './data/repo-meta.json';
 const STACK = ['Python', 'TypeScript', 'Java', 'OCaml', 'React', 'Next.js', 'FastAPI', 'PostgreSQL', 'PyTorch', 'LangChain', 'Solana / Anchor', 'Docker'];
 
 const careerTimeline = [
-  { year: '2025', role: 'Founder & CTO', company: 'Zybit', logo: '/logos/zybit.png', mark: 'Z', companyUrl: 'https://getzybit.com', desc: 'Voice AI that charts for dentists. Live in 3 dental clinics today, onboarding more by hand.' },
+  { year: '2026 – Present', role: 'Founder & CTO', company: 'Zybit', logo: '/logos/zybit.png', mark: 'Z', companyUrl: 'https://getzybit.com', desc: 'Voice AI that charts for dentists. Live in 3 dental clinics today, onboarding more by hand.' },
   { year: '2026 – Present', role: 'Student Ambassador', company: 'Akash Network', logo: '/logos/akash.ico', mark: 'AK', companyUrl: 'https://akash.network', desc: 'Running campus workshops on decentralized compute.' },
   { year: '2025 – Present', role: 'Vice President, prev. AI Engineer', company: 'Generative AI at Cornell', logo: '/logos/genai.ico', mark: 'GA', companyUrl: 'https://cornellgenai.dev', desc: 'Leading LLM initiatives after starting as an engineer.' },
-  { year: '2025 – Present', role: 'Blockchain Engineering Subteam', company: 'Cornell Blockchain', logo: '/logos/cornellblockchain.png', mark: 'CB', companyUrl: 'https://cornellblockchain.org', desc: 'Building on-chain projects with the engineering subteam.' },
+  { year: '2025 – Present', role: 'Engineering Subteam', company: 'Cornell Blockchain', logo: '/logos/cornellblockchain.png', mark: 'CB', companyUrl: 'https://cornellblockchain.org', desc: 'Building on-chain projects with the engineering subteam.' },
   { year: '2024', role: 'LLM Application Developer Intern', company: 'RIIG / HOOTL', logo: '/logos/riig.png', mark: 'R', companyUrl: 'https://www.riigtech.com', desc: 'Built an AI pipeline for financial regulatory analysis.' },
 ];
 
