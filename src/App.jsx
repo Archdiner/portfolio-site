@@ -1,17 +1,18 @@
 import { useState } from 'react';
-import { Github, Linkedin, Twitter, FileText, Mail, ArrowUpRight } from 'lucide-react';
+import { Github, Linkedin, Twitter, FileText, Mail, ChevronLeft, ChevronRight } from 'lucide-react';
 import projectsData from './data/projects.json';
 import repoMeta from './data/repo-meta.json';
 
 // --- content --------------------------------------------------------------
 
-const STACK = ['Python', 'TypeScript', 'OCaml', 'React', 'Next.js', 'FastAPI', 'PostgreSQL', 'PyTorch', 'LangChain', 'Solana / Anchor', 'Docker', 'Neo4j'];
+const STACK = ['Python', 'TypeScript', 'Java', 'OCaml', 'React', 'Next.js', 'FastAPI', 'PostgreSQL', 'PyTorch', 'LangChain', 'Solana / Anchor', 'Docker'];
 
 const careerTimeline = [
-  { year: '2026', role: 'Student Ambassador', company: 'Akash Network', domain: 'akash.network', mark: 'AK', companyUrl: 'https://akash.network', desc: 'Running campus workshops on decentralized compute.' },
-  { year: '2025', role: 'Vice President, prev. AI Engineer', company: 'Generative AI at Cornell', domain: 'cornellgenai.com', mark: 'GA', companyUrl: 'https://cornellgenai.com', desc: 'Leading LLM initiatives after starting as an engineer.' },
-  { year: '2025', role: 'Accelerator Subteam', company: 'Cornell Blockchain', domain: 'cornellblockchain.org', mark: 'CB', companyUrl: 'https://cornellblockchain.org', desc: 'Working on accelerator initiatives and early-stage ventures.' },
-  { year: '2024', role: 'LLM Application Developer Intern', company: 'RIIG / HOOTL', domain: 'riigtech.com', mark: 'R', companyUrl: 'https://www.riigtech.com', desc: 'Built an AI pipeline for financial regulatory analysis.' },
+  { year: '2025', role: 'Founder & CTO', company: 'Zybit', logo: '/logos/zybit.png', mark: 'Z', companyUrl: 'https://getzybit.com', desc: 'Voice AI that charts for dentists. Live in 3 dental clinics today, onboarding more by hand.' },
+  { year: '2026', role: 'Student Ambassador', company: 'Akash Network', logo: '/logos/akash.ico', mark: 'AK', companyUrl: 'https://akash.network', desc: 'Running campus workshops on decentralized compute.' },
+  { year: '2025', role: 'Vice President, prev. AI Engineer', company: 'Generative AI at Cornell', logo: '/logos/genai.ico', mark: 'GA', companyUrl: 'https://cornellgenai.dev', desc: 'Leading LLM initiatives after starting as an engineer.' },
+  { year: '2025', role: 'Accelerator Subteam', company: 'Cornell Blockchain', logo: '/logos/cornellblockchain.png', mark: 'CB', companyUrl: 'https://cornellblockchain.org', desc: 'Working on accelerator initiatives and early-stage ventures.' },
+  { year: '2024', role: 'LLM Application Developer Intern', company: 'RIIG / HOOTL', logo: '/logos/riig.png', mark: 'R', companyUrl: 'https://www.riigtech.com', desc: 'Built an AI pipeline for financial regulatory analysis.' },
 ];
 
 const writing = [
@@ -21,11 +22,14 @@ const writing = [
 ];
 
 const reading = [
-  { title: 'Six of Crows', author: 'Leigh Bardugo' },
-  { title: 'Kafka on the Shore', author: 'Haruki Murakami' },
-  { title: 'The Metamorphosis', author: 'Franz Kafka' },
-  { title: 'Down and Out in Paris and London', author: 'George Orwell' },
-  { title: 'Dear Evan Hansen', author: 'Steven Levenson' },
+  { title: 'Six of Crows', author: 'Leigh Bardugo', cover: '/books/six-of-crows.jpg' },
+  { title: 'Kafka on the Shore', author: 'Haruki Murakami', cover: '/books/kafka-shore.jpg' },
+  { title: 'The Metamorphosis', author: 'Franz Kafka', cover: '/books/metamorphosis.jpg' },
+  { title: 'Down and Out in Paris and London', author: 'George Orwell', cover: '/books/down-and-out.jpg' },
+  { title: 'Dear Evan Hansen', author: 'Val Emmich', cover: '/books/dear-evan-hansen.jpg' },
+  { title: 'The Picture of Dorian Gray', author: 'Oscar Wilde', cover: '/books/dorian-gray.jpg' },
+  { title: 'Life 3.0', author: 'Max Tegmark', cover: '/books/life-3.jpg' },
+  { title: 'Twenty Thousand Leagues Under the Sea', author: 'Jules Verne', cover: '/books/20000-leagues.jpg' },
 ];
 
 // --- helpers --------------------------------------------------------------
@@ -54,14 +58,14 @@ const CONTACTS = [
   { label: 'X', href: 'https://x.com/carne_asado', Icon: Twitter },
 ];
 
-const OrgLogo = ({ domain, mark }) => {
+const OrgLogo = ({ logo, mark }) => {
   const [failed, setFailed] = useState(false);
-  if (failed || !domain) {
-    return <div className="w-9 h-9 shrink-0 rounded bg-cream border border-line flex items-center justify-center font-mono text-[11px] font-semibold text-orange">{mark}</div>;
+  if (failed || !logo) {
+    return <div className="w-9 h-9 shrink-0 rounded-sm bg-cream border border-line flex items-center justify-center font-mono text-[11px] font-semibold text-orange">{mark}</div>;
   }
   return (
-    <div className="w-9 h-9 shrink-0 rounded bg-white border border-line flex items-center justify-center overflow-hidden">
-      <img src={`https://www.google.com/s2/favicons?domain=${domain}&sz=64`} alt="" width="20" height="20" onError={() => setFailed(true)} />
+    <div className="w-9 h-9 shrink-0 rounded-sm bg-white border border-line flex items-center justify-center overflow-hidden">
+      <img src={logo} alt="" className="w-6 h-6 object-contain" onError={() => setFailed(true)} />
     </div>
   );
 };
@@ -70,17 +74,47 @@ const Eyebrow = ({ children }) => (
   <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted mb-6">{children}</p>
 );
 
+const ReadingCarousel = () => {
+  const [idx, setIdx] = useState(0);
+  const n = reading.length;
+  const at = (o) => reading[((idx + o) % n + n) % n];
+  const go = (d) => setIdx((i) => ((i + d) % n + n) % n);
+  return (
+    <section className="py-12 border-t border-line">
+      <div className="flex items-center justify-between mb-8">
+        <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted">Reading List</p>
+        <span className="font-mono text-[11px] text-muted">{String(idx + 1).padStart(2, '0')} / {n}</span>
+      </div>
+      <div className="flex items-center justify-center gap-3 sm:gap-6">
+        <button aria-label="Previous" onClick={() => go(-1)} className="p-2 rounded-md border border-line hover:border-orange hover:text-orange transition-colors shrink-0"><ChevronLeft size={18} /></button>
+        {[-1, 0, 1].map((o) => {
+          const b = at(o);
+          const center = o === 0;
+          return (
+            <button key={o} onClick={() => !center && go(o)} className={`flex flex-col items-center shrink-0 transition-all duration-300 ${center ? '' : 'opacity-40 hover:opacity-75'}`}>
+              <img src={b.cover} alt={b.title} className={`${center ? 'w-36 sm:w-44' : 'w-20 sm:w-28'} aspect-[2/3] object-cover rounded-md border border-line shadow-[0_6px_24px_rgba(28,26,20,0.16)]`} />
+              {center && (
+                <div className="mt-4 text-center max-w-[220px]">
+                  <p className="font-display font-bold text-[15px] leading-tight">{b.title}</p>
+                  <p className="font-mono text-xs text-muted mt-1">{b.author}</p>
+                </div>
+              )}
+            </button>
+          );
+        })}
+        <button aria-label="Next" onClick={() => go(1)} className="p-2 rounded-md border border-line hover:border-orange hover:text-orange transition-colors shrink-0"><ChevronRight size={18} /></button>
+      </div>
+    </section>
+  );
+};
+
 const App = () => (
   <div className="grain relative bg-paper text-ink min-h-screen">
     <div className="relative z-[2] max-w-4xl mx-auto px-6">
 
       {/* Hero — photo first */}
       <section className="pt-16 md:pt-20 pb-14 flex flex-col md:flex-row gap-8 md:gap-12 md:items-center">
-        <img
-          src="/art/zine/avatar-color.jpg"
-          alt="Asad Rizvi"
-          className="w-40 h-40 md:w-52 md:h-52 rounded-2xl object-cover shrink-0 ring-1 ring-line"
-        />
+        <img src="/art/zine/avatar-color.jpg" alt="Asad Rizvi" className="w-40 h-40 md:w-52 md:h-52 rounded-xl object-cover shrink-0 ring-1 ring-line" />
         <div>
           <div className="inline-flex items-center gap-2 mb-5 font-mono text-[11px] uppercase tracking-wide text-muted">
             <span className="w-2 h-2 rounded-full bg-orange animate-pulse" /> Open to Summer 2027 internships
@@ -95,12 +129,12 @@ const App = () => (
             system over financial regulation.
           </p>
           <div className="mt-6 flex flex-wrap gap-2.5">
-            <a href="mailto:sar367@cornell.edu" className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange text-cream font-medium text-sm hover:bg-rust transition-colors">
+            <a href="mailto:sar367@cornell.edu" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-orange text-cream font-medium text-sm hover:bg-rust transition-colors">
               <Mail size={15} /> Email
             </a>
             {CONTACTS.map(({ label, href, Icon }) => (
               <a key={label} href={href} target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-line text-ink font-medium text-sm hover:border-orange hover:text-orange transition-colors">
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-line text-ink font-medium text-sm hover:border-orange hover:text-orange transition-colors">
                 <Icon size={15} /> {label}
               </a>
             ))}
@@ -117,7 +151,7 @@ const App = () => (
             const Wrap = href ? 'a' : 'div';
             return (
               <Wrap key={i} {...(href ? { href, target: '_blank', rel: 'noopener noreferrer' } : {})} className="group block">
-                <div className="aspect-[16/10] rounded-lg overflow-hidden bg-cream ring-1 ring-line">
+                <div className="aspect-[16/10] rounded-md overflow-hidden bg-cream ring-1 ring-line">
                   {p.image ? (
                     <img src={p.image} alt={p.title} className="w-full h-full object-cover object-top group-hover:scale-[1.03] transition-transform duration-500" />
                   ) : (
@@ -126,9 +160,7 @@ const App = () => (
                 </div>
                 <div className="mt-3 flex items-baseline justify-between gap-2">
                   <h3 className="font-display font-bold text-lg leading-tight group-hover:text-orange transition-colors">{p.title}</h3>
-                  <span className="font-mono text-[11px] text-orange shrink-0">
-                    {p.hackathonWinner ? '★ 3rd' : p.tag ? 'Live' : p.projectLink ? 'Live' : 'Code'}
-                  </span>
+                  <span className="font-mono text-[11px] text-orange shrink-0">{p.hackathonWinner ? '★ 3rd' : (p.tag || p.projectLink) ? 'Live' : 'Code'}</span>
                 </div>
                 <p className="mt-1.5 text-[14px] leading-snug text-ink/75">{p.blurb}</p>
                 <p className="mt-2 font-mono text-[11px] text-muted">{p.stack.join(' · ')}</p>
@@ -138,40 +170,13 @@ const App = () => (
         </div>
       </section>
 
-      {/* Stack + Reading side by side, tasteful */}
-      <section className="py-12 border-t border-line grid md:grid-cols-2 gap-12">
-        <div>
-          <Eyebrow>What I work with</Eyebrow>
-          <p className="text-[17px] leading-loose text-ink/80">
-            {STACK.map((t, i) => (
-              <span key={t}>
-                <span className="text-ink">{t}</span>
-                {i < STACK.length - 1 && <span className="text-orange"> · </span>}
-              </span>
-            ))}
-          </p>
-        </div>
-        <div>
-          <Eyebrow>On my shelf</Eyebrow>
-          <ul className="space-y-2.5">
-            {reading.map((r) => (
-              <li key={r.title} className="flex items-baseline gap-2 text-[15px]">
-                <span className="font-medium">{r.title}</span>
-                <span className="flex-1 border-b border-dotted border-line translate-y-[-3px]" />
-                <span className="text-muted text-sm shrink-0">{r.author}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
       {/* Experience */}
       <section id="experience" className="py-12 border-t border-line">
         <Eyebrow>Experience</Eyebrow>
         <div className="space-y-6">
           {careerTimeline.map((item, i) => (
             <div key={i} className="flex gap-4 items-start">
-              <OrgLogo domain={item.domain} mark={item.mark} />
+              <OrgLogo logo={item.logo} mark={item.mark} />
               <div className="flex-1">
                 <div className="flex items-baseline justify-between gap-3 flex-wrap">
                   <h3 className="font-semibold text-[16px]">{item.role}</h3>
@@ -185,31 +190,47 @@ const App = () => (
         </div>
       </section>
 
-      {/* Writing */}
-      <section className="py-12 border-t border-line">
-        <Eyebrow>Writing</Eyebrow>
-        <div className="space-y-4">
-          {writing.map((w, i) => (
-            <a key={i} href={w.href} target="_blank" rel="noopener noreferrer" className="group flex items-baseline justify-between gap-4">
-              <h3 className="text-[15px] group-hover:text-orange transition-colors">{w.title}</h3>
-              <span className="font-mono text-[11px] text-muted shrink-0">{w.tag}</span>
-            </a>
-          ))}
+      {/* Reading carousel */}
+      <ReadingCarousel />
+
+      {/* Stack + Writing */}
+      <section className="py-12 border-t border-line grid md:grid-cols-2 gap-12">
+        <div>
+          <Eyebrow>What I work with</Eyebrow>
+          <p className="text-[17px] leading-loose text-ink/80">
+            {STACK.map((t, i) => (
+              <span key={t}>
+                <span className="text-ink">{t}</span>
+                {i < STACK.length - 1 && <span className="text-orange"> · </span>}
+              </span>
+            ))}
+          </p>
+        </div>
+        <div>
+          <Eyebrow>Writing</Eyebrow>
+          <div className="space-y-4">
+            {writing.map((w, i) => (
+              <a key={i} href={w.href} target="_blank" rel="noopener noreferrer" className="group block">
+                <h3 className="text-[15px] leading-snug group-hover:text-orange transition-colors">{w.title}</h3>
+                <span className="font-mono text-[11px] text-muted">{w.tag}</span>
+              </a>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Footer CTA */}
-      <footer className="my-10 rounded-2xl bg-ink text-cream p-10 md:p-14">
+      <footer className="my-10 rounded-xl bg-ink text-cream p-10 md:p-14">
         <h2 className="font-display font-bold text-3xl md:text-4xl leading-tight max-w-lg">
           Building something, or hiring someone who does? <span className="text-orange">Say hi.</span>
         </h2>
         <div className="mt-7 flex flex-wrap gap-2.5">
-          <a href="mailto:sar367@cornell.edu" className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange text-cream font-medium text-sm hover:bg-rust transition-colors">
+          <a href="mailto:sar367@cornell.edu" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-orange text-cream font-medium text-sm hover:bg-rust transition-colors">
             <Mail size={15} /> sar367@cornell.edu
           </a>
           {CONTACTS.map(({ label, href, Icon }) => (
             <a key={label} href={href} target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-cream/30 font-medium text-sm hover:border-orange hover:text-orange transition-colors">
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-cream/30 font-medium text-sm hover:border-orange hover:text-orange transition-colors">
               <Icon size={15} /> {label}
             </a>
           ))}
