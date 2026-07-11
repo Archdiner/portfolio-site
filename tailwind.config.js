@@ -7,18 +7,18 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        serif: ['"Playfair Display Variable"', 'Georgia', 'serif'],
-        sans: ['"Space Grotesk Variable"', 'system-ui', 'sans-serif'],
-        mono: ['"Space Mono"', 'ui-monospace', 'monospace'],
+        display: ['"Bricolage Grotesque Variable"', 'system-ui', 'sans-serif'],
+        sans: ['"Bricolage Grotesque Variable"', 'system-ui', 'sans-serif'],
+        mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],
       },
       colors: {
-        paper: '#f2efe6',
-        card: '#f8f6ef',
-        ink: '#191612',
-        orange: '#e0531c',
-        rust: '#b23f16',
-        muted: '#726c5f',
-        line: 'rgba(25,22,18,0.14)',
+        paper: '#f0ede4',
+        ink: '#1c1a14',
+        orange: '#dd521f',
+        rust: '#b23f14',
+        cream: '#f6f1e6',
+        muted: '#78735f',
+        line: 'rgba(28,26,20,0.16)',
       },
     },
   },
