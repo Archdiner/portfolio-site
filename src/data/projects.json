@@ -31,7 +31,7 @@
     "repo": "commitment-parties",
     "title": "CommitMint",
     "hackathonWinner": "3rd, Global Solana Hackathon",
-    "blurb": "An app that makes you stake money on your goals and only pays out once your progress is verified. Settlement runs on Anchor smart contracts.",
+    "blurb": "An app that lets you stake money on your goals and only pays out once your progress is verified. Settlement runs on Anchor smart contracts.",
     "stack": ["Solana", "Anchor", "Next.js"],
     "image": "/commitmint-screenshot.png",
     "projectLink": "https://commitmint.app",
