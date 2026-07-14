@@ -163,24 +163,29 @@ const App = () => (
       {/* Projects — scannable grid */}
       <section id="work" className="py-10 border-t border-line">
         <Eyebrow>Projects</Eyebrow>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-5 sm:gap-y-10">
           {projects.map((p, i) => {
             const href = p.projectLink || p.githubLink;
             const Wrap = href ? 'a' : 'div';
             return (
-              <Wrap key={i} {...(href ? { href, target: '_blank', rel: 'noopener noreferrer' } : {})} className="group block">
-                <div className="aspect-[16/10] rounded-md overflow-hidden bg-cream ring-1 ring-line">
+              <Wrap
+                key={i}
+                {...(href ? { href, target: '_blank', rel: 'noopener noreferrer' } : {})}
+                className="group block border-b border-line pb-5 last:border-b-0 last:pb-0 sm:border-b-0 sm:pb-0"
+              >
+                {/* image hidden on mobile — text-only, higher-density list there */}
+                <div className="hidden sm:block aspect-[16/10] rounded-md overflow-hidden bg-cream ring-1 ring-line">
                   {p.image ? (
                     <img src={p.image} alt={p.title} className="w-full h-full object-cover object-top group-hover:scale-[1.03] transition-transform duration-500" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center font-mono text-[11px] text-muted p-4 text-center">{p.stack.join(' · ')}</div>
                   )}
                 </div>
-                <div className="mt-3 flex items-baseline justify-between gap-2">
-                  <h3 className="font-display font-bold text-lg leading-tight group-hover:text-orange transition-colors">{p.title}</h3>
+                <div className="sm:mt-3 flex items-baseline justify-between gap-2">
+                  <h3 className="font-display font-bold text-base sm:text-lg leading-tight group-hover:text-orange transition-colors">{p.title}</h3>
                   <span className="font-mono text-[11px] text-orange shrink-0">{p.hackathonWinner ? '★ 3rd' : (p.tag || p.projectLink) ? 'Live' : 'Code'}</span>
                 </div>
-                <p className="mt-1.5 text-[14px] leading-snug text-ink/75">{p.blurb}</p>
+                <p className="mt-1.5 text-[13px] sm:text-[14px] leading-snug text-ink/75">{p.blurb}</p>
                 <p className="mt-2 font-mono text-[11px] text-muted">{p.stack.join(' · ')}</p>
               </Wrap>
             );
