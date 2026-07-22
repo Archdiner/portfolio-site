@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Github, Linkedin, Twitter, FileText, Mail, ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import projectsData from './data/projects.json';
 import repoMeta from './data/repo-meta.json';
+import lionArt from './data/lion.txt?raw';
 
 // --- content --------------------------------------------------------------
 
@@ -141,14 +142,23 @@ const ReadingCarousel = () => {
 const FeaturedProject = ({ p }) => {
   const href = p.projectLink || p.githubLink;
   return (
-    <a href={href} target="_blank" rel="noopener noreferrer" className="group block mb-10">
-      <div className="aspect-[16/9] overflow-hidden bg-faint border border-line">
+    <a href={href} target="_blank" rel="noopener noreferrer" className="group block mb-10 border border-line hover:border-blood transition-colors">
+      <div className="aspect-[16/9] overflow-hidden bg-faint border-b border-line">
         {p.image && <img src={p.image} alt={p.title} className="w-full h-full object-cover object-top group-hover:scale-[1.02] transition-transform duration-700" />}
       </div>
-      <p className="mt-4 font-mono text-[11px] text-blood uppercase tracking-[0.12em]">Currently building · {statusFor(p)}</p>
-      <h3 className="mt-1 font-display text-3xl font-semibold leading-tight tracking-tight group-hover:text-blood transition-colors">{p.title}</h3>
-      <p className="mt-2 text-[15px] leading-relaxed text-ink/75">{p.blurb}</p>
-      <p className="mt-3 font-mono text-[11px] text-muted">{p.stack.join('  ·  ')}</p>
+      <div className="p-5">
+        <div className="flex items-baseline justify-between gap-3">
+          <h3 className="font-display text-2xl md:text-3xl font-semibold leading-tight tracking-tight group-hover:text-blood transition-colors">{p.title}</h3>
+          <span className="font-mono text-[11px] text-blood shrink-0">★ Featured · {statusFor(p)}</span>
+        </div>
+        <p className="mt-2 text-[15px] leading-relaxed text-ink/75">{p.blurb}</p>
+        <div className="mt-4 pt-3 border-t border-line flex items-center justify-between gap-3">
+          <span className="font-mono text-[11px] text-muted">{p.stack.join('  ·  ')}</span>
+          <span className="font-mono text-[11px] text-ink/60 group-hover:text-blood transition-colors shrink-0 inline-flex items-center gap-1">
+            {(p.projectLink || p.githubLink || '').replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')} <ArrowUpRight size={12} />
+          </span>
+        </div>
+      </div>
     </a>
   );
 };
@@ -198,9 +208,14 @@ const App = () => (
           </div>
         </div>
         <p className="mt-7 text-[17px] leading-relaxed text-ink/80">
-          I build AI products and ship them. Right now that&apos;s Zybit, voice AI that charts for dentists, live
-          in three practices. Before it: an agent that audits whether tokenized real-world assets are actually
-          backed, a GPU marketplace, and an app that lets you stake money on your screen-time goals.
+          I build and ship AI products. Right now that&apos;s Zybit, voice AI that charts for dentists, live in
+          three practices.
+        </p>
+        <p className="mt-4 text-[17px] leading-relaxed text-ink/80">
+          I&apos;m just as deep in <span className="text-blood font-medium">crypto</span>. I ship on Solana and
+          Anchor, wrote ZK verification into a credit score for people with no credit file (<a href="https://kitecredit.xyz" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Kite&nbsp;Credit</a>),
+          built an agent that audits whether tokenized real-world assets are actually backed, and took 3rd at the
+          Global Solana Hackathon with an on-chain staking app.
         </p>
         <p className="mt-4 text-[17px] leading-relaxed text-ink/70">
           Away from the keyboard I play <span className="text-blood font-medium">bass</span> in a jazz band <Trinket>🎸</Trinket>,{' '}
@@ -280,6 +295,7 @@ const App = () => (
     {/* Footer — full-bleed, dark, with a colophon */}
     <footer className="mt-8 bg-ink text-paper">
       <div className="max-w-2xl mx-auto px-6 py-16 md:py-20">
+        <pre aria-hidden="true" className="text-clay/70 leading-[1.05] mb-12 overflow-x-auto font-mono text-[6px] sm:text-[7px] md:text-[8px] whitespace-pre">{lionArt}</pre>
         <h2 className="font-display text-4xl md:text-5xl font-semibold leading-[1.02] tracking-tight max-w-xl">
           Building something, or hiring someone who does? <span className="text-clay italic">Say hi.</span>
         </h2>
@@ -294,9 +310,8 @@ const App = () => (
             </a>
           ))}
         </div>
-        <p className="mt-14 pt-6 border-t border-paper/15 font-mono text-[11px] text-paper/45 leading-relaxed">
-          Set in EB Garamond. Built by hand with React, not a template.<br />
-          Ithaca, NY · © 2026 Asad Rizvi.
+        <p className="mt-14 pt-6 border-t border-paper/15 font-mono text-[11px] text-paper/45">
+          Ithaca, NY · © 2026 Asad Rizvi
         </p>
       </div>
     </footer>
