@@ -1,9 +1,9 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import '@fontsource-variable/bricolage-grotesque'
+import '@fontsource-variable/fraunces'
+import '@fontsource-variable/inter'
 import '@fontsource/ibm-plex-mono/400.css'
 import '@fontsource/ibm-plex-mono/500.css'
-import '@fontsource/ibm-plex-mono/600.css'
 import App from './App.jsx'
 import './index.css'
 

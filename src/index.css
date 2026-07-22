@@ -5,29 +5,28 @@
 html { scroll-behavior: smooth; }
 
 body {
-  font-family: "Bricolage Grotesque Variable", system-ui, sans-serif;
+  font-family: "Inter Variable", system-ui, sans-serif;
+  background: #ece5d8;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  font-feature-settings: "cv05" 1, "cv08" 1, "ss01" 1; /* Inter: single-storey g, tweaks */
 }
 
-/* film-grain texture, like Dryft */
-.grain::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  opacity: 0.06;
-  mix-blend-mode: multiply;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+/* Fraunces display: give the serif some character — a little softness + wonk */
+.font-display {
+  font-optical-sizing: auto;
+  font-variation-settings: "SOFT" 40, "WONK" 1, "opsz" 100;
+  letter-spacing: -0.015em;
 }
 
-/* blueprint grid for the orange manifesto block */
-.blueprint {
-  background-image:
-    linear-gradient(rgba(246,241,230,0.13) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(246,241,230,0.13) 1px, transparent 1px);
-  background-size: 40px 40px;
+/* editorial link underline: thin, offset, drawn on hover */
+.link-ul {
+  text-decoration: underline;
+  text-decoration-color: rgba(124,43,38,0.35);
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  transition: text-decoration-color 0.2s, color 0.2s;
 }
+.link-ul:hover { color: #7c2b26; text-decoration-color: #7c2b26; }
 
-::selection { background: #dd521f; color: #f6f1e6; }
+::selection { background: #7c2b26; color: #ece5d8; }

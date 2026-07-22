@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Github, Linkedin, Twitter, FileText, Mail, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Github, Linkedin, Twitter, FileText, Mail, ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import projectsData from './data/projects.json';
 import repoMeta from './data/repo-meta.json';
 
@@ -8,16 +8,16 @@ import repoMeta from './data/repo-meta.json';
 const STACK = ['Python', 'TypeScript', 'Java', 'OCaml', 'React', 'Next.js', 'FastAPI', 'PostgreSQL', 'PyTorch', 'LangChain', 'Solana / Anchor', 'Docker'];
 
 const careerTimeline = [
-  { year: '2026 – Present', role: 'Founder & CTO', company: 'Zybit', logo: '/logos/zybit.png', mark: 'Z', companyUrl: 'https://getzybit.com', desc: 'Voice AI that charts for dentists. Live in 3 dental clinics today, onboarding more by hand.' },
-  { year: '2026 – Present', role: 'Student Ambassador', company: 'Akash Network', logo: '/logos/akash.ico', mark: 'AK', companyUrl: 'https://akash.network', desc: 'Running campus workshops on decentralized compute.' },
-  { year: '2025 – Present', role: 'Vice President', company: 'Generative AI at Cornell', logo: '/logos/genai.ico', mark: 'GA', companyUrl: 'https://cornellgenai.dev', desc: 'Leading LLM initiatives after starting as an engineer.' },
-  { year: '2025 – Present', role: 'Engineering Subteam', company: 'Cornell Blockchain', logo: '/logos/cornellblockchain.png', mark: 'CB', companyUrl: 'https://cornellblockchain.org', desc: 'Building on-chain projects with the engineering subteam.' },
+  { year: '2026 —', role: 'Founder & CTO', company: 'Zybit', logo: '/logos/zybit.png', mark: 'Z', companyUrl: 'https://getzybit.com', desc: 'Voice AI that charts for dentists. Live in 3 dental clinics today, onboarding more by hand.' },
+  { year: '2026 —', role: 'Student Ambassador', company: 'Akash Network', logo: '/logos/akash.ico', mark: 'AK', companyUrl: 'https://akash.network', desc: 'Running campus workshops on decentralized compute.' },
+  { year: '2025 —', role: 'Vice President', company: 'Generative AI at Cornell', logo: '/logos/genai.ico', mark: 'GA', companyUrl: 'https://cornellgenai.dev', desc: 'Leading LLM initiatives after starting as an engineer.' },
+  { year: '2025 —', role: 'Engineering Subteam', company: 'Cornell Blockchain', logo: '/logos/cornellblockchain.png', mark: 'CB', companyUrl: 'https://cornellblockchain.org', desc: 'Building on-chain projects with the engineering subteam.' },
   { year: '2024', role: 'LLM Application Developer Intern', company: 'RIIG / HOOTL', logo: '/logos/riig.png', mark: 'R', companyUrl: 'https://www.riigtech.com', desc: 'Built an AI pipeline for financial regulatory analysis.' },
 ];
 
 const writing = [
-  { tag: 'Research, 2025', title: "Arteta-Ball: Modeling Arsenal's Possession with Markov Chains", href: '/research/arteta_wharton-2.pdf' },
-  { tag: 'Research, 2025', title: 'Gradient Integrity: Verifying Honest Computation on GPU Networks', href: '/research/gradient-integrity.pdf' },
+  { tag: 'Research · 2025', title: "Arteta-Ball: Modeling Arsenal's Possession with Markov Chains", href: '/research/arteta_wharton-2.pdf' },
+  { tag: 'Research · 2025', title: 'Gradient Integrity: Verifying Honest Computation on GPU Networks', href: '/research/gradient-integrity.pdf' },
   { tag: 'Write-up', title: "Why You Can't Trust the Volume Numbers You See Online", href: 'https://github.com/Archdiner/blockchain_trading_volume_generator' },
 ];
 
@@ -50,35 +50,63 @@ const projects = projectsData.map((p) => {
   const meta = p.repo ? repoMeta[p.repo] : null;
   return { ...p, stars: meta?.stars ?? null, updated: timeAgo(meta?.pushedAt) };
 });
+const [featured, ...restProjects] = projects;
 
 /* eslint-disable react/prop-types */
 const CONTACTS = [
   { label: 'GitHub', href: 'https://github.com/Archdiner', Icon: Github },
-  { label: 'Résumé', href: '/Rizvi_Asad_Resume.pdf', Icon: FileText },
   { label: 'LinkedIn', href: 'https://www.linkedin.com/in/asad-rizvi-02a1782a2/', Icon: Linkedin },
+  { label: 'Résumé', href: '/Rizvi_Asad_Resume.pdf', Icon: FileText },
   { label: 'X', href: 'https://x.com/carne_asado', Icon: Twitter },
 ];
+
+// hand-drawn inline Pokéball — a small authored trinket, no dependency on a logo asset
+const Pokeball = ({ size = 17 }) => (
+  <svg viewBox="0 0 24 24" width={size} height={size} className="inline-block align-[-0.18em] mx-[1px]" aria-hidden="true">
+    <circle cx="12" cy="12" r="11" fill="#fdfaf3" stroke="#1f1a13" strokeWidth="1.6" />
+    <path d="M1 12a11 11 0 0 1 22 0z" fill="#7c2b26" stroke="#1f1a13" strokeWidth="1.6" />
+    <line x1="1" y1="12" x2="23" y2="12" stroke="#1f1a13" strokeWidth="1.6" />
+    <circle cx="12" cy="12" r="3.4" fill="#fdfaf3" stroke="#1f1a13" strokeWidth="1.6" />
+  </svg>
+);
+
+const Trinket = ({ children }) => (
+  <span className="text-[1.02em] align-[-0.12em] mx-[1px]" aria-hidden="true">{children}</span>
+);
 
 const OrgLogo = ({ logo, mark }) => {
   const [failed, setFailed] = useState(false);
   if (failed || !logo) {
-    return <div className="w-9 h-9 shrink-0 rounded-sm bg-cream border border-line flex items-center justify-center font-mono text-[11px] font-semibold text-orange">{mark}</div>;
+    return <div className="w-9 h-9 shrink-0 bg-faint border border-line flex items-center justify-center font-mono text-[11px] font-semibold text-blood">{mark}</div>;
   }
   return (
-    <div className="w-9 h-9 shrink-0 rounded-sm bg-white border border-line flex items-center justify-center overflow-hidden">
+    <div className="w-9 h-9 shrink-0 bg-white border border-line flex items-center justify-center overflow-hidden">
       <img src={logo} alt="" className="w-6 h-6 object-contain" onError={() => setFailed(true)} />
     </div>
   );
 };
 
-const Eyebrow = ({ children }) => (
-  <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted mb-6">{children}</p>
+const SectionHead = ({ n, title, id }) => (
+  <div id={id} className="flex items-baseline justify-between gap-4 mb-9 pb-2.5 border-b border-ink/25">
+    <h2 className="font-display text-2xl md:text-[28px] font-semibold tracking-tight">{title}</h2>
+    <span className="font-mono text-[11px] text-muted tabular-nums shrink-0">{n} / 05</span>
+  </div>
 );
+
+// external text link with a small rising arrow
+const NavLink = ({ href, children }) => (
+  <a href={href} target="_blank" rel="noopener noreferrer"
+    className="group inline-flex items-center gap-1 text-[14px] text-ink/80 hover:text-blood transition-colors">
+    <span className="link-ul">{children}</span>
+    <ArrowUpRight size={13} className="text-muted group-hover:text-blood transition-colors" />
+  </a>
+);
+
+const statusFor = (p) => (p.hackathonWinner ? '★ 3rd place' : p.projectLink ? 'Live' : 'Source');
 
 const ReadingCarousel = () => {
   const [idx, setIdx] = useState(0);
   const n = reading.length;
-  // warm the browser cache with every cover so paging never hits the network cold
   useEffect(() => {
     reading.forEach((b) => { const im = new Image(); im.src = b.cover; });
   }, []);
@@ -86,14 +114,9 @@ const ReadingCarousel = () => {
   const go = (d) => setIdx((i) => ((i + d) % n + n) % n);
   const center = at(0);
   return (
-    <section className="py-12 border-t border-line select-none">
-      <div className="flex items-center justify-between mb-8">
-        <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted">Reading List</p>
-        <span className="font-mono text-[11px] text-muted">{String(idx + 1).padStart(2, '0')} / {n}</span>
-      </div>
-      {/* fixed-height book row so the caption below never shifts the arrows */}
+    <div className="select-none">
       <div className="flex items-center justify-center gap-2 sm:gap-6 h-[220px] sm:h-[268px]">
-        <button aria-label="Previous" onClick={() => go(-1)} className="p-1.5 sm:p-2 rounded-md border border-line hover:border-orange hover:text-orange transition-colors shrink-0"><ChevronLeft size={18} /></button>
+        <button aria-label="Previous" onClick={() => go(-1)} className="p-1.5 sm:p-2 border border-line hover:border-blood hover:text-blood transition-colors shrink-0"><ChevronLeft size={18} /></button>
         {[-1, 0, 1].map((o) => {
           const b = at(o);
           const isCenter = o === 0;
@@ -102,165 +125,195 @@ const ReadingCarousel = () => {
               key={o}
               aria-label={isCenter ? b.title : `Go to ${b.title}`}
               onClick={() => !isCenter && go(o)}
-              className={`shrink-0 transition-opacity duration-300 ${isCenter ? '' : 'opacity-40 hover:opacity-75 cursor-pointer'}`}
+              className={`shrink-0 transition-opacity duration-300 ${isCenter ? '' : 'opacity-35 hover:opacity-70 cursor-pointer'}`}
             >
-              <img src={b.cover} alt={b.title} draggable="false" className={`${isCenter ? 'w-28 sm:w-40' : 'w-16 sm:w-24'} aspect-[2/3] object-cover rounded-md border border-line shadow-[0_6px_24px_rgba(28,26,20,0.16)]`} />
+              <img src={b.cover} alt={b.title} draggable="false" className={`${isCenter ? 'w-28 sm:w-40' : 'w-16 sm:w-24'} aspect-[2/3] object-cover border border-line shadow-[0_10px_30px_rgba(31,26,19,0.22)]`} />
             </button>
           );
         })}
-        <button aria-label="Next" onClick={() => go(1)} className="p-1.5 sm:p-2 rounded-md border border-line hover:border-orange hover:text-orange transition-colors shrink-0"><ChevronRight size={18} /></button>
+        <button aria-label="Next" onClick={() => go(1)} className="p-1.5 sm:p-2 border border-line hover:border-blood hover:text-blood transition-colors shrink-0"><ChevronRight size={18} /></button>
       </div>
-      {/* caption lives in its own fixed-height block, out of the flex row */}
       <div className="h-14 mt-4 flex flex-col items-center justify-start text-center px-4">
-        <p className="font-display font-bold text-[15px] leading-tight">{center.title}</p>
-        <p className="font-mono text-xs text-muted mt-1">{center.author}</p>
+        <p className="font-display font-semibold text-[16px] leading-tight">{center.title}</p>
+        <p className="text-[13px] text-muted mt-1">{center.author}</p>
       </div>
-    </section>
+    </div>
   );
 };
 
-const App = () => (
-  <div className="grain relative bg-paper text-ink min-h-screen">
-    <div className="relative z-[2] max-w-4xl mx-auto px-6">
+// --- project cards --------------------------------------------------------
 
-      {/* Hero — photo first */}
-      <section className="pt-16 md:pt-20 pb-14 flex flex-col md:flex-row gap-8 md:gap-12 md:items-center">
-        <img src="/art/zine/avatar-color.jpg" alt="Asad Rizvi" className="w-40 h-40 md:w-52 md:h-52 rounded-xl object-cover shrink-0 ring-1 ring-line" />
+const FeaturedProject = ({ p }) => {
+  const href = p.projectLink || p.githubLink;
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" className="group grid md:grid-cols-[1.35fr,1fr] gap-6 md:gap-8 items-center mb-12">
+      <div className="aspect-[16/10] overflow-hidden bg-faint border border-line order-1 md:order-none">
+        {p.image && <img src={p.image} alt={p.title} className="w-full h-full object-cover object-top group-hover:scale-[1.02] transition-transform duration-700" />}
+      </div>
+      <div>
+        <p className="font-mono text-[11px] text-blood uppercase tracking-[0.12em] mb-2">Currently building · {statusFor(p)}</p>
+        <h3 className="font-display text-3xl md:text-4xl font-semibold leading-[0.98] tracking-tight group-hover:text-blood transition-colors">{p.title}</h3>
+        <p className="mt-3 text-[15px] leading-relaxed text-ink/75">{p.blurb}</p>
+        <p className="mt-4 font-mono text-[11px] text-muted">{p.stack.join('  ·  ')}</p>
+      </div>
+    </a>
+  );
+};
+
+const ProjectCard = ({ p }) => {
+  const href = p.projectLink || p.githubLink;
+  const Wrap = href ? 'a' : 'div';
+  return (
+    <Wrap
+      {...(href ? { href, target: '_blank', rel: 'noopener noreferrer' } : {})}
+      className="group block"
+    >
+      <div className="hidden sm:block aspect-[16/10] overflow-hidden bg-faint border border-line">
+        {p.image ? (
+          <img src={p.image} alt={p.title} className="w-full h-full object-cover object-top group-hover:scale-[1.03] transition-transform duration-500" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center font-mono text-[11px] text-muted p-4 text-center">{p.stack.join(' · ')}</div>
+        )}
+      </div>
+      <div className="sm:mt-3 flex items-baseline justify-between gap-2 border-b border-line pb-1.5 sm:border-0 sm:pb-0">
+        <h3 className="font-display font-semibold text-lg leading-tight group-hover:text-blood transition-colors">{p.title}</h3>
+        <span className="font-mono text-[11px] text-muted shrink-0">{statusFor(p)}</span>
+      </div>
+      <p className="mt-1.5 text-[14px] leading-snug text-ink/75">{p.blurb}</p>
+      <p className="mt-2 font-mono text-[11px] text-muted">{p.stack.join(' · ')}</p>
+    </Wrap>
+  );
+};
+
+// --- page -----------------------------------------------------------------
+
+const App = () => (
+  <div className="bg-paper text-ink min-h-screen">
+
+    {/* Masthead — a thin running header, like a publication */}
+    <header className="border-b border-ink/30">
+      <div className="max-w-4xl mx-auto px-6 py-3 flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.18em] text-muted">
+        <span className="text-ink">Asad Rizvi</span>
+        <span className="hidden sm:inline">Software &amp; AI</span>
+        <span>Ithaca, NY</span>
+      </div>
+    </header>
+
+    <div className="max-w-4xl mx-auto px-6">
+
+      {/* Hero */}
+      <section className="pt-14 md:pt-20 pb-16 flex flex-col md:flex-row gap-8 md:gap-12 md:items-start">
+        <img src="/portrait-dither.png" alt="Asad Rizvi" className="w-40 h-48 md:w-52 md:h-64 object-cover shrink-0 border border-ink/25 grayscale-[0.1]" />
         <div>
-          <div className="inline-flex items-center gap-2 mb-5 font-mono text-[11px] uppercase tracking-wide text-muted">
-            <span className="w-2 h-2 rounded-full bg-orange animate-pulse" /> Open to Summer 2027 internships
-          </div>
-          <h1 className="font-display font-extrabold text-4xl md:text-5xl tracking-tight leading-none">Asad Rizvi</h1>
-          <p className="mt-3 text-lg text-ink/80">
-            CS at Cornell, from Bahrain. Founder of <a href="https://getzybit.com" target="_blank" rel="noopener noreferrer" className="text-orange font-semibold hover:underline">Zybit</a>.
+          <p className="font-display italic text-[15px] text-muted mb-4">Open to Summer 2027 internships.</p>
+          <h1 className="font-display text-5xl md:text-[68px] font-semibold leading-[0.92] tracking-tight">Asad Rizvi</h1>
+          <p className="mt-4 font-display text-xl md:text-2xl text-ink/85 leading-snug">
+            CS at Cornell, from Bahrain. Founder of{' '}
+            <a href="https://getzybit.com" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Zybit</a>.
           </p>
-          <p className="mt-4 text-[16px] leading-relaxed text-ink/75 max-w-xl">
-            I build AI products and ship them. Right now that&apos;s Zybit, voice AI that charts for dentists, live
-            in 3 practices. Before it: an agent that audits whether tokenized real-world assets are actually
+          <p className="mt-5 text-[16px] leading-relaxed text-ink/75 max-w-xl">
+            I build AI products and ship them. Right now that&apos;s Zybit — voice AI that charts for dentists, live
+            in three practices. Before it: an agent that audits whether tokenized real-world assets are actually
             backed, a GPU marketplace, and an app that lets you stake money on your screen-time goals.
           </p>
-          <div className="mt-6 flex flex-wrap gap-2.5">
-            <a href="mailto:sar367@cornell.edu" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-orange text-cream font-medium text-sm hover:bg-rust transition-colors">
-              <Mail size={15} /> Email
+          <p className="mt-5 text-[16px] leading-relaxed text-ink/70 max-w-xl">
+            Away from the keyboard I play bass in a jazz band <Trinket>🎸</Trinket>, box a little <Trinket>🥊</Trinket>,
+            and once cracked the top&nbsp;20 in competitive Pok&eacute;mon <Pokeball />.
+          </p>
+          <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3">
+            <a href="mailto:sar367@cornell.edu" className="group inline-flex items-center gap-1.5 text-[14px] font-medium text-blood">
+              <Mail size={15} /> <span className="link-ul">sar367@cornell.edu</span>
             </a>
-            {CONTACTS.map(({ label, href, Icon }) => (
-              <a key={label} href={href} target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-line text-ink font-medium text-sm hover:border-orange hover:text-orange transition-colors">
-                <Icon size={15} /> {label}
-              </a>
+            {CONTACTS.map(({ label, href }) => (
+              <NavLink key={label} href={href}>{label}</NavLink>
             ))}
           </div>
-          <p className="mt-6 font-mono text-[12px] text-muted flex flex-wrap items-center gap-x-2 gap-y-1">
-            <span>Bass in a jazz band</span>
-            <span className="text-orange">·</span>
-            <span>amateur boxing</span>
-            <span className="text-orange">·</span>
-            <span>once top-20 at competitive Pok&eacute;mon</span>
-          </p>
         </div>
       </section>
 
-      {/* Projects — scannable grid */}
-      <section id="work" className="py-10 border-t border-line">
-        <Eyebrow>Projects</Eyebrow>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-5 sm:gap-y-10">
-          {projects.map((p, i) => {
-            const href = p.projectLink || p.githubLink;
-            const Wrap = href ? 'a' : 'div';
-            return (
-              <Wrap
-                key={i}
-                {...(href ? { href, target: '_blank', rel: 'noopener noreferrer' } : {})}
-                className="group block border-b border-line pb-5 last:border-b-0 last:pb-0 sm:border-b-0 sm:pb-0"
-              >
-                {/* image hidden on mobile — text-only, higher-density list there */}
-                <div className="hidden sm:block aspect-[16/10] rounded-md overflow-hidden bg-cream ring-1 ring-line">
-                  {p.image ? (
-                    <img src={p.image} alt={p.title} className="w-full h-full object-cover object-top group-hover:scale-[1.03] transition-transform duration-500" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center font-mono text-[11px] text-muted p-4 text-center">{p.stack.join(' · ')}</div>
-                  )}
-                </div>
-                <div className="sm:mt-3 flex items-baseline justify-between gap-2">
-                  <h3 className="font-display font-bold text-base sm:text-lg leading-tight group-hover:text-orange transition-colors">{p.title}</h3>
-                  <span className="font-mono text-[11px] text-orange shrink-0">{p.hackathonWinner ? '★ 3rd' : (p.tag || p.projectLink) ? 'Live' : 'Code'}</span>
-                </div>
-                <p className="mt-1.5 text-[13px] sm:text-[14px] leading-snug text-ink/75">{p.blurb}</p>
-                <p className="mt-2 font-mono text-[11px] text-muted">{p.stack.join(' · ')}</p>
-              </Wrap>
-            );
-          })}
+      {/* Work */}
+      <section className="py-12 border-t border-line">
+        <SectionHead n="01" title="Selected work" id="work" />
+        <FeaturedProject p={featured} />
+        <div className="grid sm:grid-cols-2 gap-x-8 gap-y-5 sm:gap-y-10">
+          {restProjects.map((p, i) => <ProjectCard key={i} p={p} />)}
         </div>
       </section>
 
       {/* Experience */}
-      <section id="experience" className="py-12 border-t border-line">
-        <Eyebrow>Experience</Eyebrow>
-        <div className="space-y-6">
+      <section className="py-12 border-t border-line">
+        <SectionHead n="02" title="Where I've worked" id="experience" />
+        <div className="space-y-7">
           {careerTimeline.map((item, i) => (
-            <div key={i} className="flex gap-4 items-start">
+            <div key={i} className="grid grid-cols-[auto,1fr] sm:grid-cols-[7rem,auto,1fr] gap-x-4 gap-y-1 items-start">
+              <span className="hidden sm:block font-mono text-[11px] text-muted pt-1 tabular-nums">{item.year}</span>
               <OrgLogo logo={item.logo} mark={item.mark} />
               <div className="flex-1">
                 <div className="flex items-baseline justify-between gap-3 flex-wrap">
                   <h3 className="font-semibold text-[16px]">{item.role}</h3>
-                  <span className="font-mono text-xs text-muted">{item.year}</span>
+                  <span className="sm:hidden font-mono text-xs text-muted">{item.year}</span>
                 </div>
-                <a href={item.companyUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-orange hover:underline">{item.company}</a>
-                <p className="text-[14px] text-ink/70 mt-0.5">{item.desc}</p>
+                <a href={item.companyUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-blood link-ul">{item.company}</a>
+                <p className="text-[14px] text-ink/70 mt-1 leading-relaxed">{item.desc}</p>
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Reading carousel */}
-      <ReadingCarousel />
+      {/* Reading */}
+      <section className="py-12 border-t border-line">
+        <SectionHead n="03" title="On the shelf" id="reading" />
+        <ReadingCarousel />
+      </section>
 
-      {/* Stack + Writing */}
+      {/* Toolkit + Writing */}
       <section className="py-12 border-t border-line grid md:grid-cols-2 gap-12">
         <div>
-          <Eyebrow>What I work with</Eyebrow>
-          <p className="text-[17px] leading-loose text-ink/80">
-            {STACK.map((t, i) => (
-              <span key={t}>
-                <span className="text-ink">{t}</span>
-                {i < STACK.length - 1 && <span className="text-orange"> · </span>}
-              </span>
+          <SectionHead n="04" title="Toolkit" />
+          <div className="flex flex-wrap gap-2">
+            {STACK.map((t) => (
+              <span key={t} className="font-mono text-[12px] text-ink/75 border border-line px-2.5 py-1">{t}</span>
             ))}
-          </p>
+          </div>
         </div>
         <div>
-          <Eyebrow>Writing</Eyebrow>
-          <div className="space-y-4">
+          <SectionHead n="05" title="Writing" />
+          <div className="space-y-5">
             {writing.map((w, i) => (
               <a key={i} href={w.href} target="_blank" rel="noopener noreferrer" className="group block">
-                <h3 className="text-[15px] leading-snug group-hover:text-orange transition-colors">{w.title}</h3>
+                <h3 className="font-display text-[16px] leading-snug group-hover:text-blood transition-colors">{w.title}</h3>
                 <span className="font-mono text-[11px] text-muted">{w.tag}</span>
               </a>
             ))}
           </div>
         </div>
       </section>
+    </div>
 
-      {/* Footer CTA */}
-      <footer className="my-10 rounded-xl bg-ink text-cream p-10 md:p-14">
-        <h2 className="font-display font-bold text-3xl md:text-4xl leading-tight max-w-lg">
-          Building something, or hiring someone who does? <span className="text-orange">Say hi.</span>
+    {/* Footer — full-bleed, dark, with a colophon */}
+    <footer className="mt-8 bg-ink text-paper">
+      <div className="max-w-4xl mx-auto px-6 py-16 md:py-20">
+        <h2 className="font-display text-4xl md:text-5xl font-semibold leading-[1.02] tracking-tight max-w-xl">
+          Building something, or hiring someone who does? <span className="text-clay italic">Say hi.</span>
         </h2>
-        <div className="mt-7 flex flex-wrap gap-2.5">
-          <a href="mailto:sar367@cornell.edu" className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-orange text-cream font-medium text-sm hover:bg-rust transition-colors">
-            <Mail size={15} /> sar367@cornell.edu
+        <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+          <a href="mailto:sar367@cornell.edu" className="inline-flex items-center gap-1.5 text-[15px] font-medium text-clay hover:text-paper transition-colors">
+            <Mail size={16} /> sar367@cornell.edu
           </a>
           {CONTACTS.map(({ label, href, Icon }) => (
             <a key={label} href={href} target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-cream/30 font-medium text-sm hover:border-orange hover:text-orange transition-colors">
+              className="inline-flex items-center gap-1.5 text-[14px] text-paper/70 hover:text-clay transition-colors">
               <Icon size={15} /> {label}
             </a>
           ))}
         </div>
-        <p className="mt-9 font-mono text-[11px] text-cream/45">Ithaca, NY.</p>
-      </footer>
-    </div>
+        <p className="mt-14 pt-6 border-t border-paper/15 font-mono text-[11px] text-paper/45 leading-relaxed">
+          Set in Fraunces &amp; Inter. Built by hand with React — no template.<br />
+          Ithaca, NY · © 2026 Asad Rizvi.
+        </p>
+      </div>
+    </footer>
   </div>
 );
 

@@ -7,18 +7,18 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        display: ['"Bricolage Grotesque Variable"', 'system-ui', 'sans-serif'],
-        sans: ['"Bricolage Grotesque Variable"', 'system-ui', 'sans-serif'],
+        display: ['"Fraunces Variable"', 'Georgia', 'Times New Roman', 'serif'],
+        sans: ['"Inter Variable"', 'system-ui', 'sans-serif'],
         mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],
       },
       colors: {
-        paper: '#f0ede4',
-        ink: '#1c1a14',
-        orange: '#dd521f',
-        rust: '#b23f14',
-        cream: '#f6f1e6',
-        muted: '#78735f',
-        line: 'rgba(28,26,20,0.16)',
+        paper: '#ece5d8',   // warm paper stock
+        ink: '#1f1a13',     // warm near-black
+        blood: '#7c2b26',   // oxblood — links, hover, key words
+        clay: '#cf9a86',    // light warm accent, used only on the dark footer
+        muted: '#6b6557',   // secondary text / meta
+        faint: '#e0d8c9',   // subtle fills (thumbnails, tags)
+        line: 'rgba(31,26,19,0.14)',
       },
     },
   },
