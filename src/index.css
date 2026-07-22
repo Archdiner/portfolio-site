@@ -6,7 +6,7 @@ html { scroll-behavior: smooth; }
 
 body {
   font-family: "EB Garamond Variable", Georgia, serif;
-  background: #ffffff;
+  background: #f4efe4;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   font-feature-settings: "liga" 1, "kern" 1;

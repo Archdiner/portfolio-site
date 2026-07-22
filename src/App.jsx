@@ -141,16 +141,14 @@ const ReadingCarousel = () => {
 const FeaturedProject = ({ p }) => {
   const href = p.projectLink || p.githubLink;
   return (
-    <a href={href} target="_blank" rel="noopener noreferrer" className="group grid md:grid-cols-[1.35fr,1fr] gap-6 md:gap-8 items-center mb-12">
-      <div className="aspect-[16/10] overflow-hidden bg-faint border border-line order-1 md:order-none">
+    <a href={href} target="_blank" rel="noopener noreferrer" className="group block mb-10">
+      <div className="aspect-[16/9] overflow-hidden bg-faint border border-line">
         {p.image && <img src={p.image} alt={p.title} className="w-full h-full object-cover object-top group-hover:scale-[1.02] transition-transform duration-700" />}
       </div>
-      <div>
-        <p className="font-mono text-[11px] text-blood uppercase tracking-[0.12em] mb-2">Currently building · {statusFor(p)}</p>
-        <h3 className="font-display text-3xl md:text-4xl font-semibold leading-[0.98] tracking-tight group-hover:text-blood transition-colors">{p.title}</h3>
-        <p className="mt-3 text-[15px] leading-relaxed text-ink/75">{p.blurb}</p>
-        <p className="mt-4 font-mono text-[11px] text-muted">{p.stack.join('  ·  ')}</p>
-      </div>
+      <p className="mt-4 font-mono text-[11px] text-blood uppercase tracking-[0.12em]">Currently building · {statusFor(p)}</p>
+      <h3 className="mt-1 font-display text-3xl font-semibold leading-tight tracking-tight group-hover:text-blood transition-colors">{p.title}</h3>
+      <p className="mt-2 text-[15px] leading-relaxed text-ink/75">{p.blurb}</p>
+      <p className="mt-3 font-mono text-[11px] text-muted">{p.stack.join('  ·  ')}</p>
     </a>
   );
 };
@@ -185,35 +183,31 @@ const ProjectCard = ({ p }) => {
 const App = () => (
   <div className="bg-paper text-ink min-h-screen">
 
-    {/* Masthead — a thin running header, like a publication */}
-    <header className="border-b border-ink/30">
-      <div className="max-w-4xl mx-auto px-6 py-3 flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.18em] text-muted">
-        <span className="text-ink">Asad Rizvi</span>
-        <span className="hidden sm:inline">Software &amp; AI</span>
-        <span>Ithaca, NY</span>
-      </div>
-    </header>
-
-    <div className="max-w-4xl mx-auto px-6">
+    <div className="max-w-2xl mx-auto px-6">
 
       {/* Hero */}
-      <section className="pt-16 md:pt-24 pb-16 max-w-2xl">
-        <h1 className="font-display text-6xl md:text-[84px] font-semibold leading-[0.9] tracking-tight">Asad Rizvi</h1>
-        <p className="mt-5 font-display text-2xl md:text-[26px] text-ink/85 leading-snug">
-          CS at Cornell, from Bahrain. Founder of{' '}
-          <a href="https://getzybit.com" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Zybit</a>.
-        </p>
-        <p className="mt-6 text-[18px] leading-relaxed text-ink/80">
+      <section className="pt-14 md:pt-16 pb-12">
+        <div className="flex items-center gap-5">
+          <img src="/art/zine/avatar-color.jpg" alt="Asad Rizvi" className="w-24 h-24 md:w-28 md:h-28 rounded-xl object-cover shrink-0 border border-line" />
+          <div>
+            <h1 className="font-display text-5xl md:text-6xl font-semibold leading-[0.95] tracking-tight">Asad Rizvi</h1>
+            <p className="mt-2 font-display text-xl md:text-[22px] text-ink/85 leading-snug">
+              CS at Cornell, from Bahrain. Founder of{' '}
+              <a href="https://getzybit.com" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Zybit</a>.
+            </p>
+          </div>
+        </div>
+        <p className="mt-7 text-[17px] leading-relaxed text-ink/80">
           I build AI products and ship them. Right now that&apos;s Zybit, voice AI that charts for dentists, live
           in three practices. Before it: an agent that audits whether tokenized real-world assets are actually
           backed, a GPU marketplace, and an app that lets you stake money on your screen-time goals.
         </p>
-        <p className="mt-5 text-[18px] leading-relaxed text-ink/70">
-          Away from the keyboard I play <span className="text-[#4d5c82] font-medium">bass</span> in a jazz band <Trinket>🎸</Trinket>,{' '}
-          <span className="text-[#a84f42] font-medium">box</span> a little <Trinket>🥊</Trinket>, and once cracked the
-          top&nbsp;20 in competitive <span className="text-[#5f7a49] font-medium">Pok&eacute;mon</span> <Pokeball />.
+        <p className="mt-4 text-[17px] leading-relaxed text-ink/70">
+          Away from the keyboard I play <span className="text-blood font-medium">bass</span> in a jazz band <Trinket>🎸</Trinket>,{' '}
+          <span className="text-blood font-medium">box</span> a little <Trinket>🥊</Trinket>, and I peaked at
+          top&nbsp;20 in competitive <span className="text-blood font-medium">Pok&eacute;mon</span> (vgc) <Pokeball />.
         </p>
-        <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+        <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3">
           <a href="mailto:sar367@cornell.edu" className="group inline-flex items-center gap-1.5 text-[15px] font-medium text-blood">
             <Mail size={15} /> <span className="link-ul">sar367@cornell.edu</span>
           </a>
@@ -285,7 +279,7 @@ const App = () => (
 
     {/* Footer — full-bleed, dark, with a colophon */}
     <footer className="mt-8 bg-ink text-paper">
-      <div className="max-w-4xl mx-auto px-6 py-16 md:py-20">
+      <div className="max-w-2xl mx-auto px-6 py-16 md:py-20">
         <h2 className="font-display text-4xl md:text-5xl font-semibold leading-[1.02] tracking-tight max-w-xl">
           Building something, or hiring someone who does? <span className="text-clay italic">Say hi.</span>
         </h2>
