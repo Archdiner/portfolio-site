@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Github, Linkedin, Twitter, FileText, Mail, ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import projectsData from './data/projects.json';
 import repoMeta from './data/repo-meta.json';
-import lionArt from './data/lion.txt?raw';
 
 // --- content --------------------------------------------------------------
 
@@ -295,7 +294,12 @@ const App = () => (
     {/* Footer — full-bleed, dark, with a colophon */}
     <footer className="mt-8 bg-ink text-paper">
       <div className="max-w-2xl mx-auto px-6 py-16 md:py-20">
-        <pre aria-hidden="true" className="text-clay/70 leading-[1.05] mb-12 overflow-x-auto font-mono text-[6px] sm:text-[7px] md:text-[8px] whitespace-pre">{lionArt}</pre>
+        <video
+          src="/ascii-lion.mp4"
+          poster="/ascii-lion-poster.png"
+          autoPlay muted loop playsInline aria-hidden="true"
+          className="block w-[300px] sm:w-[360px] max-w-full mb-10 mix-blend-screen pointer-events-none select-none"
+        />
         <h2 className="font-display text-4xl md:text-5xl font-semibold leading-[1.02] tracking-tight max-w-xl">
           Building something, or hiring someone who does? <span className="text-clay italic">Say hi.</span>
         </h2>
