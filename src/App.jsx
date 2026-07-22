@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Github, Linkedin, Twitter, FileText, Mail, ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import projectsData from './data/projects.json';
 import repoMeta from './data/repo-meta.json';
+import lionArt from './data/lion.txt?raw';
 
 // --- content --------------------------------------------------------------
 
@@ -291,30 +292,29 @@ const App = () => (
       </section>
     </div>
 
-    {/* Footer — full-bleed, dark, with a colophon */}
+    {/* Footer — full-bleed dark; ASCII lion left, call-to-action right */}
     <footer className="mt-8 bg-ink text-paper">
       <div className="max-w-2xl mx-auto px-6 py-16 md:py-20">
-        <video
-          src="/ascii-lion.mp4"
-          poster="/ascii-lion-poster.png"
-          autoPlay muted loop playsInline aria-hidden="true"
-          className="block w-[300px] sm:w-[360px] max-w-full mb-10 mix-blend-screen pointer-events-none select-none"
-        />
-        <h2 className="font-display text-4xl md:text-5xl font-semibold leading-[1.02] tracking-tight max-w-xl">
-          Building something, or hiring someone who does? <span className="text-clay italic">Say hi.</span>
-        </h2>
-        <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
-          <a href="mailto:sar367@cornell.edu" className="inline-flex items-center gap-1.5 text-[15px] font-medium text-clay hover:text-paper transition-colors">
-            <Mail size={16} /> sar367@cornell.edu
-          </a>
-          {CONTACTS.map(({ label, href, Icon }) => (
-            <a key={label} href={href} target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-[14px] text-paper/70 hover:text-clay transition-colors">
-              <Icon size={15} /> {label}
-            </a>
-          ))}
+        <div className="flex flex-col sm:flex-row items-center sm:items-center gap-8 sm:gap-9">
+          <pre aria-hidden="true" className="shrink-0 text-clay/85 font-mono text-[6px] sm:text-[7px] leading-[1.05] whitespace-pre select-none">{lionArt}</pre>
+          <div className="flex-1 min-w-0">
+            <h2 className="font-display text-3xl md:text-[40px] font-semibold leading-[1.03] tracking-tight">
+              Building something, or hiring someone who does? <span className="text-clay italic">Say hi.</span>
+            </h2>
+            <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3">
+              <a href="mailto:sar367@cornell.edu" className="inline-flex items-center gap-1.5 text-[15px] font-medium text-clay hover:text-paper transition-colors">
+                <Mail size={16} /> sar367@cornell.edu
+              </a>
+              {CONTACTS.map(({ label, href, Icon }) => (
+                <a key={label} href={href} target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-[14px] text-paper/70 hover:text-clay transition-colors">
+                  <Icon size={15} /> {label}
+                </a>
+              ))}
+            </div>
+          </div>
         </div>
-        <p className="mt-14 pt-6 border-t border-paper/15 font-mono text-[11px] text-paper/45">
+        <p className="mt-12 pt-6 border-t border-paper/15 font-mono text-[11px] text-paper/45">
           Ithaca, NY · © 2026 Asad Rizvi
         </p>
       </div>
