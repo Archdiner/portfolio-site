@@ -22,9 +22,9 @@ const writing = [
 ];
 
 const reading = [
-  { title: 'Six of Crows', author: 'Leigh Bardugo', cover: '/books/six-of-crows.jpg' },
+  { title: 'The Alchemist', author: 'Paulo Coelho', cover: '/books/alchemist.jpg' },
   { title: 'Kafka on the Shore', author: 'Haruki Murakami', cover: '/books/kafka-shore.jpg' },
-  { title: 'The Secret History', author: 'Donna Tartt', cover: '/books/secret-history.jpg' },
+  { title: 'The Count of Monte Cristo', author: 'Alexandre Dumas', cover: '/books/monte-cristo.jpg' },
   { title: 'The Kite Runner', author: 'Khaled Hosseini', cover: '/books/kite-runner.jpg' },
   { title: 'Down and Out in Paris and London', author: 'George Orwell', cover: '/books/down-and-out.jpg' },
   { title: 'Dear Evan Hansen', author: 'Val Emmich', cover: '/books/dear-evan-hansen.jpg' },
