@@ -1,0 +1,21 @@
+<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Pokeball">
+  <defs>
+    <clipPath id="pb-clip"><circle cx="150" cy="150" r="129"/></clipPath>
+  </defs>
+  <!-- outer black shell -->
+  <circle cx="150" cy="150" r="146" fill="#0c0c0f"/>
+  <g clip-path="url(#pb-clip)">
+    <!-- hemispheres -->
+    <rect x="0" y="0" width="300" height="150" fill="#f4232b"/>
+    <rect x="0" y="150" width="300" height="150" fill="#fcfcfc"/>
+    <!-- soft 3D depth toward the lower-right -->
+    <ellipse cx="232" cy="176" rx="150" ry="168" fill="#000000" opacity="0.12"/>
+    <ellipse cx="250" cy="230" rx="120" ry="96" fill="#dcdcdc" opacity="0.5"/>
+    <!-- central band -->
+    <rect x="0" y="132" width="300" height="36" fill="#0c0c0f"/>
+  </g>
+  <!-- center button -->
+  <circle cx="150" cy="150" r="47" fill="#0c0c0f"/>
+  <circle cx="150" cy="150" r="31" fill="#fcfcfc"/>
+  <circle cx="150" cy="150" r="16" fill="#141019"/>
+</svg>

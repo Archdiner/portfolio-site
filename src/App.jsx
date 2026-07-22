@@ -8,10 +8,10 @@ import repoMeta from './data/repo-meta.json';
 const STACK = ['Python', 'TypeScript', 'Java', 'OCaml', 'React', 'Next.js', 'FastAPI', 'PostgreSQL', 'PyTorch', 'LangChain', 'Solana / Anchor', 'Docker'];
 
 const careerTimeline = [
-  { year: '2026 —', role: 'Founder & CTO', company: 'Zybit', logo: '/logos/zybit.png', mark: 'Z', companyUrl: 'https://getzybit.com', desc: 'Voice AI that charts for dentists. Live in 3 dental clinics today, onboarding more by hand.' },
-  { year: '2026 —', role: 'Student Ambassador', company: 'Akash Network', logo: '/logos/akash.ico', mark: 'AK', companyUrl: 'https://akash.network', desc: 'Running campus workshops on decentralized compute.' },
-  { year: '2025 —', role: 'Vice President', company: 'Generative AI at Cornell', logo: '/logos/genai.ico', mark: 'GA', companyUrl: 'https://cornellgenai.dev', desc: 'Leading LLM initiatives after starting as an engineer.' },
-  { year: '2025 —', role: 'Engineering Subteam', company: 'Cornell Blockchain', logo: '/logos/cornellblockchain.png', mark: 'CB', companyUrl: 'https://cornellblockchain.org', desc: 'Building on-chain projects with the engineering subteam.' },
+  { year: 'Since 2026', role: 'Founder & CTO', company: 'Zybit', logo: '/logos/zybit.png', mark: 'Z', companyUrl: 'https://getzybit.com', desc: 'Voice AI that charts for dentists. Live in 3 dental clinics today, onboarding more by hand.' },
+  { year: 'Since 2026', role: 'Student Ambassador', company: 'Akash Network', logo: '/logos/akash.ico', mark: 'AK', companyUrl: 'https://akash.network', desc: 'Running campus workshops on decentralized compute.' },
+  { year: 'Since 2025', role: 'Vice President', company: 'Generative AI at Cornell', logo: '/logos/genai.ico', mark: 'GA', companyUrl: 'https://cornellgenai.dev', desc: 'Leading LLM initiatives after starting as an engineer.' },
+  { year: 'Since 2025', role: 'Engineering Subteam', company: 'Cornell Blockchain', logo: '/logos/cornellblockchain.png', mark: 'CB', companyUrl: 'https://cornellblockchain.org', desc: 'Building on-chain projects with the engineering subteam.' },
   { year: '2024', role: 'LLM Application Developer Intern', company: 'RIIG / HOOTL', logo: '/logos/riig.png', mark: 'R', companyUrl: 'https://www.riigtech.com', desc: 'Built an AI pipeline for financial regulatory analysis.' },
 ];
 
@@ -60,14 +60,9 @@ const CONTACTS = [
   { label: 'X', href: 'https://x.com/carne_asado', Icon: Twitter },
 ];
 
-// hand-drawn inline Pokéball — a small authored trinket, no dependency on a logo asset
-const Pokeball = ({ size = 17 }) => (
-  <svg viewBox="0 0 24 24" width={size} height={size} className="inline-block align-[-0.18em] mx-[1px]" aria-hidden="true">
-    <circle cx="12" cy="12" r="11" fill="#fdfaf3" stroke="#1f1a13" strokeWidth="1.6" />
-    <path d="M1 12a11 11 0 0 1 22 0z" fill="#7c2b26" stroke="#1f1a13" strokeWidth="1.6" />
-    <line x1="1" y1="12" x2="23" y2="12" stroke="#1f1a13" strokeWidth="1.6" />
-    <circle cx="12" cy="12" r="3.4" fill="#fdfaf3" stroke="#1f1a13" strokeWidth="1.6" />
-  </svg>
+// Pokéball logo trinket
+const Pokeball = ({ size = 19 }) => (
+  <img src="/pokeball.svg" alt="Pokéball" width={size} height={size} className="inline-block align-[-0.22em] mx-[1px]" />
 );
 
 const Trinket = ({ children }) => (
@@ -202,32 +197,29 @@ const App = () => (
     <div className="max-w-4xl mx-auto px-6">
 
       {/* Hero */}
-      <section className="pt-14 md:pt-20 pb-16 flex flex-col md:flex-row gap-8 md:gap-12 md:items-start">
-        <img src="/portrait-dither.png" alt="Asad Rizvi" className="w-40 h-48 md:w-52 md:h-64 object-cover shrink-0 border border-ink/25 grayscale-[0.1]" />
-        <div>
-          <p className="font-display italic text-[15px] text-muted mb-4">Open to Summer 2027 internships.</p>
-          <h1 className="font-display text-5xl md:text-[68px] font-semibold leading-[0.92] tracking-tight">Asad Rizvi</h1>
-          <p className="mt-4 font-display text-xl md:text-2xl text-ink/85 leading-snug">
-            CS at Cornell, from Bahrain. Founder of{' '}
-            <a href="https://getzybit.com" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Zybit</a>.
-          </p>
-          <p className="mt-5 text-[16px] leading-relaxed text-ink/75 max-w-xl">
-            I build AI products and ship them. Right now that&apos;s Zybit — voice AI that charts for dentists, live
-            in three practices. Before it: an agent that audits whether tokenized real-world assets are actually
-            backed, a GPU marketplace, and an app that lets you stake money on your screen-time goals.
-          </p>
-          <p className="mt-5 text-[16px] leading-relaxed text-ink/70 max-w-xl">
-            Away from the keyboard I play bass in a jazz band <Trinket>🎸</Trinket>, box a little <Trinket>🥊</Trinket>,
-            and once cracked the top&nbsp;20 in competitive Pok&eacute;mon <Pokeball />.
-          </p>
-          <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3">
-            <a href="mailto:sar367@cornell.edu" className="group inline-flex items-center gap-1.5 text-[14px] font-medium text-blood">
-              <Mail size={15} /> <span className="link-ul">sar367@cornell.edu</span>
-            </a>
-            {CONTACTS.map(({ label, href }) => (
-              <NavLink key={label} href={href}>{label}</NavLink>
-            ))}
-          </div>
+      <section className="pt-16 md:pt-24 pb-16 max-w-2xl">
+        <h1 className="font-display text-6xl md:text-[84px] font-semibold leading-[0.9] tracking-tight">Asad Rizvi</h1>
+        <p className="mt-5 font-display text-2xl md:text-[26px] text-ink/85 leading-snug">
+          CS at Cornell, from Bahrain. Founder of{' '}
+          <a href="https://getzybit.com" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Zybit</a>.
+        </p>
+        <p className="mt-6 text-[18px] leading-relaxed text-ink/80">
+          I build AI products and ship them. Right now that&apos;s Zybit, voice AI that charts for dentists, live
+          in three practices. Before it: an agent that audits whether tokenized real-world assets are actually
+          backed, a GPU marketplace, and an app that lets you stake money on your screen-time goals.
+        </p>
+        <p className="mt-5 text-[18px] leading-relaxed text-ink/70">
+          Away from the keyboard I play <span className="text-[#4d5c82] font-medium">bass</span> in a jazz band <Trinket>🎸</Trinket>,{' '}
+          <span className="text-[#a84f42] font-medium">box</span> a little <Trinket>🥊</Trinket>, and once cracked the
+          top&nbsp;20 in competitive <span className="text-[#5f7a49] font-medium">Pok&eacute;mon</span> <Pokeball />.
+        </p>
+        <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+          <a href="mailto:sar367@cornell.edu" className="group inline-flex items-center gap-1.5 text-[15px] font-medium text-blood">
+            <Mail size={15} /> <span className="link-ul">sar367@cornell.edu</span>
+          </a>
+          {CONTACTS.map(({ label, href }) => (
+            <NavLink key={label} href={href}>{label}</NavLink>
+          ))}
         </div>
       </section>
 
@@ -309,7 +301,7 @@ const App = () => (
           ))}
         </div>
         <p className="mt-14 pt-6 border-t border-paper/15 font-mono text-[11px] text-paper/45 leading-relaxed">
-          Set in Fraunces &amp; Inter. Built by hand with React — no template.<br />
+          Set in EB Garamond. Built by hand with React, not a template.<br />
           Ithaca, NY · © 2026 Asad Rizvi.
         </p>
       </div>

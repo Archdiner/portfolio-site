@@ -7,18 +7,18 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        display: ['"Fraunces Variable"', 'Georgia', 'Times New Roman', 'serif'],
-        sans: ['"Inter Variable"', 'system-ui', 'sans-serif'],
+        display: ['"EB Garamond Variable"', 'Georgia', 'Times New Roman', 'serif'],
+        sans: ['"EB Garamond Variable"', 'Georgia', 'Times New Roman', 'serif'],
         mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],
       },
       colors: {
-        paper: '#ece5d8',   // warm paper stock
-        ink: '#1f1a13',     // warm near-black
+        paper: '#ffffff',   // clean white
+        ink: '#1b1813',     // warm near-black
         blood: '#7c2b26',   // oxblood — links, hover, key words
         clay: '#cf9a86',    // light warm accent, used only on the dark footer
-        muted: '#6b6557',   // secondary text / meta
-        faint: '#e0d8c9',   // subtle fills (thumbnails, tags)
-        line: 'rgba(31,26,19,0.14)',
+        muted: '#6f6a5e',   // secondary text / meta
+        faint: '#f3f2ee',   // subtle fills (thumbnails, tags)
+        line: 'rgba(20,18,14,0.14)',
       },
     },
   },

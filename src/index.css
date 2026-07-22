@@ -5,19 +5,15 @@
 html { scroll-behavior: smooth; }
 
 body {
-  font-family: "Inter Variable", system-ui, sans-serif;
-  background: #ece5d8;
+  font-family: "EB Garamond Variable", Georgia, serif;
+  background: #ffffff;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  font-feature-settings: "cv05" 1, "cv08" 1, "ss01" 1; /* Inter: single-storey g, tweaks */
+  font-feature-settings: "liga" 1, "kern" 1;
 }
 
-/* Fraunces display: give the serif some character — a little softness + wonk */
-.font-display {
-  font-optical-sizing: auto;
-  font-variation-settings: "SOFT" 40, "WONK" 1, "opsz" 100;
-  letter-spacing: -0.015em;
-}
+/* EB Garamond runs small; nudge display tracking a touch tighter */
+.font-display { letter-spacing: -0.005em; }
 
 /* editorial link underline: thin, offset, drawn on hover */
 .link-ul {
@@ -29,4 +25,4 @@ body {
 }
 .link-ul:hover { color: #7c2b26; text-decoration-color: #7c2b26; }
 
-::selection { background: #7c2b26; color: #ece5d8; }
+::selection { background: #7c2b26; color: #ffffff; }
