@@ -2,7 +2,7 @@
   {
     "repo": "reckon-review",
     "title": "Reckon Review",
-    "blurb": "A GitHub app that blocks a pull request from merging until a human can explain, in their own words, what the change actually does. An isolated AI grader checks the explanation before it unblocks.",
+    "blurb": "A GitHub app that blocks a pull request from merging until a human can explain, in their own words, what the change actually does.",
     "stack": ["TypeScript", "Probot", "Supabase"],
     "image": null,
     "projectLink": "https://github.com/apps/reckon-review",

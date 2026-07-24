@@ -170,9 +170,9 @@ const App = () => (
       {/* Hero */}
       <section className="pt-14 md:pt-16 pb-12">
         <div className="flex items-center gap-5">
-          <img src="/art/zine/avatar-color.jpg" alt="Asad Rizvi" className="w-24 h-24 md:w-28 md:h-28 rounded-xl object-cover shrink-0 border border-line" />
+          <img src="/art/zine/avatar-color.jpg" alt="Asad Rizvi" className="w-32 h-32 md:w-40 md:h-40 rounded-xl object-cover shrink-0 border border-line" />
           <div>
-            <h1 className="font-display text-5xl md:text-6xl font-semibold leading-[0.95] tracking-tight">Asad Rizvi</h1>
+            <h1 className="font-display text-4xl md:text-5xl font-semibold leading-[0.95] tracking-tight">Asad Rizvi</h1>
             <p className="mt-2 font-display text-xl md:text-[22px] text-ink/85 leading-snug">
               CS at Cornell, from Bahrain. Founder of{' '}
               <a href="https://getzybit.com" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Zybit</a>.
@@ -185,10 +185,8 @@ const App = () => (
           app that blocks a pull request until a human can explain what it changes.
         </p>
         <p className="mt-4 text-[17px] leading-relaxed text-ink/80">
-          I&apos;m just as much a <span className="text-blood font-medium">crypto</span> dev. I build on Solana and
-          Anchor &mdash; a ZK-verified credit score for the credit-invisible (<a href="https://kitecredit.xyz" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Kite&nbsp;Credit</a>), an agent
-          that checks whether tokenized real-world assets are actually backed, and a staking app that took 3rd at
-          the Global Solana Hackathon.
+          I&apos;m just as much a <span className="text-blood font-medium">crypto</span> dev. I&apos;ve built on-chain
+          projects with Solana and Anchor, and took 3rd at the Global Solana Student Hackathon.
         </p>
         <p className="mt-4 text-[17px] leading-relaxed text-ink/70">
           Away from the keyboard I play <span className="text-blood font-medium">bass</span> in a jazz band <Trinket>🎸</Trinket>,{' '}
