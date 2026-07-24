@@ -180,13 +180,15 @@ const App = () => (
           </div>
         </div>
         <p className="mt-7 text-[17px] leading-relaxed text-ink/80">
-          I build and ship applied AI. Right now that&apos;s <a href="https://getzybit.com" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Zybit</a>, voice
-          AI that charts for dentists, live in three practices &mdash; and <a href="https://github.com/Archdiner/reckon-review" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Reckon&nbsp;Review</a>, a GitHub
-          app that blocks a pull request until a human can explain what it changes.
+          I build and ship applied AI. Right now that&apos;s <a href="https://getzybit.com" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Zybit</a> (voice
+          AI that charts for dentists, live in three practices) and <a href="https://github.com/Archdiner/reckon-review" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Reckon&nbsp;Review</a>, a GitHub
+          app that blocks a pull request until a human can explain what it changes. I&apos;m drawn to the layer
+          underneath it too: open models, local inference, and decentralized compute with <a href="https://akash.network" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Akash</a>.
         </p>
         <p className="mt-4 text-[17px] leading-relaxed text-ink/80">
           I&apos;m just as much a <span className="text-blood font-medium">crypto</span> dev. I&apos;ve built on-chain
-          projects with Solana and Anchor, and took 3rd at the Global Solana Student Hackathon.
+          projects with Solana and Anchor, and took 3rd at the Global Solana Student Hackathon. What pulls me in is
+          abstraction: hiding the crypto so it&apos;s genuinely usable inside the financial systems people already rely on.
         </p>
         <p className="mt-4 text-[17px] leading-relaxed text-ink/70">
           Away from the keyboard I play <span className="text-blood font-medium">bass</span> in a jazz band <Trinket>🎸</Trinket>,{' '}
