@@ -5,15 +5,15 @@
 html { scroll-behavior: smooth; }
 
 body {
-  font-family: "EB Garamond Variable", Georgia, serif;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, Calibri, sans-serif;
   background: #f4efe4;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   font-feature-settings: "liga" 1, "kern" 1;
 }
 
-/* EB Garamond runs small; nudge display tracking a touch tighter */
-.font-display { letter-spacing: -0.005em; }
+/* Large sans headings read best with slightly tighter tracking */
+.font-display { letter-spacing: -0.02em; }
 
 /* editorial link underline: thin, offset, drawn on hover */
 .link-ul {

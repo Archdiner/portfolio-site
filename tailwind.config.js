@@ -7,8 +7,10 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        display: ['"EB Garamond Variable"', 'Georgia', 'Times New Roman', 'serif'],
-        sans: ['"EB Garamond Variable"', 'Georgia', 'Times New Roman', 'serif'],
+        // Native system UI stack — most universally readable, no webfont download.
+        // Renders San Francisco (Apple), Segoe UI (Windows), Roboto (Android), Calibri/Arial fallback.
+        display: ['system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'Calibri', 'sans-serif'],
+        sans: ['system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', '"Helvetica Neue"', 'Arial', 'Calibri', 'sans-serif'],
         mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],
       },
       colors: {

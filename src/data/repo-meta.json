@@ -1,4 +1,10 @@
 {
+  "reckon-review": {
+    "stars": 1,
+    "pushedAt": "2026-07-23T22:05:37Z",
+    "description": "Reckon Review — a GitHub app that blocks a PR from merging until a human can explain, in their own words, the mechanism of what it changes.",
+    "language": "TypeScript"
+  },
   "rwa-analyzer": {
     "stars": 0,
     "pushedAt": "2026-07-11T01:42:01Z",

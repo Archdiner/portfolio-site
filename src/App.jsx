@@ -51,7 +51,6 @@ const projects = projectsData.map((p) => {
   const meta = p.repo ? repoMeta[p.repo] : null;
   return { ...p, stars: meta?.stars ?? null, updated: timeAgo(meta?.pushedAt) };
 });
-const [featured, ...restProjects] = projects;
 
 /* eslint-disable react/prop-types */
 const CONTACTS = [
@@ -139,30 +138,6 @@ const ReadingCarousel = () => {
 
 // --- project cards --------------------------------------------------------
 
-const FeaturedProject = ({ p }) => {
-  const href = p.projectLink || p.githubLink;
-  return (
-    <a href={href} target="_blank" rel="noopener noreferrer" className="group block mb-10 border border-line hover:border-blood transition-colors">
-      <div className="aspect-[16/9] overflow-hidden bg-faint border-b border-line">
-        {p.image && <img src={p.image} alt={p.title} className="w-full h-full object-cover object-top group-hover:scale-[1.02] transition-transform duration-700" />}
-      </div>
-      <div className="p-5">
-        <div className="flex items-baseline justify-between gap-3">
-          <h3 className="font-display text-2xl md:text-3xl font-semibold leading-tight tracking-tight group-hover:text-blood transition-colors">{p.title}</h3>
-          <span className="font-mono text-[11px] text-blood shrink-0">★ Featured · {statusFor(p)}</span>
-        </div>
-        <p className="mt-2 text-[15px] leading-relaxed text-ink/75">{p.blurb}</p>
-        <div className="mt-4 pt-3 border-t border-line flex items-center justify-between gap-3">
-          <span className="font-mono text-[11px] text-muted">{p.stack.join('  ·  ')}</span>
-          <span className="font-mono text-[11px] text-ink/60 group-hover:text-blood transition-colors shrink-0 inline-flex items-center gap-1">
-            {(p.projectLink || p.githubLink || '').replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '')} <ArrowUpRight size={12} />
-          </span>
-        </div>
-      </div>
-    </a>
-  );
-};
-
 const ProjectCard = ({ p }) => {
   const href = p.projectLink || p.githubLink;
   const Wrap = href ? 'a' : 'div';
@@ -171,19 +146,16 @@ const ProjectCard = ({ p }) => {
       {...(href ? { href, target: '_blank', rel: 'noopener noreferrer' } : {})}
       className="group block"
     >
-      <div className="hidden sm:block aspect-[16/10] overflow-hidden bg-faint border border-line">
-        {p.image ? (
+      {p.image && (
+        <div className="hidden sm:block aspect-[16/10] overflow-hidden bg-faint border border-line">
           <img src={p.image} alt={p.title} className="w-full h-full object-cover object-top group-hover:scale-[1.03] transition-transform duration-500" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center font-mono text-[11px] text-muted p-4 text-center">{p.stack.join(' · ')}</div>
-        )}
-      </div>
-      <div className="sm:mt-3 flex items-baseline justify-between gap-2 border-b border-line pb-1.5 sm:border-0 sm:pb-0">
+        </div>
+      )}
+      <div className={`${p.image ? 'sm:mt-3' : ''} flex items-baseline justify-between gap-2 border-b border-line pb-1.5 sm:border-0 sm:pb-0`}>
         <h3 className="font-display font-semibold text-lg leading-tight group-hover:text-blood transition-colors">{p.title}</h3>
         <span className="font-mono text-[11px] text-muted shrink-0">{statusFor(p)}</span>
       </div>
       <p className="mt-1.5 text-[14px] leading-snug text-ink/75">{p.blurb}</p>
-      <p className="mt-2 font-mono text-[11px] text-muted">{p.stack.join(' · ')}</p>
     </Wrap>
   );
 };
@@ -208,14 +180,15 @@ const App = () => (
           </div>
         </div>
         <p className="mt-7 text-[17px] leading-relaxed text-ink/80">
-          I build and ship AI products. Right now that&apos;s Zybit, voice AI that charts for dentists, live in
-          three practices.
+          I build and ship applied AI. Right now that&apos;s <a href="https://getzybit.com" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Zybit</a>, voice
+          AI that charts for dentists, live in three practices &mdash; and <a href="https://github.com/Archdiner/reckon-review" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Reckon&nbsp;Review</a>, a GitHub
+          app that blocks a pull request until a human can explain what it changes.
         </p>
         <p className="mt-4 text-[17px] leading-relaxed text-ink/80">
-          I&apos;m just as deep in <span className="text-blood font-medium">crypto</span>. I ship on Solana and
-          Anchor, wrote ZK verification into a credit score for people with no credit file (<a href="https://kitecredit.xyz" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Kite&nbsp;Credit</a>),
-          built an agent that audits whether tokenized real-world assets are actually backed, and took 3rd at the
-          Global Solana Hackathon with an on-chain staking app.
+          I&apos;m just as much a <span className="text-blood font-medium">crypto</span> dev. I build on Solana and
+          Anchor &mdash; a ZK-verified credit score for the credit-invisible (<a href="https://kitecredit.xyz" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Kite&nbsp;Credit</a>), an agent
+          that checks whether tokenized real-world assets are actually backed, and a staking app that took 3rd at
+          the Global Solana Hackathon.
         </p>
         <p className="mt-4 text-[17px] leading-relaxed text-ink/70">
           Away from the keyboard I play <span className="text-blood font-medium">bass</span> in a jazz band <Trinket>🎸</Trinket>,{' '}
@@ -235,9 +208,8 @@ const App = () => (
       {/* Work */}
       <section className="py-12 border-t border-line">
         <SectionHead n="01" title="Selected work" id="work" />
-        <FeaturedProject p={featured} />
         <div className="grid sm:grid-cols-2 gap-x-8 gap-y-5 sm:gap-y-10">
-          {restProjects.map((p, i) => <ProjectCard key={i} p={p} />)}
+          {projects.map((p, i) => <ProjectCard key={i} p={p} />)}
         </div>
       </section>
 
