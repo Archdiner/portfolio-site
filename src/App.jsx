@@ -181,7 +181,7 @@ const App = () => (
         </div>
         <p className="mt-7 text-[17px] leading-relaxed text-ink/80">
           I build and ship applied AI: <a href="https://getzybit.com" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Zybit</a>, voice
-          AI that charts for dentists in three practices, and <a href="https://github.com/Archdiner/reckon-review" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Reckon&nbsp;Review</a>, a GitHub
+          AI that charts for dentists in three practices, and <a href="https://www.reckonreview.dev" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Reckon&nbsp;Review</a>, a GitHub
           app that won&apos;t let a pull request merge until a human can explain it. I&apos;m just as into the infra
           underneath: open models, local inference, decentralized compute with <a href="https://akash.network" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Akash</a>.
         </p>

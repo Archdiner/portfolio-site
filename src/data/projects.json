@@ -4,8 +4,8 @@
     "title": "Reckon Review",
     "blurb": "A GitHub app that blocks a pull request from merging until a human can explain, in their own words, what the change actually does.",
     "stack": ["TypeScript", "Probot", "Supabase"],
-    "image": null,
-    "projectLink": "https://github.com/apps/reckon-review",
+    "image": "/shots/reckon.png",
+    "projectLink": "https://www.reckonreview.dev",
     "githubLink": "https://github.com/Archdiner/reckon-review"
   },
   {
@@ -17,15 +17,6 @@
     "image": "/shots/zybit.png",
     "projectLink": "https://getzybit.com",
     "githubLink": null
-  },
-  {
-    "repo": "rwa-analyzer",
-    "title": "RWA Analyzer",
-    "blurb": "Verifies whether a tokenized real-world asset is actually backed, instead of rubber-stamping it. Runs over MCP, CLI, and HTTP.",
-    "stack": ["TypeScript", "MCP", "Agents"],
-    "image": "/shots/rwa.png",
-    "projectLink": "https://rwa-analyzer.vercel.app",
-    "githubLink": "https://github.com/Archdiner/rwa-analyzer"
   },
   {
     "repo": "kite-credit",
