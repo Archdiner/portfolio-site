@@ -60,15 +60,25 @@ const Study = () => (
         <h1 className="text-[52px] md:text-[64px] leading-[0.95] tracking-[-0.02em]">
           Asad Rizvi
         </h1>
+        {/* Plain declaratives, concrete nouns, one unguarded personal line at
+            the end. No thesis statement — neither reference site has one, and
+            a slogan is the fastest way to sound like everyone else. */}
         <p className="mt-6 text-[19px] md:text-[20px] leading-[1.55] text-ink/80">
-          I build things that refuse to let you not look — a merge that won&apos;t
-          land until someone can explain it, a ledger you can check instead of
-          trust, eight hundred pages of law you can finally ask a question.
+          I&apos;m a CS student at Cornell and the founder of{' '}
+          <a href="https://getzybit.com" className="text-blood link-ul">Zybit</a>, voice
+          AI that writes up a dentist&apos;s notes while they&apos;re still working
+          on you. It&apos;s running in three clinics.
+        </p>
+        <p className="mt-5 text-[19px] md:text-[20px] leading-[1.55] text-ink/75">
+          I also run LLM projects as VP of Generative AI at Cornell, build on-chain
+          with Cornell Blockchain, and took 3rd at the Global Solana Student
+          Hackathon.
         </p>
         <p className="mt-5 text-[19px] md:text-[20px] leading-[1.55] text-ink/70">
-          Pakistani, raised on an island in the Gulf, currently in Ithaca. The
-          sea out there holds one of the largest dugong populations on earth and
-          almost nobody knows it.
+          Pakistani, grew up in Bahrain, now in Ithaca. I play bass in a jazz band,
+          box a little, and once peaked top 20 in competitive Pokémon. The sea I
+          grew up on has one of the biggest dugong herds left in the world. Almost
+          nobody knows that.
         </p>
         <div className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-2
                         font-mono text-[11px] tracking-wide text-muted">
