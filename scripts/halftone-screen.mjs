@@ -45,9 +45,10 @@ function parseHex(h) {
   const x = h.replace('#', '');
   return [parseInt(x.slice(0, 2), 16), parseInt(x.slice(2, 4), 16), parseInt(x.slice(4, 6), 16)];
 }
-const [BG_TOP, BG_BOT] = BG.includes('..')
-  ? BG.split('..').map(parseHex)
-  : [parseHex(BG), parseHex(BG)];
+const REF = process.argv[10] || (BG === 'none' ? '#3a8b94..#005399' : BG);
+const [BG_TOP, BG_BOT] = REF.includes('..')
+  ? REF.split('..').map(parseHex)
+  : [parseHex(REF), parseHex(REF)];
 
 const img = await loadImage(input);
 const OUTH = Math.round(OUTW * (img.height / img.width));
@@ -60,7 +61,17 @@ const data = sctx.getImageData(0, 0, OUTW, OUTH).data;
 
 const out = createCanvas(OUTW, OUTH);
 const ctx = out.getContext('2d');
-{
+// "none" leaves the canvas transparent. The gradient is still used below as the
+// REFERENCE that decides which cells survive — it just doesn't get painted.
+//
+// This matters more than it sounds. Baking the background into the image means
+// the image carries its own ramp over its own height, while the page carries a
+// ramp over the viewport; the two are at different scales and offsets, so the
+// tone inside the image never quite matches the page around it no matter how
+// the colours are chosen. Rendering on transparency removes the problem by
+// construction: there is only ever one gradient, the page's, and the dots sit
+// directly on it at any size, position or viewport.
+if (BG !== 'none') {
   const grad = ctx.createLinearGradient(0, 0, 0, OUTH);
   grad.addColorStop(0, `rgb(${BG_TOP.join(',')})`);
   grad.addColorStop(1, `rgb(${BG_BOT.join(',')})`);

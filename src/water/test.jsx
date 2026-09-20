@@ -15,14 +15,18 @@ import '../index.css';
 // cancels to nothing. The animal, the bubbles, the surface sparkle and the
 // seagrass are what's left — which means the image has no edge and needs no
 // frame. It doesn't sit on the page; it is the page.
-const SEA_TOP = '#3a8b94';
-const SEA_DEEP = '#005399';
+// One flat colour, sampled as the median of this exact frame's water, and baked
+// into the halftone as its background too. A gradient page can never agree with
+// a gradient baked into an image: one runs over the viewport, the other over the
+// image, so their scales and offsets differ and the picture always reads as a
+// slightly wrong rectangle. Flat on flat cannot disagree.
+const SEA = '#1b88a1';
 
 const Hero = () => (
   <main
     className="min-h-screen w-full"
     style={{
-      background: `linear-gradient(to bottom, ${SEA_TOP} 0%, ${SEA_DEEP} 100%)`,
+      background: SEA,
       fontFamily: 'Newsreader, Georgia, serif',
       color: '#f2f6f7',
     }}
@@ -71,8 +75,6 @@ const Hero = () => (
       </div>
 
       <div className="md:col-span-6 md:col-start-7 relative">
-        {/* No mask, no border, no aspect box. The halftone's own background is
-            the page gradient, so the footage already ends in nothing. */}
         {/* A still, not a loop.
             The screen is fixed to the page while the footage moves through it,
             so every cell flickers as the content under it shifts — a halftone
@@ -96,11 +98,6 @@ const Hero = () => (
             maskComposite: 'intersect',
           }}
         />
-        <p className="mt-3 flex items-baseline gap-3 font-mono text-[10.5px] tracking-wide text-white/45">
-          <span className="italic font-sans text-[12px] text-white/60">Dugong dugon</span>
-          <span className="h-px flex-1 bg-white/20" />
-          <span>GULF OF BAHRAIN</span>
-        </p>
       </div>
     </div>
   </main>
