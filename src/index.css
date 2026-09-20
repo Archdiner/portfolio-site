@@ -37,3 +37,14 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .slide-in { animation: none; }
 }
+
+/* Truck-art motion: rosettes turn slowly the way a painted wheel-hub does, and
+   the chain fringe never hangs quite still. */
+@keyframes rosette-spin { to { transform: rotate(360deg); } }
+@keyframes fringe-sway {
+  0%, 100% { transform: rotate(-7deg); }
+  50%      { transform: rotate(7deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  [style*="rosette-spin"], [style*="fringe-sway"] { animation: none !important; }
+}
