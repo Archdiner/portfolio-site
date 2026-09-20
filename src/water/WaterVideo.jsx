@@ -318,8 +318,11 @@ export default function WaterVideo({ src, poster, className = '', style, childre
         drops.push({
           x: 0.12 + Math.random() * 0.76,
           y: 0.45 + Math.random() * 0.5,
-          r: 0.018 + Math.random() * 0.02,
-          s: (0.035 + Math.random() * 0.055) * P.ambient,
+          // Wider and weaker than a click. The glide clip's open water is smooth
+          // enough that a tight idle drop reads as a scratch on the footage
+          // rather than a ripple in it.
+          r: 0.045 + Math.random() * 0.035,
+          s: (0.016 + Math.random() * 0.024) * P.ambient,
         });
       }
 
