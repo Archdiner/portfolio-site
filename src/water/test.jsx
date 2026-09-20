@@ -25,38 +25,51 @@ import '../index.css';
 // Sea slides carry an alpha halftone over a gradient. Truck-art slides bake a
 // flat near-black behind the dots and paint the page the same colour — flat on
 // flat needs no alpha channel, which is what keeps them under 350KB.
+// Each slide changes the whole page: background, image, and where that image
+// sits. Lance goes white → black → black → sky, and the picture moves with it —
+// a portrait held to one side, an orchid sprawling off the bottom-right corner,
+// a mountain filling the lower half edge to edge. Holding one picture in one
+// tidy column across four sections is what made an earlier pass read as a deck
+// of the same slide with different words on it.
+//
+// `place` is what does that work: absolute insets so an image can run off the
+// viewport instead of being politely contained. Bleeding off the canvas is most
+// of why the reference feels composed rather than laid out.
 const LOOKS = [
   {
     name: 'Hello',
     bg: 'linear-gradient(to bottom, #3a8b94 0%, #00477f 100%)',
     img: 'media/dugong-hero.webp',
     alt: 'A dugong gliding over a seagrass meadow, as a halftone screen',
-    fit: 'max-h-[72vh]',
-    feather: true,
+    place: { top: '4%', right: '-4%', height: '92vh' },
+    feather: 'linear-gradient(to right, transparent 0%, #000 14%, #000 100%), linear-gradient(to bottom, transparent 0%, #000 8%, #000 86%, transparent 100%)',
   },
   {
     name: 'Work',
-    bg: '#0b0a0c',
-    img: 'media/slide-work.jpg',
-    alt: 'A hand-painted Pakistani truck art rosette, as a halftone screen',
-    fit: 'max-h-[74vh]',
-    feather: true,
+    bg: '#120607',
+    img: 'media/art-rosette.jpg',
+    alt: 'A hand-painted rosette on the tailgate of a Pakistani truck',
+    // Oversized and pushed off two edges, so you see a fragment of something
+    // much bigger rather than a photograph centred in a box.
+    place: { top: '-14%', right: '-16%', height: '128vh' },
+    feather: 'linear-gradient(to right, transparent 0%, #000 26%, #000 100%), linear-gradient(to bottom, transparent 0%, #000 18%, #000 82%, transparent 100%)',
   },
   {
     name: 'Writing',
     bg: '#1e6268',
     img: 'media/slide-writing.jpg',
     alt: 'A dugong facing the camera with a mouthful of seagrass, as a halftone screen',
-    fit: 'max-h-[76vh]',
-    feather: true,
+    place: { top: '8%', right: '2%', height: '84vh' },
+    feather: 'linear-gradient(to right, transparent 0%, #000 12%, #000 90%, transparent 100%), linear-gradient(to bottom, transparent 0%, #000 8%, #000 84%, transparent 100%)',
   },
   {
-    name: 'Off the clock',
-    bg: '#0d0a0e',
-    img: 'media/slide-life.jpg',
-    alt: 'A painted peacock panel on a Pakistani truck door, as a halftone screen',
-    fit: 'max-h-[78vh]',
-    feather: true,
+    name: 'Reading',
+    bg: '#0c0507',
+    img: 'media/art-peacock.jpg',
+    alt: 'A painted peacock on the door of a Pakistani truck',
+    // Low and wide off the bottom-right, the way the orchid sprawls.
+    place: { bottom: '-22%', right: '-10%', height: '116vh' },
+    feather: 'linear-gradient(to right, transparent 0%, #000 22%, #000 100%), linear-gradient(to bottom, transparent 0%, #000 16%, #000 100%)',
   },
 ];
 const SLIDES = LOOKS.map((l) => l.name);
@@ -69,19 +82,19 @@ const Hello = () => (
     <h1 className="text-[54px] md:text-[68px] leading-[0.94] tracking-[-0.025em]">Asad Rizvi</h1>
     <p className={`mt-7 ${P} text-white/90`}>
       I&apos;m a CS student at{' '}
-      <Org src="/logos/cornell.png" href="https://www.cornell.edu">Cornell</Org> and the founder of{' '}
-      <Org src="/logos/zybit.png" href="https://getzybit.com">Zybit</Org>, voice AI that writes up a
+      <Org src="logos/cornell.png" href="https://www.cornell.edu">Cornell</Org> and the founder of{' '}
+      <Org src="logos/zybit.png" href="https://getzybit.com">Zybit</Org>, voice AI that writes up a
       dentist&apos;s notes while they&apos;re still working on you. It&apos;s running in three
       clinics and backed by{' '}
-      <Org src="/logos/cornell.png" href="https://eship.cornell.edu">eLab</Org>.
+      <Org src="logos/cornell.png" href="https://eship.cornell.edu">eLab</Org>.
     </p>
     <p className={`mt-5 ${P} text-white/80`}>
       I also run LLM projects as VP of{' '}
-      <Org src="/logos/genai.ico" href="https://cornellgenai.dev">Generative AI at Cornell</Org>,
+      <Org src="logos/genai.ico" href="https://cornellgenai.dev">Generative AI at Cornell</Org>,
       build on-chain with{' '}
-      <Org src="/logos/cornellblockchain.png" href="https://cornellblockchain.org">Cornell Blockchain</Org>,
+      <Org src="logos/cornellblockchain.png" href="https://cornellblockchain.org">Cornell Blockchain</Org>,
       run campus workshops for{' '}
-      <Org src="/logos/akash.ico" href="https://akash.network">Akash</Org>, and took 3rd at the
+      <Org src="logos/akash.ico" href="https://akash.network">Akash</Org>, and took 3rd at the
       Global Solana Student Hackathon.
     </p>
     <p className={`mt-5 ${P} text-white/75`}>
@@ -136,11 +149,11 @@ const Writing = () => (
   <>
     <h2 className="text-[40px] md:text-[48px] leading-[1.0] tracking-[-0.02em]">Writing</h2>
     <ul className="mt-7 space-y-5">
-      <Item title="Arteta-Ball" href="/research/arteta_wharton-2.pdf" meta="RESEARCH · 2025">
+      <Item title="Arteta-Ball" href="research/arteta_wharton-2.pdf" meta="RESEARCH · 2025">
         Modelling Arsenal&apos;s possession play as a Markov chain, to ask which build-up patterns
         actually end in a shot.
       </Item>
-      <Item title="Gradient Integrity" href="/research/gradient-integrity.pdf" meta="RESEARCH · 2025">
+      <Item title="Gradient Integrity" href="research/gradient-integrity.pdf" meta="RESEARCH · 2025">
         How to check that a GPU you rented on a decentralised network really ran the training step
         it billed you for.
       </Item>
@@ -195,7 +208,7 @@ const Site = () => {
 
   return (
     <main
-      className="min-h-screen w-full overflow-x-hidden"
+      className="relative min-h-screen w-full overflow-x-hidden"
       style={{
         background: look.bg,
         transition: 'background 500ms ease',
@@ -203,7 +216,26 @@ const Site = () => {
         color: '#f2f6f7',
       }}
     >
-      <div className="mx-auto max-w-[1240px] px-7 md:px-14 py-12 md:py-16
+      {/* The picture is a layer, not a column: absolute, sized in viewport units,
+          and allowed to run past the edges. Bleeding off the canvas is most of
+          why the reference reads as composed rather than laid out. */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden hidden md:block" aria-hidden="true">
+        <img
+          key={look.img}
+          src={look.img}
+          alt=""
+          className="absolute max-w-none slide-in"
+          style={{
+            ...look.place,
+            WebkitMaskImage: look.feather,
+            maskImage: look.feather,
+            WebkitMaskComposite: 'source-in',
+            maskComposite: 'intersect',
+          }}
+        />
+      </div>
+
+      <div className="relative mx-auto max-w-[1240px] px-7 md:px-14 py-12 md:py-16
                       grid gap-8 md:gap-0 md:grid-cols-12 items-center min-h-screen">
         <div className="md:col-span-5 md:pr-12">
           {/* Lance's 01 / 04 — a mechanism rather than a label. It promises there
@@ -238,27 +270,14 @@ const Site = () => {
             <a href="https://github.com/Archdiner" className="link-ul">GITHUB</a>
             <a href="https://www.linkedin.com/in/asad-rizvi-02a1782a2/" className="link-ul">LINKEDIN</a>
             <a href="https://x.com/carne_asado" className="link-ul">X</a>
-            <a href="/Rizvi_Asad_Resume.pdf" className="link-ul">RÉSUMÉ</a>
+            <a href="Rizvi_Asad_Resume.pdf" className="link-ul">RÉSUMÉ</a>
           </div>
         </div>
 
-        {/* The sea is the constant. It doesn't change between slides — it's the
-            page's material, not an illustration of any one section. */}
-        <div className="md:col-span-6 md:col-start-7">
-          <img
-            key={look.img}
-            src={look.img}
-            alt={look.alt}
-            className={`w-full h-auto object-contain slide-in ${look.fit}`}
-            style={{
-              WebkitMaskImage:
-                'linear-gradient(to right, transparent 0%, #000 12%, #000 90%, transparent 100%), linear-gradient(to bottom, transparent 0%, #000 8%, #000 80%, transparent 100%)',
-              maskImage:
-                'linear-gradient(to right, transparent 0%, #000 12%, #000 90%, transparent 100%), linear-gradient(to bottom, transparent 0%, #000 8%, #000 80%, transparent 100%)',
-              WebkitMaskComposite: 'source-in',
-              maskComposite: 'intersect',
-            }}
-          />
+        {/* On phones the picture stacks under the words instead of bleeding,
+            since there is no margin to bleed into. */}
+        <div className="md:hidden -mx-7">
+          <img src={look.img} alt={look.alt} className="w-full h-auto" />
         </div>
       </div>
     </main>

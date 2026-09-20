@@ -14,9 +14,6 @@ export default defineConfig({
         // can be opened on a real phone — a laptop GPU tells you nothing about
         // how the simulation holds up on mobile. Nothing links to it.
         water: resolve(__dirname, 'water-test.html'),
-        // The truck-art treatment, built so it can be compared side by side
-        // with the sea one on a real device.
-        truck: resolve(__dirname, 'truck.html'),
       },
     },
   },
