@@ -4,7 +4,7 @@ import '@fontsource/newsreader/400.css';
 import '@fontsource/newsreader/500.css';
 import '@fontsource/newsreader/400-italic.css';
 import '@fontsource/ibm-plex-mono/400.css';
-import { Org } from './Mark';
+import Mark, { Org } from './Mark';
 import '../index.css';
 
 /* eslint-disable react/prop-types */
@@ -17,10 +17,49 @@ import '../index.css';
 // which is what made an earlier version read as a slightly wrong rectangle. A
 // flat page fixes that but loses the depth. Transparency costs ~450KB of alpha
 // channel and buys a blend that holds at any size, position or viewport.
-const SEA_TOP = '#3a8b94';
-const SEA_DEEP = '#00477f';
-
-const SLIDES = ['Hello', 'Work', 'Writing', 'Off the clock'];
+// Each slide changes the whole page, not just the words. Lance goes white →
+// black → black → sky; the image, the background and the crop all move. Holding
+// one picture across four sections is what made this read as a deck of the same
+// slide with different text on it.
+//
+// Sea slides carry an alpha halftone over a gradient. Truck-art slides bake a
+// flat near-black behind the dots and paint the page the same colour — flat on
+// flat needs no alpha channel, which is what keeps them under 350KB.
+const LOOKS = [
+  {
+    name: 'Hello',
+    bg: 'linear-gradient(to bottom, #3a8b94 0%, #00477f 100%)',
+    img: 'media/dugong-hero.webp',
+    alt: 'A dugong gliding over a seagrass meadow, as a halftone screen',
+    fit: 'max-h-[72vh]',
+    feather: true,
+  },
+  {
+    name: 'Work',
+    bg: '#0b0a0c',
+    img: 'media/slide-work.jpg',
+    alt: 'A hand-painted Pakistani truck art rosette, as a halftone screen',
+    fit: 'max-h-[74vh]',
+    feather: true,
+  },
+  {
+    name: 'Writing',
+    bg: '#1e6268',
+    img: 'media/slide-writing.jpg',
+    alt: 'A dugong facing the camera with a mouthful of seagrass, as a halftone screen',
+    fit: 'max-h-[76vh]',
+    feather: true,
+  },
+  {
+    name: 'Off the clock',
+    bg: '#0d0a0e',
+    img: 'media/slide-life.jpg',
+    alt: 'A painted peacock panel on a Pakistani truck door, as a halftone screen',
+    fit: 'max-h-[78vh]',
+    feather: true,
+  },
+];
+const SLIDES = LOOKS.map((l) => l.name);
 const P = 'text-[19px] md:text-[20px] leading-[1.6]';
 
 // --- slide bodies ---------------------------------------------------------
@@ -53,11 +92,12 @@ const Hello = () => (
   </>
 );
 
-const Item = ({ title, href, meta, children }) => (
+const Item = ({ title, mark, href, meta, children }) => (
   <li className="border-t border-white/15 pt-3">
     <div className="flex items-baseline justify-between gap-4">
       <a href={href} target="_blank" rel="noopener noreferrer"
-        className="text-[21px] md:text-[22px] link-ul hover:text-white transition-colors">{title}</a>
+        className="text-[21px] md:text-[22px] link-ul hover:text-white transition-colors">
+        {mark && <Mark src={mark} size={17} />}{title}</a>
       <span className="font-mono text-[10px] tracking-wide text-white/45 shrink-0">{meta}</span>
     </div>
     <p className="mt-1 text-[17px] leading-[1.5] text-white/70">{children}</p>
@@ -68,7 +108,7 @@ const Work = () => (
   <>
     <h2 className="text-[40px] md:text-[48px] leading-[1.0] tracking-[-0.02em]">Work</h2>
     <ul className="mt-7 space-y-5">
-      <Item title="Zybit" href="https://getzybit.com" meta="LIVE · 3 CLINICS">
+      <Item title="Zybit" mark="/logos/zybit.png" href="https://getzybit.com" meta="LIVE · 3 CLINICS">
         Voice AI that writes a dentist&apos;s spoken findings straight into Open Dental, on the right
         tooth and in their own codes.
       </Item>
@@ -80,7 +120,7 @@ const Work = () => (
         A credit score for people with no local credit file, assembled from ZK-verified bank
         statements, GitHub history and wallet activity.
       </Item>
-      <Item title="CommitMint" href="https://commitmint.app" meta="★ 3RD, SOLANA">
+      <Item title="CommitMint" mark="/logos/commitmint.ico" href="https://commitmint.app" meta="★ 3RD, SOLANA">
         Stake money on your own goals; it only pays out once your progress is verified. Settlement
         runs on Anchor contracts.
       </Item>
@@ -122,7 +162,7 @@ const Life = () => (
     </p>
     <p className={`mt-5 ${P} text-white/75`}>
       I have a grey Persian cat called Leo. My family is Pakistani; I grew up in Bahrain, which is
-      where the dugongs are, and where the truck art I keep meaning to put on this site comes from.
+      where the dugongs are. The painted panels on this page are Pakistani truck art.
     </p>
     <p className={`mt-7 ${P} text-white/90`}>
       Open to internships, and to building things with people. If you&apos;re working on applied AI
@@ -151,12 +191,14 @@ const Site = () => {
   }, [go]);
 
   const Body = BODIES[i];
+  const look = LOOKS[i];
 
   return (
     <main
       className="min-h-screen w-full overflow-x-hidden"
       style={{
-        background: `linear-gradient(to bottom, ${SEA_TOP} 0%, ${SEA_DEEP} 100%)`,
+        background: look.bg,
+        transition: 'background 500ms ease',
         fontFamily: 'Newsreader, Georgia, serif',
         color: '#f2f6f7',
       }}
@@ -204,9 +246,10 @@ const Site = () => {
             page's material, not an illustration of any one section. */}
         <div className="md:col-span-6 md:col-start-7">
           <img
-            src="media/dugong-hero.webp"
-            alt="A dugong gliding over a seagrass meadow, rendered as a halftone screen"
-            className="w-full h-auto max-h-[72vh] object-contain"
+            key={look.img}
+            src={look.img}
+            alt={look.alt}
+            className={`w-full h-auto object-contain slide-in ${look.fit}`}
             style={{
               WebkitMaskImage:
                 'linear-gradient(to right, transparent 0%, #000 12%, #000 90%, transparent 100%), linear-gradient(to bottom, transparent 0%, #000 8%, #000 80%, transparent 100%)',
