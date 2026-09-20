@@ -73,25 +73,25 @@ const Hero = () => (
       <div className="md:col-span-6 md:col-start-7 relative">
         {/* No mask, no border, no aspect box. The halftone's own background is
             the page gradient, so the footage already ends in nothing. */}
-        <video
-          src="media/dugong-halftone.mp4"
-          poster="media/dugong-halftone-poster.jpg"
-          muted
-          loop
-          playsInline
-          autoPlay
-          preload="auto"
-          aria-hidden="true"
-          className="w-full h-auto max-h-[68vh] object-contain"
+        {/* A still, not a loop.
+            The screen is fixed to the page while the footage moves through it,
+            so every cell flickers as the content under it shifts — a halftone
+            of moving water churns. And crossfading a halftone dissolves the dot
+            pattern itself, which reads as a glitch rather than a loop. The
+            reference is a still for the same reason. */}
+        <img
+          src="media/dugong-hero.jpg"
+          alt="A dugong gliding over a seagrass meadow, rendered as a halftone screen"
+          className="w-full h-auto max-h-[70vh] object-contain"
           style={{
             // Feather every edge into nothing. The page behind is the exact
             // gradient the halftone was screened against, so a mask fade here
-            // doesn't blend the footage into a background — it returns those
+            // doesn't blend the image into a background — it returns those
             // cells to the sea they came from. No border, no frame, no edge.
             WebkitMaskImage:
-              'linear-gradient(to right, transparent 0%, #000 14%, #000 88%, transparent 100%), linear-gradient(to bottom, transparent 0%, #000 10%, #000 74%, transparent 100%)',
+              'linear-gradient(to right, transparent 0%, #000 12%, #000 90%, transparent 100%), linear-gradient(to bottom, transparent 0%, #000 8%, #000 80%, transparent 100%)',
             maskImage:
-              'linear-gradient(to right, transparent 0%, #000 14%, #000 88%, transparent 100%), linear-gradient(to bottom, transparent 0%, #000 10%, #000 74%, transparent 100%)',
+              'linear-gradient(to right, transparent 0%, #000 12%, #000 90%, transparent 100%), linear-gradient(to bottom, transparent 0%, #000 8%, #000 80%, transparent 100%)',
             WebkitMaskComposite: 'source-in',
             maskComposite: 'intersect',
           }}
