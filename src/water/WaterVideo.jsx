@@ -11,15 +11,18 @@ const DEFAULTS = {
   stiffBig: 0.10,
   dampFine: 0.984,
   dampBig: 0.994,
-  refract: 0.30,
+  refract: 0.10,
   ampFine: 1.0,
   ampBig: 0.45,
-  caustic: 2.2,
+  caustic: 0.55,
+  causticScale: 9.0,
+  causticSpeed: 0.35,
+  causticBend: 2.5,
   dither: 0.85,
   levels: 8,
   pixel: 3,
-  tint: 0.35,
-  vignette: 0.22,
+  tint: 0.25,
+  vignette: 0.10,
   motionPush: 0,
   surfaceBand: 0.8,
   ambient: 1,
@@ -98,6 +101,11 @@ export default function WaterVideo({ src, poster, className = '', style, childre
   const canvasRef = useRef(null);
   const videoRef = useRef(null);
   const [fallback, setFallback] = useState(false);
+  // The canvas stays hidden until one frame has demonstrably rendered from real
+  // video pixels. Revealing it unconditionally means any GL failure downstream
+  // of context creation -- an incomplete framebuffer, a tainted video texture --
+  // shows a black rectangle instead of falling back to the footage.
+  const [live, setLive] = useState(false);
 
   useEffect(() => {
     const reduced =
@@ -169,6 +177,11 @@ export default function WaterVideo({ src, poster, className = '', style, childre
         const f = gl.createFramebuffer();
         gl.bindFramebuffer(gl.FRAMEBUFFER, f);
         gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, t, 0);
+        if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) {
+          // Some drivers advertise EXT_color_buffer_float but can't actually
+          // render to RGBA16F. Better to find out here than to draw nothing.
+          throw new Error('half-float render target not complete');
+        }
         gl.clearColor(0, 0, 0, 0);
         gl.clear(gl.COLOR_BUFFER_BIT);
         states.push(t);
@@ -212,9 +225,15 @@ export default function WaterVideo({ src, poster, className = '', style, childre
       recomputeCover();
     }
 
+    try {
+      resize();
+    } catch (err) {
+      if (import.meta.env?.DEV) console.error(err);
+      setFallback(true);
+      return undefined;
+    }
     const ro = new ResizeObserver(resize);
     ro.observe(wrap);
-    resize();
 
     // --- input ------------------------------------------------------------
     const pointer = { x: -1, y: -1, px: -1, py: -1, strength: 0, active: false };
@@ -263,6 +282,7 @@ export default function WaterVideo({ src, poster, className = '', style, childre
     let raf = 0;
     let visible = true;
     let nextAmbient = 900;
+    let revealed = false;
 
     const io = new IntersectionObserver(
       ([entry]) => {
@@ -297,6 +317,7 @@ export default function WaterVideo({ src, poster, className = '', style, childre
         videoCur = 1 - videoCur;
         gl.bindTexture(gl.TEXTURE_2D, videoTex[videoCur]);
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        try {
         if (!videoSized) {
           gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE, video);
           // Both textures need real dimensions before the first difference.
@@ -306,6 +327,14 @@ export default function WaterVideo({ src, poster, className = '', style, childre
           recomputeCover();
         } else {
           gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE, video);
+        }
+        } catch (err) {
+          // A cross-origin video taints the texture and throws here. Nothing to
+          // recover: show the footage plainly rather than a black canvas.
+          if (import.meta.env?.DEV) console.error(err);
+          cancelAnimationFrame(raf);
+          setFallback(true);
+          return;
         }
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
       }
@@ -386,16 +415,31 @@ export default function WaterVideo({ src, poster, className = '', style, childre
       gl.uniform2f(render.u.u_texel, 1 / simW, 1 / simH);
       gl.uniform2f(render.u.u_cover, cover[0], cover[1]);
       gl.uniform2f(render.u.u_coverOff, coverOff[0], coverOff[1]);
+      gl.uniform1f(render.u.u_time, now * 0.001);
+      gl.uniform1f(render.u.u_causticScale, P.causticScale);
+      gl.uniform1f(render.u.u_causticSpeed, P.causticSpeed);
+      gl.uniform1f(render.u.u_causticBend, P.causticBend);
       gl.uniform1f(render.u.u_refract, P.refract);
       gl.uniform2f(render.u.u_amp, P.ampFine, P.ampBig);
       gl.uniform1f(render.u.u_caustic, P.caustic);
       gl.uniform1f(render.u.u_dither, P.dither);
       gl.uniform1f(render.u.u_levels, P.levels);
       gl.uniform1f(render.u.u_pixel, P.pixel);
-      gl.uniform2f(render.u.u_resolution, cw, ch);
       gl.uniform1f(render.u.u_tint, P.tint);
       gl.uniform1f(render.u.u_vignette, P.vignette);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+      if (!revealed && videoSized) {
+        const err = gl.getError();
+        if (err === gl.NO_ERROR) {
+          revealed = true;
+          setLive(true);
+        } else {
+          if (import.meta.env?.DEV) console.error('gl error', err);
+          cancelAnimationFrame(raf);
+          setFallback(true);
+        }
+      }
     }
 
     video.play?.().catch(() => {});
@@ -428,7 +472,10 @@ export default function WaterVideo({ src, poster, className = '', style, childre
         playsInline
         preload="auto"
         aria-hidden="true"
-        className={`absolute inset-0 w-full h-full object-cover ${fallback ? '' : 'opacity-0'}`}
+        crossOrigin="anonymous"
+        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
+          live && !fallback ? 'opacity-0' : 'opacity-100'
+        }`}
       >
         {/* webm first: Chromium builds without the proprietary H.264 decoder are
             real, and they fall through to this rather than showing nothing. */}
@@ -438,7 +485,9 @@ export default function WaterVideo({ src, poster, className = '', style, childre
       <canvas
         ref={canvasRef}
         aria-hidden="true"
-        className={`absolute inset-0 w-full h-full ${fallback ? 'hidden' : ''}`}
+        className={`absolute inset-0 w-full h-full transition-opacity duration-500 ${
+          live && !fallback ? 'opacity-100' : 'opacity-0'
+        }`}
       />
       {children}
     </div>

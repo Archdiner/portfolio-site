@@ -143,13 +143,16 @@ uniform sampler2D u_video;
 uniform vec2  u_texel;
 uniform vec2  u_cover;       // object-fit: cover correction
 uniform vec2  u_coverOff;
+uniform float u_time;
 uniform float u_refract;
 uniform vec2  u_amp;         // x = fine weight, y = big weight
 uniform float u_caustic;
+uniform float u_causticScale;
+uniform float u_causticSpeed;
+uniform float u_causticBend; // how hard ripples bend the light web
 uniform float u_dither;      // 0 = off, 1 = full
 uniform float u_levels;      // colour steps per channel when dithering
 uniform float u_pixel;       // dither cell size, device px
-uniform vec2  u_resolution;
 uniform float u_tint;
 uniform float u_vignette;
 
@@ -158,8 +161,6 @@ out vec4 o_color;
 
 // 8x8 Bayer matrix. Ordered dithering rather than Floyd-Steinberg because error
 // diffusion is inherently sequential and can't be evaluated per-pixel on a GPU.
-// This is also what gives the crisp woven texture in the reference clip, where
-// error diffusion would look like noise.
 const float BAYER[64] = float[64](
    0.0, 32.0,  8.0, 40.0,  2.0, 34.0, 10.0, 42.0,
   48.0, 16.0, 56.0, 24.0, 50.0, 18.0, 58.0, 26.0,
@@ -173,65 +174,79 @@ const float BAYER[64] = float[64](
 
 float bayerAt(vec2 fragPx) {
   vec2 c = floor(mod(fragPx / max(u_pixel, 1.0), 8.0));
-  int idx = int(c.y) * 8 + int(c.x);
-  return BAYER[idx] / 64.0 - 0.5;
+  return BAYER[int(c.y) * 8 + int(c.x)] / 64.0 - 0.5;
+}
+
+// A branching caustic web.
+//
+// This footage is shot from underwater looking sideways, so there is no water
+// surface in the image plane to ripple -- which is why displacing the pixels
+// read as a filter smeared over a video rather than as water. What actually
+// tells the eye "this is underwater" is the light: a surface overhead focuses
+// sunlight into a moving cellular net that crawls over everything below it.
+//
+// So the surface being simulated is above the camera, out of frame, and what
+// reaches the image is its light. Each iteration folds the coordinate through a
+// sine field; accumulating reciprocal distance leaves bright veins where the
+// folds pile up, which is where a real wrinkled surface concentrates light.
+float causticWeb(vec2 p, float t) {
+  vec2 i = p;
+  float c = 1.0;
+  const float inten = 0.0045;
+  for (int n = 0; n < 5; n++) {
+    float tt = t * (1.0 - (3.5 / float(n + 1)));
+    i = p + vec2(cos(tt - i.x) + sin(tt + i.y),
+                 sin(tt - i.y) + cos(tt + i.x));
+    c += 1.0 / length(vec2(p.x / (sin(i.x + tt) / inten),
+                           p.y / (cos(i.y + tt) / inten)));
+  }
+  c /= 5.0;
+  c = 1.17 - pow(c, 1.4);
+  return clamp(pow(abs(c), 8.0), 0.0, 1.0);
 }
 
 void main() {
   vec2 dx = vec2(u_texel.x, 0.0);
   vec2 dy = vec2(0.0, u_texel.y);
 
-  vec4 sL = texture(u_state, v_uv - dx);
-  vec4 sR = texture(u_state, v_uv + dx);
-  vec4 sD = texture(u_state, v_uv - dy);
-  vec4 sU = texture(u_state, v_uv + dy);
-  vec4 sC = texture(u_state, v_uv);
+  float hL = texture(u_state, v_uv - dx).r * u_amp.x + texture(u_state, v_uv - dx).b * u_amp.y;
+  float hR = texture(u_state, v_uv + dx).r * u_amp.x + texture(u_state, v_uv + dx).b * u_amp.y;
+  float hD = texture(u_state, v_uv - dy).r * u_amp.x + texture(u_state, v_uv - dy).b * u_amp.y;
+  float hU = texture(u_state, v_uv + dy).r * u_amp.x + texture(u_state, v_uv + dy).b * u_amp.y;
 
-  // Combined surface height, then its gradient. The gradient is the surface
-  // normal's tilt, which is what bends a light ray passing through.
-  float hL = sL.r * u_amp.x + sL.b * u_amp.y;
-  float hR = sR.r * u_amp.x + sR.b * u_amp.y;
-  float hD = sD.r * u_amp.x + sD.b * u_amp.y;
-  float hU = sU.r * u_amp.x + sU.b * u_amp.y;
-  float hC = sC.r * u_amp.x + sC.b * u_amp.y;
+  vec2 slope = clamp(vec2(hR - hL, hU - hD), -0.10, 0.10);
 
-  vec2 slope = vec2(hR - hL, hU - hD);
-  // Hard ceiling on displacement. Beyond a few percent of the frame the sample
-  // lands somewhere unrelated and the image tears instead of refracting — the
-  // difference between water and a smear.
-  slope = clamp(slope, -0.10, 0.10);
-
-  // Refraction: offset where we sample the footage by the surface tilt. This is
-  // the whole illusion — the dugong is a flat video, but reading it through a
-  // displaced coordinate makes it sit *under* moving water.
-  // Depth weighting. The real air-water boundary is the band at the top of the
-  // frame; the animal sits well below it. Refracting the whole image uniformly
-  // warps the dugong's silhouette, which is exactly what surface ripples do not
-  // do to a subject that far under. So displacement is strongest at the surface
-  // and falls away with depth, while the caustic light still plays over
-  // everything — which is how ripples actually read on underwater footage.
-  float depthW = mix(0.18, 1.0, smoothstep(0.05, 0.92, v_uv.y));
+  // Displacement is now almost nothing: a trace of shimmer, strongest at the top
+  // of the frame where the real surface actually is, and gone by the seabed. The
+  // ripples do their real work through the light below, not by bending pixels.
+  float depthW = mix(0.10, 1.0, smoothstep(0.05, 0.92, v_uv.y));
   vec2 uv = (v_uv - u_coverOff) / u_cover;
   uv += slope * u_refract * depthW;
   vec3 col = texture(u_video, clamp(uv, 0.001, 0.999)).rgb;
 
-  // Caustics: where the surface is concave it focuses light, where convex it
-  // spreads it. Curvature (the Laplacian) is a good cheap stand-in for that,
-  // and it lands the bright veins right where the ripples pinch.
-  float curv = clamp((hL + hR + hD + hU) - 4.0 * hC, -0.5, 0.5);
-  // Scaled by how bright the spot already is, so highlights bloom on lit water
-  // and the shadowed body doesn't grow a neon rim.
-  float lum = dot(col, vec3(0.299, 0.587, 0.114));
-  float light = max(curv, 0.0) * (0.35 + 0.65 * lum);
-  col += vec3(0.55, 0.78, 0.74) * light * u_caustic;
-  col -= vec3(0.05, 0.09, 0.11) * max(-curv, 0.0) * u_caustic * 0.4;
+  // The ripple field bends the light web. Disturbing the water overhead moves
+  // the caustics on everything below, which is how the interaction reads as
+  // touching water rather than as warping a picture of water.
+  vec2 cp = v_uv * u_causticScale + slope * u_causticBend;
+  float web = causticWeb(cp, u_time * u_causticSpeed);
 
-  // Gulf water pulls green-cyan; nudge toward it so the sim and the footage read
-  // as one body of water rather than an effect sitting on top of a clip.
-  col = mix(col, col * vec3(0.86, 1.04, 1.02), u_tint);
+  // Caustics land on what faces up and what is already lit -- the seagrass bed
+  // and the animal's back take them; the shadowed underside does not.
+  float lum = dot(col, vec3(0.299, 0.587, 0.114));
+  float facing = smoothstep(0.12, 0.70, lum);
+  // Headroom. This footage was shot under a real surface and already carries
+  // real caustics, so the seagrass is near-blown before the shader touches it.
+  // Without this the added light clips it to white and destroys the very
+  // texture that made the clip worth using. Light only goes where there is
+  // room for it -- the midtones and the open water.
+  float headroom = 1.0 - smoothstep(0.50, 0.92, lum);
+  float reach = mix(1.0, 0.55, smoothstep(0.45, 1.0, v_uv.y));
+  col += vec3(0.72, 0.95, 0.90) * web * u_caustic * facing * headroom * reach;
+
+  col = mix(col, col * vec3(0.90, 1.03, 1.01), u_tint);
 
   float r = distance(v_uv, vec2(0.5));
-  col *= 1.0 - u_vignette * smoothstep(0.35, 0.95, r);
+  col *= 1.0 - u_vignette * smoothstep(0.40, 1.0, r);
 
   if (u_dither > 0.001) {
     float t = bayerAt(gl_FragCoord.xy);
