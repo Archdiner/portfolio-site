@@ -4,7 +4,7 @@ import '@fontsource/newsreader/400.css';
 import '@fontsource/newsreader/500.css';
 import '@fontsource/newsreader/400-italic.css';
 import '@fontsource/ibm-plex-mono/400.css';
-import WaterVideo from './WaterVideo';
+import DitheredVideo from './DitheredVideo';
 import '../index.css';
 
 // Composition study for the Gulf hero.
@@ -26,17 +26,16 @@ const Aperture = () => (
         // Feathered on all four sides so the footage dissolves into the paper
         // instead of ending at a border.
         WebkitMaskImage:
-          'linear-gradient(to right, transparent 0%, #000 4%, #000 96%, transparent 100%), linear-gradient(to bottom, transparent 0%, #000 3.5%, #000 96.5%, transparent 100%)',
+          'linear-gradient(to right, transparent 0%, #000 1.5%, #000 98.5%, transparent 100%), linear-gradient(to bottom, transparent 0%, #000 1.2%, #000 98.8%, transparent 100%)',
         maskImage:
-          'linear-gradient(to right, transparent 0%, #000 4%, #000 96%, transparent 100%), linear-gradient(to bottom, transparent 0%, #000 3.5%, #000 96.5%, transparent 100%)',
+          'linear-gradient(to right, transparent 0%, #000 1.5%, #000 98.5%, transparent 100%), linear-gradient(to bottom, transparent 0%, #000 1.2%, #000 98.8%, transparent 100%)',
         WebkitMaskComposite: 'source-in',
         maskComposite: 'intersect',
       }}
     >
-      <WaterVideo
-        src="media/dugong-glide"
-        poster="media/dugong-glide-poster.jpg"
-        className="w-full h-full"
+      <DitheredVideo
+        src="media/dugong-ink6"
+        poster="media/dugong-ink6-poster.jpg"
       />
     </div>
     {/* A plate caption, the way a specimen sits under one in a naturalist
@@ -44,8 +43,7 @@ const Aperture = () => (
     <figcaption className="mt-4 flex items-baseline gap-3 font-mono text-[10.5px] tracking-wide text-muted">
       <span className="italic font-sans text-[12px] text-ink/70">Dugong dugon</span>
       <span className="h-px flex-1 bg-line" />
-      <span className="hidden sm:inline">DRAG THE WATER</span>
-      <span className="sm:hidden">TOUCH THE WATER</span>
+      <span>GULF OF BAHRAIN</span>
     </figcaption>
   </figure>
 );
