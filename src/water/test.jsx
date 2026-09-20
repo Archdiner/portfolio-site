@@ -11,8 +11,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <p>Pointer over the panel lays a wake; click drops into it.</p>
       </div>
       <WaterVideo
-        src="/media/dugong-glide"
-        poster="/media/dugong-glide-poster.jpg"
+        src="media/dugong-glide"
+        poster="media/dugong-glide-poster.jpg"
         style={{ width: '46vw', height: '100vh' }}
       />
     </div>
