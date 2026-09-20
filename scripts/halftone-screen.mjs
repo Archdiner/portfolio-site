@@ -16,7 +16,8 @@
 //     angle  screen rotation in degrees (default 45)
 //     shape  dot|diamond  (default diamond)
 //     width  output width  (default 900)
-//     bg     hex background (default #ffffff)
+//     bg     hex background (default #ffffff) — dots are sized by contrast against it
+//     contrast  gain on that difference (default 2.6)
 
 import { createCanvas, loadImage } from 'canvas';
 import fs from 'node:fs';
@@ -31,6 +32,22 @@ const ANGLE = ((angleArg != null ? Number(angleArg) : 45) * Math.PI) / 180;
 const SHAPE = shapeArg || 'diamond';
 const OUTW = Number(widthArg) || 900;
 const BG = bgArg || '#ffffff';
+const CONTRAST = Number(process.argv[9]) || 2.6;
+
+// The page colour can be a vertical gradient, given as "#top..#bottom".
+//
+// It has to be, in fact: the sea in the footage is not one colour but a ramp
+// from bright cyan at the surface to deep teal below. Measured against a single
+// flat colour, only one horizontal band of water ever cancels out and the rest
+// fires dots. Against the same ramp the page is painted with, the whole water
+// column disappears and only what isn't water is left.
+function parseHex(h) {
+  const x = h.replace('#', '');
+  return [parseInt(x.slice(0, 2), 16), parseInt(x.slice(2, 4), 16), parseInt(x.slice(4, 6), 16)];
+}
+const [BG_TOP, BG_BOT] = BG.includes('..')
+  ? BG.split('..').map(parseHex)
+  : [parseHex(BG), parseHex(BG)];
 
 const img = await loadImage(input);
 const OUTH = Math.round(OUTW * (img.height / img.width));
@@ -43,8 +60,13 @@ const data = sctx.getImageData(0, 0, OUTW, OUTH).data;
 
 const out = createCanvas(OUTW, OUTH);
 const ctx = out.getContext('2d');
-ctx.fillStyle = BG;
-ctx.fillRect(0, 0, OUTW, OUTH);
+{
+  const grad = ctx.createLinearGradient(0, 0, 0, OUTH);
+  grad.addColorStop(0, `rgb(${BG_TOP.join(',')})`);
+  grad.addColorStop(1, `rgb(${BG_BOT.join(',')})`);
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, OUTW, OUTH);
+}
 
 const cos = Math.cos(ANGLE);
 const sin = Math.sin(ANGLE);
@@ -68,15 +90,32 @@ for (let j = -reach; j <= reach; j++) {
     if (x < -PITCH || y < -PITCH || x > OUTW + PITCH || y > OUTH + PITCH) continue;
 
     const [r, g, b] = sample(x, y);
-    const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-    const darkness = 1 - lum;
-    if (darkness <= 0.02) continue;
 
-    // Area, not radius, tracks darkness: a dot's ink coverage goes with r^2, so
-    // scaling the radius linearly would make the midtones far too heavy.
-    // sqrt keeps perceived tone honest. The 1.45 lets shadows overlap into
+    // Coverage is contrast against the page, not absolute darkness.
+    //
+    // When the page colour is sampled from the footage's own water, anything
+    // the same colour as the water produces no dot at all — the sea simply
+    // *is* the page, and the animal and the seagrass are what emerge from it.
+    // Keying by luminance can't do this: the water is mid-tone, so it would
+    // fire medium dots everywhere and fill the frame with texture.
+    const t = Math.max(0, Math.min(1, y / OUTH));
+    const bgr = BG_TOP[0] + (BG_BOT[0] - BG_TOP[0]) * t;
+    const bgg = BG_TOP[1] + (BG_BOT[1] - BG_TOP[1]) * t;
+    const bgb = BG_TOP[2] + (BG_BOT[2] - BG_TOP[2]) * t;
+    const dr = (r - bgr) / 255;
+    const dg = (g - bgg) / 255;
+    const db = (b - bgb) / 255;
+    // Weighted toward luminance, because the eye reads tonal difference more
+    // strongly than hue difference at this dot size.
+    const diff = Math.sqrt(0.5 * dr * dr + 0.8 * dg * dg + 0.3 * db * db);
+    const coverage = Math.min(diff * CONTRAST, 1);
+    if (coverage <= 0.02) continue;
+
+    // Area, not radius, tracks coverage: a dot's ink goes with r^2, so scaling
+    // the radius linearly would make every midtone far too heavy. sqrt keeps
+    // perceived tone honest. The 1.45 lets the darkest cells overlap into
     // solid, which is what leaves those little unlinked gaps in the blacks.
-    const radius = Math.sqrt(darkness) * (PITCH / 2) * 1.45;
+    const radius = Math.sqrt(coverage) * (PITCH / 2) * 1.45;
     if (radius < 0.35) continue;
 
     ctx.fillStyle = `rgb(${r},${g},${b})`;

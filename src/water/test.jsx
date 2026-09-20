@@ -4,91 +4,103 @@ import '@fontsource/newsreader/400.css';
 import '@fontsource/newsreader/500.css';
 import '@fontsource/newsreader/400-italic.css';
 import '@fontsource/ibm-plex-mono/400.css';
-import DitheredVideo from './DitheredVideo';
+import { Org } from './Mark';
 import '../index.css';
 
-// Composition study for the Gulf hero.
+// Gulf hero — colour halftone, edgeless.
 //
-// Not a split screen. A half-and-half layout makes the footage a *panel* — two
-// equal architectural slabs, which is what made the earlier pass read as a tech
-// demo bolted to some text. This treats the water as an *object* instead: one
-// aperture, cut into a field of warm paper, placed off-centre with real margins
-// so the paper stays the dominant material and the water is the thing set into
-// it. The feathered mask is doing most of that work — a hard rectangle reads as
-// a video element, a soft edge reads as a window.
+// The page background is the sea. Both stops are sampled from the footage's own
+// water column (#3a8b94 at the surface down to #005399 in the deep), and the
+// halftone is screened against that same ramp, so every cell that *is* water
+// cancels to nothing. The animal, the bubbles, the surface sparkle and the
+// seagrass are what's left — which means the image has no edge and needs no
+// frame. It doesn't sit on the page; it is the page.
+const SEA_TOP = '#3a8b94';
+const SEA_DEEP = '#005399';
 
-const Aperture = () => (
-  <figure className="m-0 w-full">
-    <div
-      className="relative w-full"
-      style={{
-        aspectRatio: '3 / 4',
-        // Feathered on all four sides so the footage dissolves into the paper
-        // instead of ending at a border.
-        WebkitMaskImage:
-          'linear-gradient(to right, transparent 0%, #000 1.5%, #000 98.5%, transparent 100%), linear-gradient(to bottom, transparent 0%, #000 1.2%, #000 98.8%, transparent 100%)',
-        maskImage:
-          'linear-gradient(to right, transparent 0%, #000 1.5%, #000 98.5%, transparent 100%), linear-gradient(to bottom, transparent 0%, #000 1.2%, #000 98.8%, transparent 100%)',
-        WebkitMaskComposite: 'source-in',
-        maskComposite: 'intersect',
-      }}
-    >
-      <DitheredVideo
-        src="media/dugong-ink6"
-        poster="media/dugong-ink6-poster.jpg"
-      />
-    </div>
-    {/* A plate caption, the way a specimen sits under one in a naturalist
-        volume. Costs nothing and does more for tone than any amount of chrome. */}
-    <figcaption className="mt-4 flex items-baseline gap-3 font-mono text-[10.5px] tracking-wide text-muted">
-      <span className="italic font-sans text-[12px] text-ink/70">Dugong dugon</span>
-      <span className="h-px flex-1 bg-line" />
-      <span>GULF OF BAHRAIN</span>
-    </figcaption>
-  </figure>
-);
-
-const Study = () => (
-  <main className="min-h-screen bg-paper text-ink" style={{ fontFamily: 'Newsreader, Georgia, serif' }}>
-    {/* Asymmetric on purpose: 5/12 of text against 6/12 of water with a full
-        column of gutter, rather than two equal halves meeting in the middle. */}
-    <div className="mx-auto max-w-[1180px] px-8 md:px-14 py-16 md:py-24
-                    grid gap-12 md:gap-0 md:grid-cols-12 items-center">
-      <div className="md:col-span-5 md:pr-10">
-        <h1 className="text-[52px] md:text-[64px] leading-[0.95] tracking-[-0.02em]">
+const Hero = () => (
+  <main
+    className="min-h-screen w-full"
+    style={{
+      background: `linear-gradient(to bottom, ${SEA_TOP} 0%, ${SEA_DEEP} 100%)`,
+      fontFamily: 'Newsreader, Georgia, serif',
+      color: '#f2f6f7',
+    }}
+  >
+    <div className="mx-auto max-w-[1240px] px-7 md:px-14 py-14 md:py-20
+                    grid gap-10 md:gap-0 md:grid-cols-12 items-center min-h-screen">
+      <div className="md:col-span-5 md:pr-12">
+        <h1 className="text-[54px] md:text-[68px] leading-[0.94] tracking-[-0.025em]">
           Asad Rizvi
         </h1>
-        {/* Plain declaratives, concrete nouns, one unguarded personal line at
-            the end. No thesis statement — neither reference site has one, and
-            a slogan is the fastest way to sound like everyone else. */}
-        <p className="mt-6 text-[19px] md:text-[20px] leading-[1.55] text-ink/80">
-          I&apos;m a CS student at Cornell and the founder of{' '}
-          <a href="https://getzybit.com" className="text-blood link-ul">Zybit</a>, voice
-          AI that writes up a dentist&apos;s notes while they&apos;re still working
-          on you. It&apos;s running in three clinics.
+
+        <p className="mt-7 text-[19px] md:text-[20px] leading-[1.6] text-white/90">
+          I&apos;m a CS student at{' '}
+          <Org src="/logos/cornell.png" href="https://www.cornell.edu">Cornell</Org>{' '}
+          and the founder of{' '}
+          <Org src="/logos/zybit.png" href="https://getzybit.com">Zybit</Org>, voice AI
+          that writes up a dentist&apos;s notes while they&apos;re still working on you.
+          It&apos;s running in three clinics and backed by{' '}
+          <Org src="/logos/cornell.png" href="https://eship.cornell.edu">eLab</Org>.
         </p>
-        <p className="mt-5 text-[19px] md:text-[20px] leading-[1.55] text-ink/75">
-          I also run LLM projects as VP of Generative AI at Cornell, build on-chain
-          with Cornell Blockchain, and took 3rd at the Global Solana Student
-          Hackathon.
+
+        <p className="mt-5 text-[19px] md:text-[20px] leading-[1.6] text-white/80">
+          I also run LLM projects as VP of{' '}
+          <Org src="/logos/genai.ico" href="https://cornellgenai.dev">Generative AI at Cornell</Org>,
+          build on-chain with{' '}
+          <Org src="/logos/cornellblockchain.png" href="https://cornellblockchain.org">Cornell Blockchain</Org>,
+          run campus workshops for{' '}
+          <Org src="/logos/akash.ico" href="https://akash.network">Akash</Org>, and took
+          3rd at the Global Solana Student Hackathon.
         </p>
-        <p className="mt-5 text-[19px] md:text-[20px] leading-[1.55] text-ink/70">
+
+        <p className="mt-5 text-[19px] md:text-[20px] leading-[1.6] text-white/75">
           Pakistani, grew up in Bahrain, now in Ithaca. I play bass in a jazz band,
           box a little, and once peaked top 20 in competitive Pokémon. The sea I
           grew up on has one of the biggest dugong herds left in the world. Almost
           nobody knows that.
         </p>
+
         <div className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-2
-                        font-mono text-[11px] tracking-wide text-muted">
-          <a href="mailto:sar367@cornell.edu" className="text-blood link-ul">EMAIL</a>
+                        font-mono text-[11px] tracking-wide text-white/60">
+          <a href="mailto:sar367@cornell.edu" className="text-white link-ul">EMAIL</a>
           <a href="https://github.com/Archdiner" className="link-ul">GITHUB</a>
           <a href="https://x.com/carne_asado" className="link-ul">X</a>
           <span className="ml-auto hidden md:inline">ITHACA, NY</span>
         </div>
       </div>
 
-      <div className="md:col-span-6 md:col-start-7">
-        <Aperture />
+      <div className="md:col-span-6 md:col-start-7 relative">
+        {/* No mask, no border, no aspect box. The halftone's own background is
+            the page gradient, so the footage already ends in nothing. */}
+        <video
+          src="media/dugong-halftone.mp4"
+          poster="media/dugong-halftone-poster.jpg"
+          muted
+          loop
+          playsInline
+          autoPlay
+          preload="auto"
+          aria-hidden="true"
+          className="w-full h-auto max-h-[68vh] object-contain"
+          style={{
+            // Feather every edge into nothing. The page behind is the exact
+            // gradient the halftone was screened against, so a mask fade here
+            // doesn't blend the footage into a background — it returns those
+            // cells to the sea they came from. No border, no frame, no edge.
+            WebkitMaskImage:
+              'linear-gradient(to right, transparent 0%, #000 14%, #000 88%, transparent 100%), linear-gradient(to bottom, transparent 0%, #000 10%, #000 74%, transparent 100%)',
+            maskImage:
+              'linear-gradient(to right, transparent 0%, #000 14%, #000 88%, transparent 100%), linear-gradient(to bottom, transparent 0%, #000 10%, #000 74%, transparent 100%)',
+            WebkitMaskComposite: 'source-in',
+            maskComposite: 'intersect',
+          }}
+        />
+        <p className="mt-3 flex items-baseline gap-3 font-mono text-[10.5px] tracking-wide text-white/45">
+          <span className="italic font-sans text-[12px] text-white/60">Dugong dugon</span>
+          <span className="h-px flex-1 bg-white/20" />
+          <span>GULF OF BAHRAIN</span>
+        </p>
       </div>
     </div>
   </main>
@@ -96,6 +108,6 @@ const Study = () => (
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <Study />
+    <Hero />
   </React.StrictMode>,
 );
