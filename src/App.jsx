@@ -1,17 +1,21 @@
 import { useState, useEffect } from 'react';
-import { Github, Linkedin, Twitter, FileText, Mail, ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Mail, ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import projectsData from './data/projects.json';
 import repoMeta from './data/repo-meta.json';
-import lionArt from './data/lion.txt?raw';
 
 // --- content --------------------------------------------------------------
 
 const careerTimeline = [
-  { year: 'Since 2026', role: 'Founder & CTO', company: 'Zybit', logo: '/logos/zybit.png', mark: 'Z', companyUrl: 'https://getzybit.com', desc: 'Voice AI that charts for dentists. Live in 3 dental clinics today, onboarding more by hand.' },
-  { year: 'Since 2026', role: 'Student Ambassador', company: 'Akash Network', logo: '/logos/akash.ico', mark: 'AK', companyUrl: 'https://akash.network', desc: 'Running campus workshops on decentralized compute.' },
+  { year: 'Since 2026', role: 'Founder & CTO', company: 'Zybit', logo: '/logos/zybit.png', mark: 'Z', companyUrl: 'https://getzybit.com', desc: <>Voice AI that charts for dentists. Live in 3 dental clinics today, onboarding more by hand. Part of <a href="https://www.elabstartup.com/2027-companies/" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">eLab</a>, Cornell&apos;s startup accelerator.</> },
   { year: 'Since 2025', role: 'Vice President', company: 'Generative AI at Cornell', logo: '/logos/genai.ico', mark: 'GA', companyUrl: 'https://cornellgenai.dev', desc: 'Leading LLM initiatives after starting as an engineer.' },
   { year: 'Since 2025', role: 'Engineering Subteam', company: 'Cornell Blockchain', logo: '/logos/cornellblockchain.png', mark: 'CB', companyUrl: 'https://cornellblockchain.org', desc: 'Building on-chain projects with the engineering subteam.' },
   { year: '2024', role: 'LLM Application Developer Intern', company: 'RIIG / HOOTL', logo: '/logos/riig.png', mark: 'R', companyUrl: 'https://www.riigtech.com', desc: 'Built an AI pipeline for financial regulatory analysis.' },
+];
+
+const awards = [
+  { title: 'CERN Beamline for Schools', note: 'Award-winning proposal to recreate the aurora borealis; top 10% across 78 countries', year: '2024', href: 'https://beamlineforschools.cern/wp-content/uploads/2025/12/BL4S_all-winners_2024_final-1.pdf' },
+  { title: 'Perse Coding Challenge', note: 'Finalist' },
+  { title: 'Bebras Challenge', note: 'High Distinction, twice' },
 ];
 
 const reading = [
@@ -46,10 +50,10 @@ const projects = projectsData.map((p) => {
 
 /* eslint-disable react/prop-types */
 const CONTACTS = [
-  { label: 'GitHub', href: 'https://github.com/Archdiner', Icon: Github },
-  { label: 'LinkedIn', href: 'https://www.linkedin.com/in/asad-rizvi-02a1782a2/', Icon: Linkedin },
-  { label: 'Résumé', href: '/Rizvi_Asad_Resume.pdf', Icon: FileText },
-  { label: 'X', href: 'https://x.com/carne_asado', Icon: Twitter },
+  { label: 'GitHub', href: 'https://github.com/Archdiner' },
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/in/asad-rizvi-02a1782a2/' },
+  // { label: 'Résumé', href: '/Rizvi_Asad_Resume.pdf' }, // hidden for now
+  { label: 'X', href: 'https://x.com/carne_asado' },
 ];
 
 // Pokéball logo trinket
@@ -76,7 +80,7 @@ const OrgLogo = ({ logo, mark }) => {
 const SectionHead = ({ n, title, id }) => (
   <div id={id} className="flex items-baseline justify-between gap-4 mb-9 pb-2.5 border-b border-ink/25">
     <h2 className="font-display text-2xl md:text-[28px] font-semibold tracking-tight">{title}</h2>
-    <span className="font-mono text-[11px] text-muted tabular-nums shrink-0">{n} / 03</span>
+    <span className="font-mono text-[11px] text-muted tabular-nums shrink-0">{n} / 04</span>
   </div>
 );
 
@@ -140,7 +144,7 @@ const ProjectCard = ({ p }) => {
     >
       {p.image && (
         <div className="hidden sm:block aspect-[16/10] overflow-hidden bg-faint border border-line">
-          <img src={p.image} alt={p.title} className="w-full h-full object-cover object-top group-hover:scale-[1.03] transition-transform duration-500" />
+          <img src={p.image} alt={p.title} style={p.imagePos ? { objectPosition: p.imagePos } : undefined} className="w-full h-full object-cover object-top group-hover:scale-[1.03] transition-transform duration-500" />
         </div>
       )}
       <div className={`${p.image ? 'sm:mt-3' : ''} flex items-baseline justify-between gap-2 border-b border-line pb-1.5 sm:border-0 sm:pb-0`}>
@@ -157,7 +161,7 @@ const ProjectCard = ({ p }) => {
 const App = () => (
   <div className="bg-paper text-ink min-h-screen">
 
-    <div className="max-w-2xl mx-auto px-6">
+    <div className="max-w-2xl mx-auto px-6 pb-16">
 
       {/* Hero */}
       <section className="pt-14 md:pt-16 pb-12">
@@ -177,9 +181,11 @@ const App = () => (
           better than it found it.
         </p>
         <p className="mt-4 text-[17px] leading-relaxed text-ink/80">
-          Right now that&apos;s <a href="https://getzybit.com" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Zybit</a>, voice
-          AI that charts for dentists so they can look at their patients instead of a screen, and <a href="https://www.reckonreview.dev" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Reckon&nbsp;Review</a>, a GitHub
-          app that won&apos;t let a pull request merge until a human can explain it.
+          Lately that&apos;s <a href="https://getnoss.com" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Noss</a>, a Mac
+          app that lets you ask Claude or ChatGPT about whatever&apos;s on your screen without leaving it,
+          and <a href="https://github.com/Archdiner/krillbench" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">KrillBench</a>, a
+          benchmark of how well frontier models play Krillion. I&apos;m also building <a href="https://getzybit.com" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Zybit</a>,
+          voice AI that charts for dentists so they can look at their patients instead of a screen.
         </p>
         <p className="mt-4 text-[17px] leading-relaxed text-ink/70">
           Away from the keyboard I play <span className="text-blood font-medium">bass</span> in a jazz band <Trinket>🎸</Trinket>,{' '}
@@ -235,40 +241,33 @@ const App = () => (
         </div>
       </section>
 
+      {/* Awards */}
+      <section className="py-12 border-t border-line">
+        <SectionHead n="03" title="Awards" id="awards" />
+        <ul className="space-y-4">
+          {awards.map((a) => {
+            const Title = a.href ? 'a' : 'span';
+            return (
+              <li key={a.title} className="grid grid-cols-[1fr,auto] gap-x-4 items-baseline">
+                <div>
+                  <Title {...(a.href ? { href: a.href, target: '_blank', rel: 'noopener noreferrer' } : {})}
+                    className={`font-semibold text-[16px] ${a.href ? 'link-ul hover:text-blood transition-colors' : ''}`}>{a.title}</Title>
+                  <p className="text-[14px] text-ink/70 mt-0.5 leading-relaxed">{a.note}</p>
+                </div>
+                <span className="font-mono text-[11px] text-muted tabular-nums">{a.year}</span>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+
       {/* Reading */}
       <section className="py-12 border-t border-line">
-        <SectionHead n="03" title="On the shelf" id="reading" />
+        <SectionHead n="04" title="On the shelf" id="reading" />
         <ReadingCarousel />
       </section>
     </div>
 
-    {/* Footer — full-bleed dark; ASCII lion left, call-to-action right */}
-    <footer className="mt-8 bg-ink text-paper">
-      <div className="max-w-2xl mx-auto px-6 py-16 md:py-20">
-        <div className="flex flex-col sm:flex-row items-center sm:items-center gap-8 sm:gap-9">
-          <pre aria-hidden="true" className="shrink-0 text-clay/85 font-mono text-[6px] sm:text-[7px] leading-[1.05] whitespace-pre select-none">{lionArt}</pre>
-          <div className="flex-1 min-w-0">
-            <h2 className="font-display text-3xl md:text-[40px] font-semibold leading-[1.03] tracking-tight">
-              Building something, or hiring someone who does? <span className="text-clay italic">Say hi.</span>
-            </h2>
-            <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3">
-              <a href="mailto:sar367@cornell.edu" className="inline-flex items-center gap-1.5 text-[15px] font-medium text-clay hover:text-paper transition-colors">
-                <Mail size={16} /> sar367@cornell.edu
-              </a>
-              {CONTACTS.map(({ label, href, Icon }) => (
-                <a key={label} href={href} target="_blank" rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-[14px] text-paper/70 hover:text-clay transition-colors">
-                  <Icon size={15} /> {label}
-                </a>
-              ))}
-            </div>
-          </div>
-        </div>
-        <p className="mt-12 pt-6 border-t border-paper/15 font-mono text-[11px] text-paper/45">
-          Ithaca, NY · © 2026 Asad Rizvi
-        </p>
-      </div>
-    </footer>
   </div>
 );
 

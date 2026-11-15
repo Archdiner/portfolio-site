@@ -1,9 +1,38 @@
 [
   {
+    "repo": null,
+    "title": "Noss",
+    "blurb": "A Mac app: tap Right Option in any app, type a question, and Claude or ChatGPT answers in your own chat with a screenshot of what you're looking at. No switching to an AI tab.",
+    "stack": [
+      "Swift",
+      "macOS",
+      "AppKit"
+    ],
+    "image": "/shots/noss.jpg",
+    "projectLink": "https://getnoss.com",
+    "githubLink": null
+  },
+  {
+    "repo": "krillbench",
+    "title": "KrillBench",
+    "blurb": "A benchmark of how well frontier models play Krillion: 347 prompts scored against the official answer sheets, with bootstrapped ranges and per-answer latency.",
+    "stack": [
+      "Python"
+    ],
+    "image": "/shots/krillbench.jpg",
+    "imagePos": "center 62%",
+    "projectLink": null,
+    "githubLink": "https://github.com/Archdiner/krillbench"
+  },
+  {
     "repo": "reckon-review",
     "title": "Reckon Review",
     "blurb": "A GitHub app that blocks a pull request from merging until a human can explain, in their own words, what the change actually does.",
-    "stack": ["TypeScript", "Probot", "Supabase"],
+    "stack": [
+      "TypeScript",
+      "Probot",
+      "Supabase"
+    ],
     "image": "/shots/reckon.png",
     "projectLink": "https://www.reckonreview.dev",
     "githubLink": "https://github.com/Archdiner/reckon-review"
@@ -13,8 +42,12 @@
     "title": "Zybit",
     "tag": "Live in 3 practices",
     "blurb": "Voice AI that writes a dentist's spoken findings straight into Open Dental, on the right tooth and in their own codes.",
-    "stack": ["Next.js", "TypeScript", "Realtime Voice"],
-    "image": "/shots/zybit.png",
+    "stack": [
+      "Next.js",
+      "TypeScript",
+      "Realtime Voice"
+    ],
+    "image": null,
     "projectLink": "https://getzybit.com",
     "githubLink": null
   },
@@ -22,7 +55,11 @@
     "repo": "kite-credit",
     "title": "Kite Credit",
     "blurb": "A credit score for people with no local credit file, assembled from ZK-verified bank statements, GitHub history, and wallet activity.",
-    "stack": ["Next.js", "Solana", "Reclaim ZK"],
+    "stack": [
+      "Next.js",
+      "Solana",
+      "Reclaim ZK"
+    ],
     "image": "/kitecredit-screenshot.png",
     "projectLink": "https://kitecredit.xyz",
     "githubLink": "https://github.com/Archdiner/kite-credit"
@@ -32,7 +69,11 @@
     "title": "CommitMint",
     "hackathonWinner": "3rd, Global Solana Hackathon",
     "blurb": "An app that lets you stake money on your goals and only pays out once your progress is verified. Settlement runs on Anchor smart contracts.",
-    "stack": ["Solana", "Anchor", "Next.js"],
+    "stack": [
+      "Solana",
+      "Anchor",
+      "Next.js"
+    ],
     "image": "/commitmint-screenshot.png",
     "projectLink": "https://commitmint.app",
     "githubLink": "https://github.com/Archdiner/commitment-parties"
@@ -41,7 +82,11 @@
     "repo": "compute-swarm",
     "title": "ComputeSwarm",
     "blurb": "A marketplace that rents out idle GPUs, metering usage and settling per-second with automated micropayments.",
-    "stack": ["React", "FastAPI", "x402"],
+    "stack": [
+      "React",
+      "FastAPI",
+      "x402"
+    ],
     "image": "/compute-swarm-screenshot.png",
     "projectLink": null,
     "githubLink": "https://github.com/Archdiner/compute-swarm"
@@ -50,7 +95,11 @@
     "repo": "GraphRAG-Dodd-Frank",
     "title": "GraphRAG Dodd-Frank",
     "blurb": "Answers questions across the 800-page Dodd-Frank Act using a knowledge graph instead of a flat vector store.",
-    "stack": ["Python", "GraphRAG", "Neo4j"],
+    "stack": [
+      "Python",
+      "GraphRAG",
+      "Neo4j"
+    ],
     "image": "/graphrag_ss.png",
     "projectLink": null,
     "githubLink": "https://github.com/Archdiner/GraphRAG-Dodd-Frank"
@@ -59,7 +108,11 @@
     "repo": "texas-holdem-ocaml",
     "title": "Texas Hold'em",
     "blurb": "Networked multiplayer poker written from scratch in OCaml, with a TCP server and terminal clients.",
-    "stack": ["OCaml", "Lwt", "TCP"],
+    "stack": [
+      "OCaml",
+      "Lwt",
+      "TCP"
+    ],
     "image": null,
     "projectLink": null,
     "githubLink": "https://github.com/archdiner/texas-holdem-ocaml"
