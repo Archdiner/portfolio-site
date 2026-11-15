@@ -6,14 +6,14 @@ import repoMeta from './data/repo-meta.json';
 // --- content --------------------------------------------------------------
 
 const careerTimeline = [
-  { year: 'Since 2026', role: 'Founder & CTO', company: 'Zybit', logo: '/logos/zybit.png', mark: 'Z', companyUrl: 'https://getzybit.com', desc: <>Voice AI that charts for dentists. Live in 3 dental clinics today, onboarding more by hand. Part of <a href="https://www.elabstartup.com/2027-companies/" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">eLab</a>, Cornell&apos;s startup accelerator.</> },
-  { year: 'Since 2025', role: 'Vice President', company: 'Generative AI at Cornell', logo: '/logos/genai.ico', mark: 'GA', companyUrl: 'https://cornellgenai.dev', desc: 'Leading LLM initiatives after starting as an engineer.' },
-  { year: 'Since 2025', role: 'Engineering Subteam', company: 'Cornell Blockchain', logo: '/logos/cornellblockchain.png', mark: 'CB', companyUrl: 'https://cornellblockchain.org', desc: 'Building on-chain projects with the engineering subteam.' },
-  { year: '2024', role: 'LLM Application Developer Intern', company: 'RIIG / HOOTL', logo: '/logos/riig.png', mark: 'R', companyUrl: 'https://www.riigtech.com', desc: 'Built an AI pipeline for financial regulatory analysis.' },
+  { year: 'Since 2026', role: 'Founder & CTO', company: 'Zybit', logo: '/logos/zybit.png', mark: 'Z', companyUrl: 'https://getzybit.com', desc: <>Voice AI for dentists, live in 3 clinics. Part of <a href="https://www.elabstartup.com/2027-companies/" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">eLab</a>.</> },
+  { year: 'Since 2025', role: 'Vice President', company: 'Generative AI at Cornell', logo: '/logos/genai.ico', mark: 'GA', companyUrl: 'https://cornellgenai.dev', desc: 'Leading LLM projects.' },
+  { year: 'Since 2025', role: 'Engineering Subteam', company: 'Cornell Blockchain', logo: '/logos/cornellblockchain.png', mark: 'CB', companyUrl: 'https://cornellblockchain.org', desc: 'Building on-chain projects.' },
+  { year: '2024', role: 'LLM Application Developer Intern', company: 'RIIG / HOOTL', logo: '/logos/riig.png', mark: 'R', companyUrl: 'https://www.riigtech.com', desc: 'Built AI for financial regulation.' },
 ];
 
 const awards = [
-  { title: 'CERN Beamline for Schools', note: 'Team Aurora, shortlisted: one of 49 proposals out of 461', year: '2024', href: 'https://beamlineforschools.cern/wp-content/uploads/2025/12/BL4S_all-winners_2024_final-1.pdf' },
+  { title: 'CERN Beamline for Schools', note: 'Team Aurora, shortlisted: top 49 of 461', year: '2024', href: 'https://beamlineforschools.cern/wp-content/uploads/2025/12/BL4S_all-winners_2024_final-1.pdf' },
   { title: 'Global Solana Student Hackathon', note: '3rd place, with CommitMint' },
   { title: 'British Online Physics Olympiad', note: 'Gold award' },
   { title: 'Perse Coding Challenge', note: 'Finalist' },
@@ -166,15 +166,8 @@ const App = () => (
           </div>
         </div>
         <p className="mt-7 text-[17px] leading-relaxed text-ink/80">
-          I like making things that feel good to use. The details people don&apos;t notice until they&apos;re
-          missing, the moment a tool gets out of your way, software that leaves someone&apos;s day a little
-          better than it found it.
-        </p>
-        <p className="mt-4 text-[17px] leading-relaxed text-ink/80">
-          Lately that&apos;s <a href="https://getnoss.com" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Noss</a>, a free Mac
-          app for asking Claude or ChatGPT from whatever app you&apos;re in, <a href="https://github.com/Archdiner/25live-mcp" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">cu25</a>,
-          a tool that books Cornell rooms on 25Live and is already in use, and <a href="https://getzybit.com" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Zybit</a>,
-          voice AI that charts for dentists so they can look at their patients instead of a screen.
+          I like making things people actually use every day, that take out friction and make
+          everyday experiences a little more human.
         </p>
         <p className="mt-4 text-[17px] leading-relaxed text-ink/70">
           I also played bass in jazz band, do some boxing, and peaked at top&nbsp;50 in competitive Pok&eacute;mon VGC.
