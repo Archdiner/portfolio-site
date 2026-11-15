@@ -6,19 +6,19 @@ import repoMeta from './data/repo-meta.json';
 // --- content --------------------------------------------------------------
 
 const careerTimeline = [
-  { year: 'Since 2026', role: 'Founder & CTO', company: 'Zybit', logo: '/logos/zybit.png', mark: 'Z', companyUrl: 'https://getzybit.com', desc: <>Voice AI for dentists, live in 3 clinics. In <a href="https://www.elabstartup.com/2027-companies/" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">eLab</a>, Cornell&apos;s accelerator.</> },
-  { year: 'Since 2025', role: 'Vice President', company: 'Generative AI at Cornell', logo: '/logos/genai.ico', mark: 'GA', companyUrl: 'https://cornellgenai.dev', desc: 'Leading LLM projects.' },
-  { year: 'Since 2025', role: 'Engineering Subteam', company: 'Cornell Blockchain', logo: '/logos/cornellblockchain.png', mark: 'CB', companyUrl: 'https://cornellblockchain.org', desc: 'Building on-chain projects.' },
-  { year: '2024', role: 'LLM Application Developer Intern', company: 'RIIG / HOOTL', logo: '/logos/riig.png', mark: 'R', companyUrl: 'https://www.riigtech.com', desc: 'AI for financial regulation.' },
+  { year: 'Since 2026', role: 'Founder & CTO', company: 'Zybit', logo: '/logos/zybit.png', mark: 'Z', companyUrl: 'https://getzybit.com', desc: <>Voice AI that charts for dentists. Live in 3 dental clinics today, onboarding more by hand. Part of <a href="https://www.elabstartup.com/2027-companies/" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">eLab</a>, Cornell&apos;s startup accelerator.</> },
+  { year: 'Since 2025', role: 'Vice President', company: 'Generative AI at Cornell', logo: '/logos/genai.ico', mark: 'GA', companyUrl: 'https://cornellgenai.dev', desc: 'Leading LLM initiatives after starting as an engineer.' },
+  { year: 'Since 2025', role: 'Engineering Subteam', company: 'Cornell Blockchain', logo: '/logos/cornellblockchain.png', mark: 'CB', companyUrl: 'https://cornellblockchain.org', desc: 'Building on-chain projects with the engineering subteam.' },
+  { year: '2024', role: 'LLM Application Developer Intern', company: 'RIIG / HOOTL', logo: '/logos/riig.png', mark: 'R', companyUrl: 'https://www.riigtech.com', desc: 'Built an AI pipeline for financial regulatory analysis.' },
 ];
 
 const awards = [
-  { title: 'CERN Beamline for Schools', note: 'Aurora borealis proposal, top 10% of 78 countries', year: '2024', href: 'https://beamlineforschools.cern/wp-content/uploads/2025/12/BL4S_all-winners_2024_final-1.pdf' },
-  { title: 'British Online Physics Olympiad', note: 'Gold' },
-  { title: 'Global Solana Student Hackathon', note: '3rd place' },
+  { title: 'CERN Beamline for Schools', note: 'Team Aurora, shortlisted: one of 49 proposals out of 461', year: '2024', href: 'https://beamlineforschools.cern/wp-content/uploads/2025/12/BL4S_all-winners_2024_final-1.pdf' },
+  { title: 'Global Solana Student Hackathon', note: '3rd place, with CommitMint' },
+  { title: 'British Online Physics Olympiad', note: 'Gold award' },
   { title: 'Perse Coding Challenge', note: 'Finalist' },
   { title: 'Bebras Challenge', note: 'High Distinction, twice' },
-]
+];
 
 const reading = [
   { title: 'The Alchemist', author: 'Paulo Coelho', cover: '/books/alchemist.jpg' },
@@ -58,15 +58,6 @@ const CONTACTS = [
   { label: 'X', href: 'https://x.com/carne_asado' },
 ];
 
-// Pokéball logo trinket
-const Pokeball = ({ size = 19 }) => (
-  <img src="/pokeball.svg" alt="Pokéball" width={size} height={size} className="inline-block align-[-0.22em] mx-[1px]" />
-);
-
-const Trinket = ({ children }) => (
-  <span className="text-[1.02em] align-[-0.12em] mx-[1px]" aria-hidden="true">{children}</span>
-);
-
 const OrgLogo = ({ logo, mark }) => {
   const [failed, setFailed] = useState(false);
   if (failed || !logo) {
@@ -95,7 +86,7 @@ const NavLink = ({ href, children }) => (
   </a>
 );
 
-const statusFor = (p) => (p.hackathonWinner ? '★ 3rd place' : p.projectLink ? 'Live' : 'Source');
+const statusFor = (p) => (p.status || (p.projectLink ? 'Live' : 'Source'));
 
 const ReadingCarousel = () => {
   const [idx, setIdx] = useState(0);
@@ -145,11 +136,11 @@ const ProjectCard = ({ p }) => {
       className="group block"
     >
       {p.image && (
-        <div className="hidden sm:block aspect-[16/10] overflow-hidden bg-faint border border-line">
+        <div className="aspect-[16/10] overflow-hidden bg-faint border border-line">
           <img src={p.image} alt={p.title} style={p.imagePos ? { objectPosition: p.imagePos } : undefined} className="w-full h-full object-cover object-top group-hover:scale-[1.03] transition-transform duration-500" />
         </div>
       )}
-      <div className={`${p.image ? 'sm:mt-3' : ''} flex items-baseline justify-between gap-2 border-b border-line pb-1.5 sm:border-0 sm:pb-0`}>
+      <div className={`${p.image ? 'mt-3' : ''} flex items-baseline justify-between gap-2`}>
         <h3 className="font-display font-semibold text-lg leading-tight group-hover:text-blood transition-colors">{p.title}</h3>
         <span className="font-mono text-[11px] text-muted shrink-0">{statusFor(p)}</span>
       </div>
@@ -182,10 +173,14 @@ const App = () => (
           missing, the moment a tool gets out of your way, software that leaves someone&apos;s day a little
           better than it found it.
         </p>
+        <p className="mt-4 text-[17px] leading-relaxed text-ink/80">
+          Lately that&apos;s <a href="https://getnoss.com" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Noss</a>, a free Mac
+          app for asking Claude or ChatGPT from whatever app you&apos;re in, <a href="https://github.com/Archdiner/25live-mcp" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">cu25</a>,
+          a tool that books Cornell rooms on 25Live and is already in use, and <a href="https://getzybit.com" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Zybit</a>,
+          voice AI that charts for dentists so they can look at their patients instead of a screen.
+        </p>
         <p className="mt-4 text-[17px] leading-relaxed text-ink/70">
-          Away from the keyboard I play <span className="text-blood font-medium">bass</span> in a jazz band <Trinket>🎸</Trinket>,{' '}
-          <span className="text-blood font-medium">box</span> a little <Trinket>🥊</Trinket>, and I peaked at
-          top&nbsp;20 in competitive <span className="text-blood font-medium">Pok&eacute;mon</span> (vgc) <Pokeball />.
+          I also played bass in jazz band, do some boxing, and peaked at top&nbsp;50 in competitive Pok&eacute;mon VGC.
         </p>
         <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3">
           <a href="mailto:sar367@cornell.edu" className="group inline-flex items-center gap-1.5 text-[15px] font-medium text-blood">
@@ -210,7 +205,7 @@ const App = () => (
       {/* Work */}
       <section className="py-12 border-t border-line">
         <SectionHead n="01" title="Selected work" id="work" />
-        <div className="grid sm:grid-cols-2 gap-x-8 gap-y-5 sm:gap-y-10">
+        <div className="grid sm:grid-cols-2 gap-x-8 gap-y-9 sm:gap-y-10">
           {projects.map((p, i) => <ProjectCard key={i} p={p} />)}
         </div>
       </section>

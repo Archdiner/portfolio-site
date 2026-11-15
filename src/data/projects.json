@@ -2,119 +2,61 @@
   {
     "repo": null,
     "title": "Noss",
-    "blurb": "Ask Claude or ChatGPT about your screen from any Mac app.",
-    "stack": [
-      "Swift",
-      "macOS",
-      "AppKit"
-    ],
+    "status": "Live",
+    "blurb": "A free Mac app. Ask Claude or ChatGPT from whatever app you're in and the answer shows up right there, so you never switch tabs.",
+    "stack": ["macOS"],
     "image": "/shots/noss.jpg",
     "projectLink": "https://getnoss.com",
     "githubLink": null
   },
   {
+    "repo": "25live-mcp",
+    "title": "cu25",
+    "status": "In use",
+    "blurb": "Book Cornell rooms on 25Live from your terminal, or let an AI agent do it. Already in use.",
+    "stack": ["Python", "MCP"],
+    "image": "/shots/cu25.jpg",
+    "projectLink": null,
+    "githubLink": "https://github.com/Archdiner/25live-mcp"
+  },
+  {
     "repo": null,
     "title": "Zybit",
-    "tag": "Live in 3 practices",
-    "blurb": "Voice AI that charts for dentists.",
-    "stack": [
-      "Next.js",
-      "TypeScript",
-      "Realtime Voice"
-    ],
+    "status": "Live in 3 practices",
+    "blurb": "Voice AI that writes a dentist's spoken findings straight into Open Dental, on the right tooth and in their own codes.",
+    "stack": ["Next.js", "TypeScript", "Realtime Voice"],
     "image": "/shots/zybit.jpg",
     "projectLink": "https://getzybit.com",
     "githubLink": null
   },
   {
-    "repo": "krillbench",
-    "title": "KrillBench",
-    "blurb": "How well frontier models play Krillion.",
-    "stack": [
-      "Python"
-    ],
-    "image": "/shots/krillbench.jpg",
-    "imagePos": "center 62%",
-    "projectLink": null,
-    "githubLink": "https://github.com/Archdiner/krillbench"
-  },
-  {
     "repo": "reckon-review",
     "title": "Reckon Review",
-    "blurb": "No merging a PR until a human can explain it.",
-    "stack": [
-      "TypeScript",
-      "Probot",
-      "Supabase"
-    ],
-    "image": "/shots/reckon.png",
+    "status": "Live",
+    "blurb": "A GitHub app that blocks a pull request from merging until a human can explain, in their own words, what the change actually does.",
+    "stack": ["TypeScript", "Probot", "Supabase"],
+    "image": "/shots/reckon.jpg",
     "projectLink": "https://www.reckonreview.dev",
     "githubLink": "https://github.com/Archdiner/reckon-review"
   },
   {
-    "repo": "kite-credit",
-    "title": "Kite Credit",
-    "blurb": "A credit score for people with no local credit history.",
-    "stack": [
-      "Next.js",
-      "Solana",
-      "Reclaim ZK"
-    ],
-    "image": "/kitecredit-screenshot.png",
-    "projectLink": "https://kitecredit.xyz",
-    "githubLink": "https://github.com/Archdiner/kite-credit"
+    "repo": "krillbench",
+    "title": "KrillBench",
+    "status": "Early results",
+    "blurb": "How do 11 AI models play the word game Krillion? 350 prompts, scored against the game's official answer sheets.",
+    "stack": ["Python"],
+    "image": "/shots/krillbench.jpg",
+    "projectLink": null,
+    "githubLink": "https://github.com/Archdiner/krillbench"
   },
   {
     "repo": "commitment-parties",
     "title": "CommitMint",
-    "hackathonWinner": "3rd, Global Solana Hackathon",
-    "blurb": "Stake money on your goals. Paid out when you hit them.",
-    "stack": [
-      "Solana",
-      "Anchor",
-      "Next.js"
-    ],
-    "image": "/commitmint-screenshot.png",
+    "status": "Waitlist",
+    "blurb": "An app that helps you spend less time on screens. Everyone puts money in, and the people who hit their goal split it.",
+    "stack": ["Solana", "Anchor", "Next.js"],
+    "image": "/shots/commitmint.jpg",
     "projectLink": "https://commitmint.app",
     "githubLink": "https://github.com/Archdiner/commitment-parties"
-  },
-  {
-    "repo": "compute-swarm",
-    "title": "ComputeSwarm",
-    "blurb": "A marketplace for idle GPUs, billed by the second.",
-    "stack": [
-      "React",
-      "FastAPI",
-      "x402"
-    ],
-    "image": "/compute-swarm-screenshot.png",
-    "projectLink": null,
-    "githubLink": "https://github.com/Archdiner/compute-swarm"
-  },
-  {
-    "repo": "GraphRAG-Dodd-Frank",
-    "title": "GraphRAG Dodd-Frank",
-    "blurb": "Q&A over the Dodd-Frank Act using a knowledge graph.",
-    "stack": [
-      "Python",
-      "GraphRAG",
-      "Neo4j"
-    ],
-    "image": "/graphrag_ss.png",
-    "projectLink": null,
-    "githubLink": "https://github.com/Archdiner/GraphRAG-Dodd-Frank"
-  },
-  {
-    "repo": "texas-holdem-ocaml",
-    "title": "Texas Hold'em",
-    "blurb": "Multiplayer poker in OCaml, from scratch.",
-    "stack": [
-      "OCaml",
-      "Lwt",
-      "TCP"
-    ],
-    "image": null,
-    "projectLink": null,
-    "githubLink": "https://github.com/archdiner/texas-holdem-ocaml"
   }
 ]
