@@ -70,11 +70,8 @@ const OrgLogo = ({ logo, mark }) => {
   );
 };
 
-const SectionHead = ({ n, title, id }) => (
-  <div id={id} className="flex items-baseline justify-between gap-4 mb-9 pb-2.5 border-b border-ink/25">
-    <h2 className="font-display text-2xl md:text-[28px] font-semibold tracking-tight">{title}</h2>
-    <span className="font-mono text-[11px] text-muted tabular-nums shrink-0">{n} / 04</span>
-  </div>
+const SectionHead = ({ title, id }) => (
+  <h2 id={id} className="mb-8 font-display text-2xl md:text-[28px] font-semibold tracking-tight">{title}</h2>
 );
 
 // external text link with a small rising arrow
@@ -203,16 +200,16 @@ const App = () => (
       </figure>
 
       {/* Work */}
-      <section className="py-12 border-t border-line">
-        <SectionHead n="01" title="Selected work" id="work" />
+      <section className="py-10">
+        <SectionHead title="Selected work" id="work" />
         <div className="grid sm:grid-cols-2 gap-x-8 gap-y-9 sm:gap-y-10">
           {projects.map((p, i) => <ProjectCard key={i} p={p} />)}
         </div>
       </section>
 
       {/* Experience */}
-      <section className="py-12 border-t border-line">
-        <SectionHead n="02" title="Where I've worked" id="experience" />
+      <section className="py-10">
+        <SectionHead title="Where I've worked" id="experience" />
         <div className="space-y-7">
           {careerTimeline.map((item, i) => (
             <div key={i} className="grid grid-cols-[auto,1fr] sm:grid-cols-[7rem,auto,1fr] gap-x-4 gap-y-1 items-start">
@@ -232,8 +229,8 @@ const App = () => (
       </section>
 
       {/* Awards */}
-      <section className="py-12 border-t border-line">
-        <SectionHead n="03" title="Awards" id="awards" />
+      <section className="py-10">
+        <SectionHead title="Awards" id="awards" />
         <ul className="space-y-4">
           {awards.map((a) => {
             const Title = a.href ? 'a' : 'span';
@@ -252,8 +249,8 @@ const App = () => (
       </section>
 
       {/* Reading */}
-      <section className="py-12 border-t border-line">
-        <SectionHead n="04" title="On the shelf" id="reading" />
+      <section className="py-10">
+        <SectionHead title="On the shelf" id="reading" />
         <ReadingCarousel />
       </section>
     </div>
