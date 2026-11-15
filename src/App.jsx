@@ -1,25 +1,23 @@
 import { useState, useEffect } from 'react';
-import { Github, Linkedin, Twitter, FileText, Mail, ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Mail, ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import projectsData from './data/projects.json';
 import repoMeta from './data/repo-meta.json';
-import lionArt from './data/lion.txt?raw';
 
 // --- content --------------------------------------------------------------
 
-const STACK = ['Python', 'TypeScript', 'Java', 'OCaml', 'React', 'Next.js', 'FastAPI', 'PostgreSQL', 'PyTorch', 'LangChain', 'Solana / Anchor', 'Docker'];
-
 const careerTimeline = [
-  { year: 'Since 2026', role: 'Founder & CTO', company: 'Zybit', logo: '/logos/zybit.png', mark: 'Z', companyUrl: 'https://getzybit.com', desc: 'Voice AI that charts for dentists. Live in 3 dental clinics today, onboarding more by hand.' },
-  { year: 'Since 2026', role: 'Student Ambassador', company: 'Akash Network', logo: '/logos/akash.ico', mark: 'AK', companyUrl: 'https://akash.network', desc: 'Running campus workshops on decentralized compute.' },
+  { year: 'Since 2026', role: 'Founder & CTO', company: 'Zybit', logo: '/logos/zybit.png', mark: 'Z', companyUrl: 'https://getzybit.com', desc: <>Voice AI that charts for dentists. Live in 3 dental clinics today, onboarding more by hand. Part of <a href="https://www.elabstartup.com/2027-companies/" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">eLab</a>, Cornell&apos;s startup accelerator.</> },
   { year: 'Since 2025', role: 'Vice President', company: 'Generative AI at Cornell', logo: '/logos/genai.ico', mark: 'GA', companyUrl: 'https://cornellgenai.dev', desc: 'Leading LLM initiatives after starting as an engineer.' },
   { year: 'Since 2025', role: 'Engineering Subteam', company: 'Cornell Blockchain', logo: '/logos/cornellblockchain.png', mark: 'CB', companyUrl: 'https://cornellblockchain.org', desc: 'Building on-chain projects with the engineering subteam.' },
   { year: '2024', role: 'LLM Application Developer Intern', company: 'RIIG / HOOTL', logo: '/logos/riig.png', mark: 'R', companyUrl: 'https://www.riigtech.com', desc: 'Built an AI pipeline for financial regulatory analysis.' },
 ];
 
-const writing = [
-  { tag: 'Research · 2025', title: "Arteta-Ball: Modeling Arsenal's Possession with Markov Chains", href: '/research/arteta_wharton-2.pdf' },
-  { tag: 'Research · 2025', title: 'Gradient Integrity: Verifying Honest Computation on GPU Networks', href: '/research/gradient-integrity.pdf' },
-  { tag: 'Write-up', title: "Why You Can't Trust the Volume Numbers You See Online", href: 'https://github.com/Archdiner/blockchain_trading_volume_generator' },
+const awards = [
+  { title: 'CERN Beamline for Schools', note: 'Team Aurora, shortlisted: one of 49 proposals out of 461', year: '2024', href: 'https://beamlineforschools.cern/wp-content/uploads/2025/12/BL4S_all-winners_2024_final-1.pdf' },
+  { title: 'Global Solana Student Hackathon', note: '3rd place, with CommitMint' },
+  { title: 'British Online Physics Olympiad', note: 'Gold award' },
+  { title: 'Perse Coding Challenge', note: 'Finalist' },
+  { title: 'Bebras Challenge', note: 'High Distinction, twice' },
 ];
 
 const reading = [
@@ -54,20 +52,11 @@ const projects = projectsData.map((p) => {
 
 /* eslint-disable react/prop-types */
 const CONTACTS = [
-  { label: 'GitHub', href: 'https://github.com/Archdiner', Icon: Github },
-  { label: 'LinkedIn', href: 'https://www.linkedin.com/in/asad-rizvi-02a1782a2/', Icon: Linkedin },
-  { label: 'Résumé', href: '/Rizvi_Asad_Resume.pdf', Icon: FileText },
-  { label: 'X', href: 'https://x.com/carne_asado', Icon: Twitter },
+  { label: 'GitHub', href: 'https://github.com/Archdiner' },
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/in/asad-rizvi-02a1782a2/' },
+  // { label: 'Résumé', href: '/Rizvi_Asad_Resume.pdf' }, // hidden for now
+  { label: 'X', href: 'https://x.com/carne_asado' },
 ];
-
-// Pokéball logo trinket
-const Pokeball = ({ size = 19 }) => (
-  <img src="/pokeball.svg" alt="Pokéball" width={size} height={size} className="inline-block align-[-0.22em] mx-[1px]" />
-);
-
-const Trinket = ({ children }) => (
-  <span className="text-[1.02em] align-[-0.12em] mx-[1px]" aria-hidden="true">{children}</span>
-);
 
 const OrgLogo = ({ logo, mark }) => {
   const [failed, setFailed] = useState(false);
@@ -84,7 +73,7 @@ const OrgLogo = ({ logo, mark }) => {
 const SectionHead = ({ n, title, id }) => (
   <div id={id} className="flex items-baseline justify-between gap-4 mb-9 pb-2.5 border-b border-ink/25">
     <h2 className="font-display text-2xl md:text-[28px] font-semibold tracking-tight">{title}</h2>
-    <span className="font-mono text-[11px] text-muted tabular-nums shrink-0">{n} / 05</span>
+    <span className="font-mono text-[11px] text-muted tabular-nums shrink-0">{n} / 04</span>
   </div>
 );
 
@@ -97,7 +86,7 @@ const NavLink = ({ href, children }) => (
   </a>
 );
 
-const statusFor = (p) => (p.hackathonWinner ? '★ 3rd place' : p.projectLink ? 'Live' : 'Source');
+const statusFor = (p) => (p.status || (p.projectLink ? 'Live' : 'Source'));
 
 const ReadingCarousel = () => {
   const [idx, setIdx] = useState(0);
@@ -147,11 +136,11 @@ const ProjectCard = ({ p }) => {
       className="group block"
     >
       {p.image && (
-        <div className="hidden sm:block aspect-[16/10] overflow-hidden bg-faint border border-line">
-          <img src={p.image} alt={p.title} className="w-full h-full object-cover object-top group-hover:scale-[1.03] transition-transform duration-500" />
+        <div className="aspect-[16/10] overflow-hidden bg-faint border border-line">
+          <img src={p.image} alt={p.title} style={p.imagePos ? { objectPosition: p.imagePos } : undefined} className="w-full h-full object-cover object-top group-hover:scale-[1.03] transition-transform duration-500" />
         </div>
       )}
-      <div className={`${p.image ? 'sm:mt-3' : ''} flex items-baseline justify-between gap-2 border-b border-line pb-1.5 sm:border-0 sm:pb-0`}>
+      <div className={`${p.image ? 'mt-3' : ''} flex items-baseline justify-between gap-2`}>
         <h3 className="font-display font-semibold text-lg leading-tight group-hover:text-blood transition-colors">{p.title}</h3>
         <span className="font-mono text-[11px] text-muted shrink-0">{statusFor(p)}</span>
       </div>
@@ -165,12 +154,12 @@ const ProjectCard = ({ p }) => {
 const App = () => (
   <div className="bg-paper text-ink min-h-screen">
 
-    <div className="max-w-2xl mx-auto px-6">
+    <div className="max-w-2xl mx-auto px-6 pb-16">
 
       {/* Hero */}
       <section className="pt-14 md:pt-16 pb-12">
         <div className="flex items-center gap-5">
-          <img src="/art/zine/avatar-color.jpg" alt="Asad Rizvi" className="w-32 h-32 md:w-40 md:h-40 rounded-xl object-cover shrink-0 border border-line" />
+          <img src="/portrait-2026.jpg" alt="Asad Rizvi" className="w-32 h-32 md:w-40 md:h-40 rounded-xl object-cover shrink-0 border border-line" />
           <div>
             <h1 className="font-display text-4xl md:text-5xl font-semibold leading-[0.95] tracking-tight">Asad Rizvi</h1>
             <p className="mt-2 font-display text-xl md:text-[22px] text-ink/85 leading-snug">
@@ -180,20 +169,18 @@ const App = () => (
           </div>
         </div>
         <p className="mt-7 text-[17px] leading-relaxed text-ink/80">
-          I build and ship applied AI: <a href="https://getzybit.com" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Zybit</a>, voice
-          AI that charts for dentists in three practices, and <a href="https://www.reckonreview.dev" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Reckon&nbsp;Review</a>, a GitHub
-          app that won&apos;t let a pull request merge until a human can explain it. I&apos;m just as into the infra
-          underneath: open models, local inference, decentralized compute with <a href="https://akash.network" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Akash</a>.
+          I like making things that feel good to use. The details people don&apos;t notice until they&apos;re
+          missing, the moment a tool gets out of your way, software that leaves someone&apos;s day a little
+          better than it found it.
         </p>
         <p className="mt-4 text-[17px] leading-relaxed text-ink/80">
-          On the <span className="text-blood font-medium">crypto</span> side, I&apos;ve built on-chain with Solana and
-          Anchor and took 3rd at the Global Solana Student Hackathon. What pulls me in is abstraction: making crypto
-          usable inside the financial systems people already rely on.
+          Lately that&apos;s <a href="https://getnoss.com" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Noss</a>, a free Mac
+          app for asking Claude or ChatGPT from whatever app you&apos;re in, <a href="https://github.com/Archdiner/25live-mcp" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">cu25</a>,
+          a tool that books Cornell rooms on 25Live and is already in use, and <a href="https://getzybit.com" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Zybit</a>,
+          voice AI that charts for dentists so they can look at their patients instead of a screen.
         </p>
         <p className="mt-4 text-[17px] leading-relaxed text-ink/70">
-          Away from the keyboard I play <span className="text-blood font-medium">bass</span> in a jazz band <Trinket>🎸</Trinket>,{' '}
-          <span className="text-blood font-medium">box</span> a little <Trinket>🥊</Trinket>, and I peaked at
-          top&nbsp;20 in competitive <span className="text-blood font-medium">Pok&eacute;mon</span> (vgc) <Pokeball />.
+          I also played bass in jazz band, do some boxing, and peaked at top&nbsp;50 in competitive Pok&eacute;mon VGC.
         </p>
         <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3">
           <a href="mailto:sar367@cornell.edu" className="group inline-flex items-center gap-1.5 text-[15px] font-medium text-blood">
@@ -205,10 +192,20 @@ const App = () => (
         </div>
       </section>
 
+      {/* Home */}
+      <figure className="pb-12">
+        <img src="/jarada.jpg" alt="A boat at sunset off Jarada Island, Bahrain" loading="lazy"
+          className="w-full aspect-[4/3] sm:aspect-[16/10] object-cover object-[center_45%] border border-line" />
+        <figcaption className="mt-2.5 flex items-baseline justify-between gap-4 font-mono text-[11px] text-muted">
+          <span>Jarada Island, Bahrain</span>
+          <span>home</span>
+        </figcaption>
+      </figure>
+
       {/* Work */}
       <section className="py-12 border-t border-line">
         <SectionHead n="01" title="Selected work" id="work" />
-        <div className="grid sm:grid-cols-2 gap-x-8 gap-y-5 sm:gap-y-10">
+        <div className="grid sm:grid-cols-2 gap-x-8 gap-y-9 sm:gap-y-10">
           {projects.map((p, i) => <ProjectCard key={i} p={p} />)}
         </div>
       </section>
@@ -234,63 +231,33 @@ const App = () => (
         </div>
       </section>
 
-      {/* Reading */}
+      {/* Awards */}
       <section className="py-12 border-t border-line">
-        <SectionHead n="03" title="On the shelf" id="reading" />
-        <ReadingCarousel />
+        <SectionHead n="03" title="Awards" id="awards" />
+        <ul className="space-y-4">
+          {awards.map((a) => {
+            const Title = a.href ? 'a' : 'span';
+            return (
+              <li key={a.title} className="grid grid-cols-[1fr,auto] gap-x-4 items-baseline">
+                <div>
+                  <Title {...(a.href ? { href: a.href, target: '_blank', rel: 'noopener noreferrer' } : {})}
+                    className={`font-semibold text-[16px] ${a.href ? 'link-ul hover:text-blood transition-colors' : ''}`}>{a.title}</Title>
+                  <p className="text-[14px] text-ink/70 mt-0.5 leading-relaxed">{a.note}</p>
+                </div>
+                <span className="font-mono text-[11px] text-muted tabular-nums">{a.year}</span>
+              </li>
+            );
+          })}
+        </ul>
       </section>
 
-      {/* Toolkit + Writing */}
-      <section className="py-12 border-t border-line grid md:grid-cols-2 gap-12">
-        <div>
-          <SectionHead n="04" title="Toolkit" />
-          <div className="flex flex-wrap gap-2">
-            {STACK.map((t) => (
-              <span key={t} className="font-mono text-[12px] text-ink/75 border border-line px-2.5 py-1">{t}</span>
-            ))}
-          </div>
-        </div>
-        <div>
-          <SectionHead n="05" title="Writing" />
-          <div className="space-y-5">
-            {writing.map((w, i) => (
-              <a key={i} href={w.href} target="_blank" rel="noopener noreferrer" className="group block">
-                <h3 className="font-display text-[16px] leading-snug group-hover:text-blood transition-colors">{w.title}</h3>
-                <span className="font-mono text-[11px] text-muted">{w.tag}</span>
-              </a>
-            ))}
-          </div>
-        </div>
+      {/* Reading */}
+      <section className="py-12 border-t border-line">
+        <SectionHead n="04" title="On the shelf" id="reading" />
+        <ReadingCarousel />
       </section>
     </div>
 
-    {/* Footer — full-bleed dark; ASCII lion left, call-to-action right */}
-    <footer className="mt-8 bg-ink text-paper">
-      <div className="max-w-2xl mx-auto px-6 py-16 md:py-20">
-        <div className="flex flex-col sm:flex-row items-center sm:items-center gap-8 sm:gap-9">
-          <pre aria-hidden="true" className="shrink-0 text-clay/85 font-mono text-[6px] sm:text-[7px] leading-[1.05] whitespace-pre select-none">{lionArt}</pre>
-          <div className="flex-1 min-w-0">
-            <h2 className="font-display text-3xl md:text-[40px] font-semibold leading-[1.03] tracking-tight">
-              Building something, or hiring someone who does? <span className="text-clay italic">Say hi.</span>
-            </h2>
-            <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3">
-              <a href="mailto:sar367@cornell.edu" className="inline-flex items-center gap-1.5 text-[15px] font-medium text-clay hover:text-paper transition-colors">
-                <Mail size={16} /> sar367@cornell.edu
-              </a>
-              {CONTACTS.map(({ label, href, Icon }) => (
-                <a key={label} href={href} target="_blank" rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-[14px] text-paper/70 hover:text-clay transition-colors">
-                  <Icon size={15} /> {label}
-                </a>
-              ))}
-            </div>
-          </div>
-        </div>
-        <p className="mt-12 pt-6 border-t border-paper/15 font-mono text-[11px] text-paper/45">
-          Ithaca, NY · © 2026 Asad Rizvi
-        </p>
-      </div>
-    </footer>
   </div>
 );
 
