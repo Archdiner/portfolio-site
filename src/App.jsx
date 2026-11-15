@@ -6,17 +6,19 @@ import repoMeta from './data/repo-meta.json';
 // --- content --------------------------------------------------------------
 
 const careerTimeline = [
-  { year: 'Since 2026', role: 'Founder & CTO', company: 'Zybit', logo: '/logos/zybit.png', mark: 'Z', companyUrl: 'https://getzybit.com', desc: <>Voice AI that charts for dentists. Live in 3 dental clinics today, onboarding more by hand. Part of <a href="https://www.elabstartup.com/2027-companies/" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">eLab</a>, Cornell&apos;s startup accelerator.</> },
-  { year: 'Since 2025', role: 'Vice President', company: 'Generative AI at Cornell', logo: '/logos/genai.ico', mark: 'GA', companyUrl: 'https://cornellgenai.dev', desc: 'Leading LLM initiatives after starting as an engineer.' },
-  { year: 'Since 2025', role: 'Engineering Subteam', company: 'Cornell Blockchain', logo: '/logos/cornellblockchain.png', mark: 'CB', companyUrl: 'https://cornellblockchain.org', desc: 'Building on-chain projects with the engineering subteam.' },
-  { year: '2024', role: 'LLM Application Developer Intern', company: 'RIIG / HOOTL', logo: '/logos/riig.png', mark: 'R', companyUrl: 'https://www.riigtech.com', desc: 'Built an AI pipeline for financial regulatory analysis.' },
+  { year: 'Since 2026', role: 'Founder & CTO', company: 'Zybit', logo: '/logos/zybit.png', mark: 'Z', companyUrl: 'https://getzybit.com', desc: <>Voice AI for dentists, live in 3 clinics. In <a href="https://www.elabstartup.com/2027-companies/" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">eLab</a>, Cornell&apos;s accelerator.</> },
+  { year: 'Since 2025', role: 'Vice President', company: 'Generative AI at Cornell', logo: '/logos/genai.ico', mark: 'GA', companyUrl: 'https://cornellgenai.dev', desc: 'Leading LLM projects.' },
+  { year: 'Since 2025', role: 'Engineering Subteam', company: 'Cornell Blockchain', logo: '/logos/cornellblockchain.png', mark: 'CB', companyUrl: 'https://cornellblockchain.org', desc: 'Building on-chain projects.' },
+  { year: '2024', role: 'LLM Application Developer Intern', company: 'RIIG / HOOTL', logo: '/logos/riig.png', mark: 'R', companyUrl: 'https://www.riigtech.com', desc: 'AI for financial regulation.' },
 ];
 
 const awards = [
-  { title: 'CERN Beamline for Schools', note: 'Award-winning proposal to recreate the aurora borealis; top 10% across 78 countries', year: '2024', href: 'https://beamlineforschools.cern/wp-content/uploads/2025/12/BL4S_all-winners_2024_final-1.pdf' },
+  { title: 'CERN Beamline for Schools', note: 'Aurora borealis proposal, top 10% of 78 countries', year: '2024', href: 'https://beamlineforschools.cern/wp-content/uploads/2025/12/BL4S_all-winners_2024_final-1.pdf' },
+  { title: 'British Online Physics Olympiad', note: 'Gold' },
+  { title: 'Global Solana Student Hackathon', note: '3rd place' },
   { title: 'Perse Coding Challenge', note: 'Finalist' },
   { title: 'Bebras Challenge', note: 'High Distinction, twice' },
-];
+]
 
 const reading = [
   { title: 'The Alchemist', author: 'Paulo Coelho', cover: '/books/alchemist.jpg' },
@@ -179,13 +181,6 @@ const App = () => (
           I like making things that feel good to use. The details people don&apos;t notice until they&apos;re
           missing, the moment a tool gets out of your way, software that leaves someone&apos;s day a little
           better than it found it.
-        </p>
-        <p className="mt-4 text-[17px] leading-relaxed text-ink/80">
-          Lately that&apos;s <a href="https://getnoss.com" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Noss</a>, a Mac
-          app that lets you ask Claude or ChatGPT about whatever&apos;s on your screen without leaving it,
-          and <a href="https://github.com/Archdiner/krillbench" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">KrillBench</a>, a
-          benchmark of how well frontier models play Krillion. I&apos;m also building <a href="https://getzybit.com" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Zybit</a>,
-          voice AI that charts for dentists so they can look at their patients instead of a screen.
         </p>
         <p className="mt-4 text-[17px] leading-relaxed text-ink/70">
           Away from the keyboard I play <span className="text-blood font-medium">bass</span> in a jazz band <Trinket>🎸</Trinket>,{' '}

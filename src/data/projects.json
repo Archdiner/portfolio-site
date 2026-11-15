@@ -2,7 +2,7 @@
   {
     "repo": null,
     "title": "Noss",
-    "blurb": "A Mac app: tap Right Option in any app, type a question, and Claude or ChatGPT answers in your own chat with a screenshot of what you're looking at. No switching to an AI tab.",
+    "blurb": "Ask Claude or ChatGPT about your screen from any Mac app.",
     "stack": [
       "Swift",
       "macOS",
@@ -13,9 +13,23 @@
     "githubLink": null
   },
   {
+    "repo": null,
+    "title": "Zybit",
+    "tag": "Live in 3 practices",
+    "blurb": "Voice AI that charts for dentists.",
+    "stack": [
+      "Next.js",
+      "TypeScript",
+      "Realtime Voice"
+    ],
+    "image": "/shots/zybit.jpg",
+    "projectLink": "https://getzybit.com",
+    "githubLink": null
+  },
+  {
     "repo": "krillbench",
     "title": "KrillBench",
-    "blurb": "A benchmark of how well frontier models play Krillion: 347 prompts scored against the official answer sheets, with bootstrapped ranges and per-answer latency.",
+    "blurb": "How well frontier models play Krillion.",
     "stack": [
       "Python"
     ],
@@ -27,7 +41,7 @@
   {
     "repo": "reckon-review",
     "title": "Reckon Review",
-    "blurb": "A GitHub app that blocks a pull request from merging until a human can explain, in their own words, what the change actually does.",
+    "blurb": "No merging a PR until a human can explain it.",
     "stack": [
       "TypeScript",
       "Probot",
@@ -38,23 +52,9 @@
     "githubLink": "https://github.com/Archdiner/reckon-review"
   },
   {
-    "repo": null,
-    "title": "Zybit",
-    "tag": "Live in 3 practices",
-    "blurb": "Voice AI that writes a dentist's spoken findings straight into Open Dental, on the right tooth and in their own codes.",
-    "stack": [
-      "Next.js",
-      "TypeScript",
-      "Realtime Voice"
-    ],
-    "image": null,
-    "projectLink": "https://getzybit.com",
-    "githubLink": null
-  },
-  {
     "repo": "kite-credit",
     "title": "Kite Credit",
-    "blurb": "A credit score for people with no local credit file, assembled from ZK-verified bank statements, GitHub history, and wallet activity.",
+    "blurb": "A credit score for people with no local credit history.",
     "stack": [
       "Next.js",
       "Solana",
@@ -68,7 +68,7 @@
     "repo": "commitment-parties",
     "title": "CommitMint",
     "hackathonWinner": "3rd, Global Solana Hackathon",
-    "blurb": "An app that lets you stake money on your goals and only pays out once your progress is verified. Settlement runs on Anchor smart contracts.",
+    "blurb": "Stake money on your goals. Paid out when you hit them.",
     "stack": [
       "Solana",
       "Anchor",
@@ -81,7 +81,7 @@
   {
     "repo": "compute-swarm",
     "title": "ComputeSwarm",
-    "blurb": "A marketplace that rents out idle GPUs, metering usage and settling per-second with automated micropayments.",
+    "blurb": "A marketplace for idle GPUs, billed by the second.",
     "stack": [
       "React",
       "FastAPI",
@@ -94,7 +94,7 @@
   {
     "repo": "GraphRAG-Dodd-Frank",
     "title": "GraphRAG Dodd-Frank",
-    "blurb": "Answers questions across the 800-page Dodd-Frank Act using a knowledge graph instead of a flat vector store.",
+    "blurb": "Q&A over the Dodd-Frank Act using a knowledge graph.",
     "stack": [
       "Python",
       "GraphRAG",
@@ -107,7 +107,7 @@
   {
     "repo": "texas-holdem-ocaml",
     "title": "Texas Hold'em",
-    "blurb": "Networked multiplayer poker written from scratch in OCaml, with a TCP server and terminal clients.",
+    "blurb": "Multiplayer poker in OCaml, from scratch.",
     "stack": [
       "OCaml",
       "Lwt",
