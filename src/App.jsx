@@ -6,20 +6,12 @@ import lionArt from './data/lion.txt?raw';
 
 // --- content --------------------------------------------------------------
 
-const STACK = ['Python', 'TypeScript', 'Java', 'OCaml', 'React', 'Next.js', 'FastAPI', 'PostgreSQL', 'PyTorch', 'LangChain', 'Solana / Anchor', 'Docker'];
-
 const careerTimeline = [
   { year: 'Since 2026', role: 'Founder & CTO', company: 'Zybit', logo: '/logos/zybit.png', mark: 'Z', companyUrl: 'https://getzybit.com', desc: 'Voice AI that charts for dentists. Live in 3 dental clinics today, onboarding more by hand.' },
   { year: 'Since 2026', role: 'Student Ambassador', company: 'Akash Network', logo: '/logos/akash.ico', mark: 'AK', companyUrl: 'https://akash.network', desc: 'Running campus workshops on decentralized compute.' },
   { year: 'Since 2025', role: 'Vice President', company: 'Generative AI at Cornell', logo: '/logos/genai.ico', mark: 'GA', companyUrl: 'https://cornellgenai.dev', desc: 'Leading LLM initiatives after starting as an engineer.' },
   { year: 'Since 2025', role: 'Engineering Subteam', company: 'Cornell Blockchain', logo: '/logos/cornellblockchain.png', mark: 'CB', companyUrl: 'https://cornellblockchain.org', desc: 'Building on-chain projects with the engineering subteam.' },
   { year: '2024', role: 'LLM Application Developer Intern', company: 'RIIG / HOOTL', logo: '/logos/riig.png', mark: 'R', companyUrl: 'https://www.riigtech.com', desc: 'Built an AI pipeline for financial regulatory analysis.' },
-];
-
-const writing = [
-  { tag: 'Research · 2025', title: "Arteta-Ball: Modeling Arsenal's Possession with Markov Chains", href: '/research/arteta_wharton-2.pdf' },
-  { tag: 'Research · 2025', title: 'Gradient Integrity: Verifying Honest Computation on GPU Networks', href: '/research/gradient-integrity.pdf' },
-  { tag: 'Write-up', title: "Why You Can't Trust the Volume Numbers You See Online", href: 'https://github.com/Archdiner/blockchain_trading_volume_generator' },
 ];
 
 const reading = [
@@ -84,7 +76,7 @@ const OrgLogo = ({ logo, mark }) => {
 const SectionHead = ({ n, title, id }) => (
   <div id={id} className="flex items-baseline justify-between gap-4 mb-9 pb-2.5 border-b border-ink/25">
     <h2 className="font-display text-2xl md:text-[28px] font-semibold tracking-tight">{title}</h2>
-    <span className="font-mono text-[11px] text-muted tabular-nums shrink-0">{n} / 05</span>
+    <span className="font-mono text-[11px] text-muted tabular-nums shrink-0">{n} / 03</span>
   </div>
 );
 
@@ -170,7 +162,7 @@ const App = () => (
       {/* Hero */}
       <section className="pt-14 md:pt-16 pb-12">
         <div className="flex items-center gap-5">
-          <img src="/art/zine/avatar-color.jpg" alt="Asad Rizvi" className="w-32 h-32 md:w-40 md:h-40 rounded-xl object-cover shrink-0 border border-line" />
+          <img src="/portrait-2026.jpg" alt="Asad Rizvi" className="w-32 h-32 md:w-40 md:h-40 rounded-xl object-cover shrink-0 border border-line" />
           <div>
             <h1 className="font-display text-4xl md:text-5xl font-semibold leading-[0.95] tracking-tight">Asad Rizvi</h1>
             <p className="mt-2 font-display text-xl md:text-[22px] text-ink/85 leading-snug">
@@ -180,15 +172,14 @@ const App = () => (
           </div>
         </div>
         <p className="mt-7 text-[17px] leading-relaxed text-ink/80">
-          I build and ship applied AI: <a href="https://getzybit.com" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Zybit</a>, voice
-          AI that charts for dentists in three practices, and <a href="https://www.reckonreview.dev" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Reckon&nbsp;Review</a>, a GitHub
-          app that won&apos;t let a pull request merge until a human can explain it. I&apos;m just as into the infra
-          underneath: open models, local inference, decentralized compute with <a href="https://akash.network" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Akash</a>.
+          I like making things that feel good to use. The details people don&apos;t notice until they&apos;re
+          missing, the moment a tool gets out of your way, software that leaves someone&apos;s day a little
+          better than it found it.
         </p>
         <p className="mt-4 text-[17px] leading-relaxed text-ink/80">
-          On the <span className="text-blood font-medium">crypto</span> side, I&apos;ve built on-chain with Solana and
-          Anchor and took 3rd at the Global Solana Student Hackathon. What pulls me in is abstraction: making crypto
-          usable inside the financial systems people already rely on.
+          Right now that&apos;s <a href="https://getzybit.com" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Zybit</a>, voice
+          AI that charts for dentists so they can look at their patients instead of a screen, and <a href="https://www.reckonreview.dev" target="_blank" rel="noopener noreferrer" className="text-blood link-ul">Reckon&nbsp;Review</a>, a GitHub
+          app that won&apos;t let a pull request merge until a human can explain it.
         </p>
         <p className="mt-4 text-[17px] leading-relaxed text-ink/70">
           Away from the keyboard I play <span className="text-blood font-medium">bass</span> in a jazz band <Trinket>🎸</Trinket>,{' '}
@@ -204,6 +195,16 @@ const App = () => (
           ))}
         </div>
       </section>
+
+      {/* Home */}
+      <figure className="pb-12">
+        <img src="/jarada.jpg" alt="A boat at sunset off Jarada Island, Bahrain" loading="lazy"
+          className="w-full aspect-[4/3] sm:aspect-[16/10] object-cover object-[center_45%] border border-line" />
+        <figcaption className="mt-2.5 flex items-baseline justify-between gap-4 font-mono text-[11px] text-muted">
+          <span>Jarada Island, Bahrain</span>
+          <span>home</span>
+        </figcaption>
+      </figure>
 
       {/* Work */}
       <section className="py-12 border-t border-line">
@@ -238,29 +239,6 @@ const App = () => (
       <section className="py-12 border-t border-line">
         <SectionHead n="03" title="On the shelf" id="reading" />
         <ReadingCarousel />
-      </section>
-
-      {/* Toolkit + Writing */}
-      <section className="py-12 border-t border-line grid md:grid-cols-2 gap-12">
-        <div>
-          <SectionHead n="04" title="Toolkit" />
-          <div className="flex flex-wrap gap-2">
-            {STACK.map((t) => (
-              <span key={t} className="font-mono text-[12px] text-ink/75 border border-line px-2.5 py-1">{t}</span>
-            ))}
-          </div>
-        </div>
-        <div>
-          <SectionHead n="05" title="Writing" />
-          <div className="space-y-5">
-            {writing.map((w, i) => (
-              <a key={i} href={w.href} target="_blank" rel="noopener noreferrer" className="group block">
-                <h3 className="font-display text-[16px] leading-snug group-hover:text-blood transition-colors">{w.title}</h3>
-                <span className="font-mono text-[11px] text-muted">{w.tag}</span>
-              </a>
-            ))}
-          </div>
-        </div>
       </section>
     </div>
 
