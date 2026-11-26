@@ -1,951 +1,599 @@
-/* Wireframe interactions for the tea cut.
-   Every number is loaded from assets/data, generated from tinker-proj results
-   and Freesound recordings. No prose lives here. */
+/* What a Kettle Knows: interactions.
+   Every number and every label is loaded from assets/data (generated from the
+   tinker-proj results and the Freesound recordings). Prose lives in index.html. */
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
-const fmt = (n, d = 3) => Number(n).toFixed(d);
-const pct = (n) => `${Math.round(n * 100)}%`;
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-const clock = (s) => {
-  s = Math.max(0, s || 0);
-  return `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
-};
-const debounce = (fn, ms) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; };
+const clock = (s) => { s = Math.max(0, s || 0); return `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`; };
+const clockT = (s) => `${Math.floor(s / 60)}:${(s % 60).toFixed(1).padStart(4, "0")}`;
+const dpr = () => window.devicePixelRatio || 1;
+const json = (n) => fetch(`assets/data/${n}.json`).then((r) => r.json());
 
-const FAMILY_COLOR = {
-  dsp: "#a8792f", cnn_distilled: "#7c2b26",
-  vit_universal_ssl: "#2f6f5e", vit_mae: "#2f6f5e", vit_ssl: "#2f6f5e", vit_unit_ssl: "#2f6f5e",
+const C = { blood: "#7c2b26", teal: "#2f6f5e", gold: "#a8792f", ink: "#1d1b17", muted: "#6f675c", faint: "#9a9183", line: "#e2d9c8", card: "#fffdf8", dark: "#171614", peach: "#f3a27f", sage: "#6fbfa8" };
+const STAGE = { off: { c: "#8c8275", name: "off" }, heat: { c: C.gold, name: "heating" }, boil: { c: C.teal, name: "boiling" } };
+const ENC = {
+  dsp_rich: ["Recipe", "dsp"], mn04_as: ["Tagger S", "tag"], mn10_as: ["Tagger M", "tag"], mn20_as: ["Tagger L", "tag"],
+  usad2_small: ["USAD", "ssl"], dasheng_base: ["Dasheng", "ssl"], eat_pretrain: ["EAT", "ssl"], beats_iter3: ["BEATs", "ssl"],
 };
-const FAMILY_LABEL = {
-  dsp: "DSP baseline", cnn_distilled: "AudioSet",
-  vit_universal_ssl: "self-supervised", vit_mae: "self-supervised", vit_ssl: "self-supervised", vit_unit_ssl: "self-supervised",
-};
-const fcolor = (f) => FAMILY_COLOR[f] || "#2f6f5e";
-const flabel = (f) => FAMILY_LABEL[f] || "SSL ViT";
+const FAM = { dsp: C.gold, tag: C.blood, ssl: C.teal };
+const EAR_WORDS = { light_switch: "light switch", running_water: "running water", coffee_machine: "coffee machine", vacuum_cleaner: "vacuum cleaner" };
 
-const CLIP_NAMES = ["kettle", "cup_spoon", "stir", "pour", "codec_original", "codec_8khz",
-  "codec_4khz", "hpss_mix", "hpss_harmonic", "hpss_percussive", "bouncing_ball"];
-const MINI = [
-  ["kettle", "The recording", "1:50"],
-  ["cup_spoon", "Cup and spoon", "0:14"],
-  ["stir", "Spoon stirring", "0:30"],
-  ["pour", "Water pour", "0:04"],
-];
+const S = { clips: {} };
 
-const state = {
-  results: null, kettle: null, taps: null, similarity: null, sources: null,
-  bounce: null, clips: {}, clip: "kettle",
-  simModel: "dsp_rich", codec: "codec_original", selectedEncoder: "mn10_as",
-  heard: false, dockDismissed: false,
-};
-
-/* ---------------------------------------------------------------- loading */
+/* ------------------------------------------------------------------ boot */
 async function boot() {
-  const [results, kettle, taps, similarity, sources, bounce] = await Promise.all([
-    fetch("assets/data/results.json").then((r) => r.json()),
-    fetch("assets/data/kettle.json").then((r) => r.json()),
-    fetch("assets/data/taps.json").then((r) => r.json()),
-    fetch("assets/data/similarity.json").then((r) => r.json()),
-    fetch("assets/data/sources.json").then((r) => r.json()),
-    fetch("assets/data/bouncing_onsets.json").then((r) => r.json()),
-  ]);
-  Object.assign(state, { results, kettle, taps, similarity, sources, bounce });
+  const names = ["kettle", "codec_original", "codec_8khz", "codec_4khz", "hpss_mix", "hpss_harmonic", "hpss_percussive", "bouncing_ball"];
+  const [results, taps, similarity, sources, bounce, ...clips] = await Promise.all(
+    ["results", "taps", "similarity", "sources", "bouncing_onsets", ...names].map(json));
+  Object.assign(S, { results, taps, similarity, sources, bounce });
+  clips.forEach((c) => (S.clips[c.name] = c));
+  S.k = S.clips.kettle;
 
-  const loaded = await Promise.all(CLIP_NAMES.map((n) =>
-    fetch(`assets/data/${n}.json`).then((r) => r.json())
-  ));
-  loaded.forEach((c) => (state.clips[c.name] = c));
-
-  buildRail();
-  buildDesk();
-  buildDock();
-  buildRecognition();
-  buildCodec();
+  initAudio();
+  buildBlind();
+  buildKettleViews();
+  buildZoom();
+  buildSwitcher({ tabs: "#codecTabs", attr: "codec", play: "#codecPlay", canvas: "#codecSpec", meta: "#codecMeta",
+    metas: { codec_original: "16,000 numbers a second", codec_8khz: "8,000 numbers a second · phone quality", codec_4khz: "nothing above 4,000 Hz" } });
+  buildSwitcher({ tabs: "#hpssTabs", attr: "stem", play: "#hpssPlay", canvas: "#hpssSpec", meta: "#hpssMeta",
+    metas: { hpss_mix: "cup, spoon and hot water · 0:14", hpss_harmonic: "the horizontal stripes: water and room", hpss_percussive: "the vertical lines: spoon and cup" } });
   buildTaps();
-  buildSimilarity();
-  buildG1();
+  buildSim();
+  buildEar();
+  buildSkills();
   buildBounce();
-  buildF2();
+  buildDiary();
   buildMemory();
-  buildKettleQuestions();
-  buildCremad();
   buildCost();
-  buildFailures();
-  buildSources();
-  buildAllTable();
-  wireScroll();
-  wireKeys();
+  buildTables();
+  wireProgress();
+  addEventListener("resize", debounce(redrawAll, 150));
 }
 
-/* ---------------------------------------------------------------- rail / scroll */
-function buildRail() {
-  const rail = document.createElement("nav");
-  rail.className = "rail";
-  rail.setAttribute("aria-label", "Sections");
-  const items = [
-    ["s01", "01 waveform"], ["s02", "02 sample rate"], ["s03", "03 embedding"],
-    ["s04", "04 episodes"], ["s05", "05 interface"], ["appendix", "appendix"],
-  ];
-  rail.innerHTML = items.map(([id, l]) => `<a href="#${id}" data-for="${id}">${l}</a>`).join("");
-  document.body.appendChild(rail);
-  const links = $$("a", rail);
-  const io = new IntersectionObserver((es) => es.forEach((e) => {
-    if (e.isIntersecting) links.forEach((l) => l.classList.toggle("on", l.dataset.for === e.target.id));
-  }), { rootMargin: "-20% 0px -70% 0px" });
-  items.forEach(([id]) => { const s = document.getElementById(id); if (s) io.observe(s); });
-}
+function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
 
-function wireScroll() {
-  const bar = $("#progress");
-  const on = () => {
-    const h = document.documentElement.scrollHeight - innerHeight;
-    bar.style.width = `${h > 0 ? (scrollY / h) * 100 : 0}%`;
-    scheduleDock();
+/* ------------------------------------------------------------------ audio */
+const players = [];
+function makeAudio(src) {
+  const a = src ? new Audio(src) : new Audio();
+  a.preload = "metadata";
+  a.addEventListener("play", () => { players.forEach((p) => p !== a && p.pause()); loop(); });
+  players.push(a);
+  return a;
+}
+let kettle;
+let activeView = null;
+function initAudio() {
+  kettle = makeAudio("assets/audio/kettle.mp3");
+  ["play", "pause", "ended", "seeked", "timeupdate"].forEach((e) => kettle.addEventListener(e, syncKettle));
+}
+let looping = false;
+function loop() {
+  if (looping) return;
+  looping = true;
+  const step = () => {
+    syncKettle(); syncSwitchers();
+    if (players.some((p) => !p.paused)) requestAnimationFrame(step); else { looping = false; syncKettle(); syncSwitchers(); }
   };
-  addEventListener("scroll", on, { passive: true });
-  addEventListener("resize", scheduleDock);
-  on();
+  requestAnimationFrame(step);
 }
-
-function wireKeys() {
-  addEventListener("keydown", (e) => {
-    if (e.code !== "Space") return;
-    const tag = document.activeElement?.tagName;
-    if (["INPUT", "SELECT", "TEXTAREA", "BUTTON"].includes(tag)) return;
-    e.preventDefault(); togglePlay();
-  });
+function toggleKettle(view) {
+  if (!kettle.paused && activeView === view) { kettle.pause(); return; }
+  activeView = view;
+  if (kettle.ended) kettle.currentTime = 0;
+  kettle.play().catch(() => {});
 }
+function kDur() { return kettle.duration || S.k.duration; }
 
-/* ---------------------------------------------------------------- audio core */
-let audio, heroBase, deskBase, heroAccent, deskAccent;
-
-function bakeWave(cv, peaks, bg) {
-  const midline = "rgba(241,234,220,.10)";
-  drawWave(cv, peaks, "#6fbfa8", bg, midline);
-  const base = snapshot(cv);
-  drawWave(cv, peaks, "#f3a27f", bg, midline);
-  const accent = snapshot(cv);
-  drawWave(cv, peaks, "#6fbfa8", bg, midline);
-  return { base, accent };
+/* ------------------------------------------------------------------ drawing */
+function sizeCanvas(cv) {
+  const w = cv.clientWidth || 600, h = Number(cv.getAttribute("height")) || 100;
+  cv.style.height = h + "px";
+  cv.width = Math.round(w * dpr()); cv.height = Math.round(h * dpr());
+  const g = cv.getContext("2d"); g.setTransform(dpr(), 0, 0, dpr(), 0, 0);
+  return { g, w, h };
 }
-
-function buildDesk() {
-  audio = new Audio("assets/audio/kettle.mp3");
-  audio.preload = "metadata";
-  audio.addEventListener("timeupdate", syncAll);
-  audio.addEventListener("play", () => { state.heard = true; setPlaying(true); scheduleDock(); });
-  audio.addEventListener("pause", () => setPlaying(false));
-  audio.addEventListener("ended", () => setPlaying(false));
-  audio.addEventListener("loadedmetadata", syncAll);
-
-  $$("[data-play-main]").forEach((b) => b.addEventListener("click", togglePlay));
-  $("#wave").addEventListener("click", seekMain);
-  $("#wave").addEventListener("mousemove", hoverMain);
-  $("#wave").addEventListener("mouseleave", () => ($("#hoverTime").style.opacity = 0));
-  $$(".clip-switch .chip").forEach((b) => b.addEventListener("click", () => loadClip(b.dataset.clip)));
-
-  drawDesk();
-  addEventListener("resize", debounce(() => {
-    drawDesk(); progressWaves();
-  }, 150));
-}
-
-function drawDesk() {
-  const c = clip();
-  const baked = bakeWave($("#wave"), c.peaks, "#171614");
-  deskBase = baked.base; deskAccent = baked.accent;
-  drawSpec($("#spec"), c.spec);
-  drawStages(c);
-  drawLane(c);
-  $("#clipLabel").textContent = publicClipLabel(c);
-  syncDockLabel();
-  $("#deskFoot").textContent = `${clock(c.duration)} · 16 kHz · 16,000 samples a second`;
-}
-
-function publicClipLabel(c) {
-  return c.label;
-}
-
-function syncDockLabel() {
-  const el = $("#dockLabel");
-  const c = clip();
-  if (!el || !c) return;
-  el.textContent = c.label;
-}
-
-function clip(name = state.clip) { return state.clips[name]; }
-
-function loadClip(name, play = false) {
-  const was = play || !audio.paused;
-  state.clip = name;
-  audio.src = `assets/audio/${name}.mp3`;
-  audio.load();
-  $$(".clip-switch .chip").forEach((b) => b.classList.toggle("active", b.dataset.clip === name));
-  $$(".mini").forEach((m) => m.classList.toggle("active", m.dataset.clip === name));
-  drawDesk();
-  if (was) audio.play().catch(() => {});
-  syncAll();
-}
-
-function togglePlay() {
-  if (audio.paused) audio.play().catch(() => {});
-  else audio.pause();
-}
-
-function setPlaying(on) {
-  $$("[data-play-main]").forEach((b) => {
-    b.classList.toggle("playing", on);
-    const label = b.querySelector("span:last-child");
-    if (label) label.textContent = on ? "Pause" : "Play";
-  });
-}
-
-function seekMain(e) {
-  const r = $("#wave").getBoundingClientRect();
-  const f = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
-  audio.currentTime = f * (audio.duration || state.kettle.duration);
-  syncAll();
-}
-
-function hoverMain(e) {
-  const r = $("#wave").getBoundingClientRect();
-  const f = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
-  const tip = $("#hoverTime");
-  tip.style.opacity = 1; tip.style.left = `${f * 100}%`;
-  tip.textContent = clock(f * (audio.duration || state.kettle.duration));
-}
-
-function syncAll() {
-  const d = audio.duration || clip().duration;
-  const t = audio.currentTime || 0;
-  const f = Math.min(1, t / d);
-  $("#playhead").style.left = `${f * 100}%`;
-  $("#dockProgress").style.width = `${f * 100}%`;
-  $("#dockTime").textContent = `${clock(t)} / ${clock(d)}`;
-  if ($("#heroTime")) $("#heroTime").textContent = `${clock(t)} / ${clock(d)}`;
-  const active = clip().events.filter((e) => t >= e.start && t <= e.end);
-  const label = active.length ? [...new Set(active.map((e) => e.text || e.label))].join(" · ") : "—";
-  $("#nowEvent").textContent = label;
-  const stage = clip().stages.find((s) => t >= s.start && t <= s.end);
-  $("#timelineNow").textContent = stage ? `${stage.label} · ${clock(t)}` : `— · ${clock(t)}`;
-  progressWaves(f);
-}
-
-function progressWaves(f = Math.min(1, (audio.currentTime || 0) / (audio.duration || clip().duration))) {
-  ["#heroWave", "#wave"].forEach((sel) => {
-    const cv = $(sel);
-    if (!cv) return;
-    const base = sel === "#heroWave" ? heroBase : deskBase;
-    const accent = sel === "#heroWave" ? heroAccent : deskAccent;
-    const g = cv.getContext("2d");
-    const dpr = window.devicePixelRatio || 1;
-    if (base) g.drawImage(base, 0, 0, cv.width / dpr, cv.height / dpr);
-    if (f > 0 && accent) {
-      g.save(); g.beginPath(); g.rect(0, 0, (cv.width / dpr) * f, cv.height / dpr); g.clip();
-      g.drawImage(accent, 0, 0, cv.width / dpr, cv.height / dpr); g.restore();
-    }
-  });
-}
-
-function drawWave(cv, peaks, color, bg, midline = "rgba(241,234,220,.12)") {
-  const dpr = window.devicePixelRatio || 1;
-  const w = cv.clientWidth || 800, h = cv.clientHeight || 120;
-  cv.width = w * dpr; cv.height = h * dpr;
-  const g = cv.getContext("2d");
-  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+function drawWave(cv, peaks, { color = C.blood, bg = C.card, upto = 1, ghost = null } = {}) {
+  const { g, w, h } = sizeCanvas(cv);
   g.fillStyle = bg; g.fillRect(0, 0, w, h);
-  const n = peaks.hi.length, mid = h / 2, amp = h * 0.44;
-  g.fillStyle = color;
+  const n = peaks.hi.length, mid = h / 2, amp = h * 0.46;
   for (let i = 0; i < n; i++) {
-    const x = (i / n) * w;
-    const y1 = mid + (peaks.lo[i] / 127) * amp;
-    const y2 = mid + (peaks.hi[i] / 127) * amp;
-    g.fillRect(x, Math.min(y1, y2), Math.max(1, w / n), Math.max(1, Math.abs(y2 - y1)));
+    const f = i / n;
+    if (f > upto && !ghost) break;
+    g.fillStyle = f <= upto ? color : ghost;
+    const x = f * w, y1 = mid + (peaks.lo[i] / 127) * amp, y2 = mid + (peaks.hi[i] / 127) * amp;
+    g.fillRect(x, Math.min(y1, y2), Math.max(1, w / n + 0.3), Math.max(1, Math.abs(y2 - y1)));
   }
-  g.strokeStyle = midline; g.beginPath(); g.moveTo(0, mid); g.lineTo(w, mid); g.stroke();
 }
-
-function snapshot(cv) {
-  const o = document.createElement("canvas");
-  o.width = cv.width; o.height = cv.height;
-  o.getContext("2d").drawImage(cv, 0, 0);
-  return o;
-}
-
-function drawSpec(cv, spec) {
-  const dpr = window.devicePixelRatio || 1;
-  const w = cv.clientWidth || 800, h = cv.clientHeight || 118;
-  cv.width = w * dpr; cv.height = h * dpr;
-  const g = cv.getContext("2d");
-  g.setTransform(dpr, 0, 0, dpr, 0, 0);
-  g.fillStyle = "#171614"; g.fillRect(0, 0, w, h);
-  const raw = Uint8Array.from(atob(spec.b64), (c) => c.charCodeAt(0));
-  const nF = spec.frames, nM = spec.n_mels;
-  const off = document.createElement("canvas"); off.width = nF; off.height = nM;
-  const octx = off.getContext("2d");
-  const img = octx.createImageData(nF, nM);
-  const lut = specLUT();
-  for (let y = 0; y < nM; y++) for (let x = 0; x < nF; x++) {
-    const c = lut[raw[y * nF + x]], k = (y * nF + x) * 4;
-    img.data[k] = c[0]; img.data[k + 1] = c[1]; img.data[k + 2] = c[2]; img.data[k + 3] = 255;
-  }
-  octx.putImageData(img, 0, 0);
-  g.imageSmoothingEnabled = true;
-  g.drawImage(off, 0, 0, w, h);
-  g.strokeStyle = "rgba(241,234,220,.10)"; g.setLineDash([2, 4]);
-  [0.25, 0.5, 0.75].forEach((f) => { g.beginPath(); g.moveTo(0, h * f); g.lineTo(w, h * f); g.stroke(); });
-  g.setLineDash([]);
-}
-
-let _lut = null;
-function specLUT() {
+let _lut;
+function lut() {
   if (_lut) return _lut;
+  const stops = [[0, [23, 22, 20]], [0.3, [40, 46, 42]], [0.52, [47, 111, 94]], [0.74, [168, 121, 47]], [0.9, [236, 168, 122]], [1, [252, 244, 222]]];
   _lut = [];
-  const stops = [[0, [23, 22, 20]], [0.28, [43, 48, 44]], [0.5, [47, 111, 94]], [0.72, [168, 121, 47]], [0.88, [232, 165, 120]], [1, [250, 240, 214]]];
   for (let i = 0; i < 256; i++) {
-    const t = i / 255; let a = stops[0], b = stops[stops.length - 1];
-    for (let j = 0; j < stops.length - 1; j++) if (t >= stops[j][0] && t <= stops[j + 1][0]) { a = stops[j]; b = stops[j + 1]; break; }
-    const u = (t - a[0]) / (b[0] - a[0] || 1);
-    _lut.push(a[1].map((v, k) => Math.round(v + (b[1][k] - v) * u)));
+    const t = i / 255; let j = 0;
+    while (j < stops.length - 2 && t > stops[j + 1][0]) j++;
+    const [a, ca] = stops[j], [b, cb] = stops[j + 1], u = (t - a) / (b - a);
+    _lut.push(ca.map((v, k) => Math.round(v + (cb[k] - v) * u)));
   }
   return _lut;
 }
-
-/* stage strip */
-const STAGE_COLOR = { off: "#3b362d", heat: "#a8792f", boil: "#2f6f5e" };
-function stageText(s) {
-  return s.label;
-}
-function drawStages(c) {
-  const strip = $("#stageStrip");
-  if (!c.stages.length) { strip.innerHTML = ""; strip.style.display = "none"; return; }
-  strip.style.display = "flex";
-  strip.innerHTML = c.stages.map((s) => {
-    const w = ((s.end - s.start) / c.duration) * 100;
-    const label = stageText(s, c.name);
-    return `<div class="stage" style="width:${w}%;border-color:${STAGE_COLOR[s.kind] || "#3b362d"}">
-      <span class="mono" style="color:${STAGE_COLOR[s.kind] || "#a49b8b"}">${esc(label)}</span>
-      ${w > 7 ? `<em class="mono">${clock(s.start)}–${clock(s.end)}</em>` : ""}</div>`;
-  }).join("");
-}
-
-/* event lane */
-function drawLane(c) {
-  const lane = $("#lane");
-  if (!c.events.length) { lane.innerHTML = `<p class="mono" style="color:#a49b8b;padding:8px 0">no predictions for this clip</p>`; return; }
-  const labels = [...new Set(c.events.map((e) => e.text || e.label))].sort();
-  lane.innerHTML = labels.map((l) => {
-    const bars = c.events.filter((e) => (e.text || e.label) === l).map((e) => {
-      const left = (e.start / c.duration) * 100;
-      const width = Math.max(0.6, ((Math.min(e.end, c.duration) - e.start) / c.duration) * 100);
-      return `<i class="lane-bar" style="left:${left}%;width:${width}%" data-t="${e.start}" title="${esc(l)} · ${e.start.toFixed(1)}–${e.end.toFixed(1)}s"></i>`;
-    }).join("");
-    return `<div class="lane-row"><span class="lbl">${esc(l)}</span><span class="lane-track">${bars}</span></div>`;
-  }).join("");
-  $$(".lane-bar", lane).forEach((b) => b.addEventListener("click", () => {
-    audio.currentTime = Number(b.dataset.t); syncAll();
-  }));
-}
-
-/* mini clips */
-function buildMiniClips() {
-  const wrap = $("#miniClips");
-  wrap.innerHTML = MINI.map(([name, title, dur]) => `
-    <div class="mini ${name === state.clip ? "active" : ""}" data-clip="${name}">
-      <div class="mini-head"><b>${title}</b><span class="mono">${dur}</span></div>
-      <canvas height="34" data-wave="${name}"></canvas>
-      <button data-load="${name}">load into desk →</button>
-    </div>`).join("");
-  MINI.forEach(([name]) => drawWave(wrap.querySelector(`[data-wave="${name}"]`), state.clips[name].peaks, "#7c2b26", "#fbf7ee", "rgba(27,25,22,.12)"));
-  $$("[data-load]", wrap).forEach((b) => b.addEventListener("click", () => {
-    loadClip(b.dataset.load, true);
-    document.getElementById("desk").scrollIntoView({ behavior: "smooth", block: "center" });
-  }));
-}
-
-/* dock — small, dismissible, and only after the hero player is gone */
-let dockQueued = false;
-function scheduleDock() {
-  if (dockQueued) return;
-  dockQueued = true;
-  requestAnimationFrame(() => { dockQueued = false; syncDock(); });
-}
-
-function sourcePlayerGone() {
-  const el = $("#desk");
-  return !!el && el.getBoundingClientRect().bottom <= 8;
-}
-
-function dockRestRect() {
-  const el = $("#dock");
-  const h = el.offsetHeight || 46;
-  const w = el.offsetWidth || Math.min(420, window.innerWidth - 24);
-  const left = (window.innerWidth - w) / 2;
-  const top = window.innerHeight - 10 - h;
-  return { top: top - 28, bottom: top + h + 16, left, right: left + w };
-}
-
-function dockCoversEvidence() {
-  const d = dockRestRect();
-  const nodes = document.querySelectorAll("figcaption, .caption, .chart, .sim-matrix, .physics, .stems, .taps, .gloss, .not-draft, .table-scroll, .questions");
-  for (const n of nodes) {
-    const r = n.getBoundingClientRect();
-    if (r.width < 2 || r.height < 2) continue;
-    if (r.bottom > d.top && r.top < d.bottom && r.right > d.left && r.left < d.right) return true;
+const specCache = new Map();
+function specImage(spec) {
+  if (specCache.has(spec)) return specCache.get(spec);
+  const raw = Uint8Array.from(atob(spec.b64), (c) => c.charCodeAt(0));
+  const nF = spec.frames, nM = spec.n_mels, o = document.createElement("canvas");
+  o.width = nF; o.height = nM;
+  const x = o.getContext("2d"), img = x.createImageData(nF, nM), L = lut();
+  for (let y = 0; y < nM; y++) for (let f = 0; f < nF; f++) {
+    const c = L[raw[y * nF + f]], k = (y * nF + f) * 4;
+    img.data[k] = c[0]; img.data[k + 1] = c[1]; img.data[k + 2] = c[2]; img.data[k + 3] = 255;
   }
-  return false;
+  x.putImageData(img, 0, 0);
+  specCache.set(spec, o);
+  return o;
 }
-
-function syncDock() {
-  const dock = $("#dock");
-  if (!dock) return;
-  const show = !state.dockDismissed && state.heard && sourcePlayerGone() && !dockCoversEvidence();
-  dock.classList.toggle("on", show);
-  dock.setAttribute("aria-hidden", show ? "false" : "true");
-  document.body.classList.toggle("dock-live", show);
-}
-
-function buildDock() {
-  drawWave($("#dockWave"), state.kettle.peaks, "#6fbfa8", "#171614");
-  $("#dockPlay").addEventListener("click", togglePlay);
-  $("#dockClose").addEventListener("click", () => {
-    state.dockDismissed = true;
-    syncDock();
-  });
-  $("#dockWave").addEventListener("click", (e) => {
-    const r = $("#dockWave").getBoundingClientRect();
-    const f = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
-    audio.currentTime = f * (audio.duration || state.kettle.duration); syncAll();
-  });
-  syncDockLabel();
-  scheduleDock();
-}
-
-/* ---------------------------------------------------------------- recognition */
-function buildRecognition() {
-  const ev = state.kettle.events;
-  const by = {};
-  ev.forEach((e) => {
-    const k = e.text || e.label;
-    by[k] = by[k] || { p: 0, dur: 0 };
-    by[k].p = Math.max(by[k].p, e.p);
-    by[k].dur += (e.end - e.start);
-  });
-  const rows = Object.entries(by).sort((a, b) => b[1].p - a[1].p);
-  $("#earTags").innerHTML = rows.map(([k, v]) => `
-    <div class="ear-tag"><span>${esc(k)}</span><em class="mono">${v.p.toFixed(2)}</em></div>`).join("");
-
-  // timeline: human states on top, ear rows below
-  const c = state.kettle;
-  const w = 1000, labelW = 150, barY = 24, barH = 24, rowStart = 96, rowH = 25;
-  const labels = rows.map(([k]) => k);
-  const h = rowStart + labels.length * rowH + 10;
-  const X = (t) => labelW + (t / c.duration) * (w - labelW - 20);
-  let b = `<text x="10" y="14" class="svg-mono" fill="#7c2b26">human states</text>`;
-  c.stages.forEach((s) => {
-    const x = X(s.start), ww = X(s.end) - x;
-    b += `<rect x="${x}" y="${barY}" width="${ww}" height="${barH}" fill="${STAGE_COLOR[s.kind]}" opacity=".86" rx="1"/>`;
-    const name = stageText(s);
-    if (ww > 40 && name) b += `<text x="${x + 5}" y="${barY + barH + 14}" class="svg-small" fill="#6f675c">${esc(name)}</text>`;
-  });
-  b += `<text x="10" y="82" class="svg-mono" fill="#2f6f5e">Ear v1 labels</text>`;
-  labels.forEach((l, i) => {
-    const y = rowStart + i * rowH;
-    b += `<text x="${labelW - 8}" y="${y + 11}" text-anchor="end" class="svg-small">${esc(l)}</text>`;
-    b += `<line x1="${labelW}" y1="${y + 8}" x2="${w - 20}" y2="${y + 8}" stroke="#eee4d2"/>`;
-    c.events.filter((e) => (e.text || e.label) === l).forEach((e) => {
-      const x = X(e.start), ww = Math.max(1.5, X(Math.min(e.end, c.duration)) - x);
-      b += `<rect x="${x}" y="${y}" width="${ww}" height="15" fill="#2f6f5e" opacity=".8" rx="1"><title>${esc(l)} · ${clock(e.start)}–${clock(e.end)}</title></rect>`;
-    });
-  });
-  $("#tagTimeline").innerHTML = svgWrap(w, h, b, "Human states versus ear labels");
-}
-
-/* ---------------------------------------------------------------- physics */
-function buildPhysics() {
-  const cards = [
-    ["kettle", "Kettle", "1:50", "the long sound"],
-    ["pour", "Pour", "0:04", "into a mug"],
-    ["cup_spoon", "Spoon and cup", "0:14", "a short hit"],
-  ];
-  $("#physicsCards").innerHTML = cards.map(([name, title, sub, label]) => `
-    <div class="physics card" data-clip="${name}">
-      <p class="eyebrow">${label}</p>
-      <h3>${title}</h3>
-      <p class="mono phys-sub">${sub}</p>
-      <canvas height="56" data-p="${name}"></canvas>
-      <canvas height="70" data-s="${name}"></canvas>
-      <button class="mini-play" data-play="${name}"><span class="play-icon"></span> hear it</button>
-    </div>`).join("");
-  cards.forEach(([name]) => {
-    drawWave($(`[data-p="${name}"]`), state.clips[name].peaks, "#7c2b26", "#fbf7ee", "rgba(27,25,22,.12)");
-    drawSpec($(`[data-s="${name}"]`), state.clips[name].spec);
-  });
-  $$("[data-play]").forEach((b) => b.addEventListener("click", () => loadClip(b.dataset.play, true)));
-}
-
-/* ---------------------------------------------------------------- codec */
-let codecAudio;
-function buildCodec() {
-  codecAudio = new Audio("assets/audio/codec_original.mp3");
-  const draw = () => {
-    const d = state.clips[state.codec];
-    drawWave($("#codecWave"), d.peaks, "#7c2b26", "#fbf7ee", "rgba(27,25,22,.12)");
-    $("#codecMeta").textContent = { codec_original: "128 kbps · 16 kHz", codec_8khz: "32 kbps · 8 kHz", codec_4khz: "4 kHz low-pass" }[state.codec];
-  };
-  draw();
-  $("#codecPlay").addEventListener("click", () => {
-    if (codecAudio.paused) codecAudio.play().catch(() => {});
-    else codecAudio.pause();
-  });
-  $$("#codecTabs .tab").forEach((b) => b.addEventListener("click", () => {
-    const was = !codecAudio.paused, t = codecAudio.currentTime;
-    state.codec = b.dataset.codec;
-    $$("#codecTabs .tab").forEach((x) => x.classList.toggle("active", x === b));
-    codecAudio.src = `assets/audio/${state.codec}.mp3`;
-    codecAudio.load();
-    const go = () => { codecAudio.currentTime = Math.min(t, 19); if (was) codecAudio.play().catch(() => {}); };
-    codecAudio.addEventListener("loadedmetadata", go, { once: true });
-    draw();
-  }));
-}
-
-/* ---------------------------------------------------------------- taps + similarity */
-let tapAudio;
-function buildTaps() {
-  tapAudio = new Audio();
-  const labels = state.taps.labels;
-  $("#taps").innerHTML = state.taps.clips.map((c, i) => `
-    <div class="tap card" data-tap="${c.name}">
-      <div class="tap-head"><span class="mono">${String.fromCharCode(65 + i)}</span><b>${esc(labels[i])}</b></div>
-      <canvas height="42" data-tapwave="${c.name}"></canvas>
-      <button class="mini-play" data-tapplay="${c.name}"><span class="play-icon"></span> play</button>
-    </div>`).join("");
-  state.taps.clips.forEach((c) => drawWave($(`[data-tapwave="${c.name}"]`), state.taps.peaks[c.name], "#7c2b26", "#fbf7ee", "rgba(27,25,22,.12)"));
-  $$("[data-tapplay]").forEach((b) => b.addEventListener("click", () => {
-    tapAudio.src = `assets/audio/${b.dataset.tapplay}.mp3`;
-    tapAudio.currentTime = 0;
-    tapAudio.play().catch(() => {});
-  }));
-}
-
-function buildSimilarity() {
-  const draw = () => {
-    const M = state.similarity.matrices[state.simModel];
-    const labels = state.similarity.labels;
-    if (!M) { $("#simMatrix").innerHTML = `<p class="prose">Matrix unavailable.</p>`; return; }
-    const flat = M.flat();
-    const lo = Math.min(...flat), hi = Math.max(...flat);
-    const color = (v) => {
-      const t = (v - lo) / (hi - lo || 1);
-      const a = [244, 239, 228], b = [124, 43, 38];
-      return `rgb(${a.map((x, i) => Math.round(x + (b[i] - x) * t)).join(",")})`;
-    };
-    let html = `<div class="sim-grid" style="grid-template-columns:88px repeat(4,1fr)">`;
-    html += `<div></div>${labels.map((l) => `<div class="sim-head mono">${esc(l)}</div>`).join("")}`;
-    M.forEach((row, i) => {
-      html += `<div class="sim-row-label mono">${esc(labels[i])}</div>`;
-      row.forEach((v, j) => {
-        const t = (v - lo) / (hi - lo || 1);
-        html += `<div class="sim-cell" style="background:${color(v)};color:${t > 0.6 ? "#f4efe4" : "#1b1916"}">${v.toFixed(2)}</div>`;
-      });
-    });
-    html += `</div>`;
-    $("#simMatrix").innerHTML = html;
-    const notes = {
-      dsp_rich: "The hand-built baseline puts the two mug taps closest, at 0.96, and a soft mug tap against the metal bowl furthest, at 0.56.",
-      beats_iter3: "BEATs also puts the mug taps closest, at 0.98. The lowest other pair is 0.87, so the grid is compressed.",
-      eat_pretrain: "EAT sits between 0.96 and 0.99. The mug pair is the closest, and the material differences are almost gone.",
-      usad2_small: "USAD puts the mug taps closest, at 0.97, and spreads the other pairs more than EAT and less than the baseline.",
-    };
-    $("#simTitle").textContent = { dsp_rich: "DSP baseline", beats_iter3: "BEATs iter3", eat_pretrain: "EAT pretrain", usad2_small: "USAD2-small" }[state.simModel];
-    $("#simNote").textContent = `${notes[state.simModel]} Colour is the rank inside this grid. The numbers are cosine similarity.`;
-    $$("#simTabs .tab").forEach((b) => b.classList.toggle("active", b.dataset.sim === state.simModel));
-  };
-  $$("#simTabs .tab").forEach((b) => b.addEventListener("click", () => { state.simModel = b.dataset.sim; draw(); }));
-  draw();
-}
-
-/* ---------------------------------------------------------------- mixer */
-const mixerAudios = {};
-const mixerState = { mix: true, harmonic: true, percussive: true };
-function buildMixer() {
-  const stems = [
-    ["hpss_mix", "mixture", "all causes"],
-    ["hpss_harmonic", "harmonic", "water + room"],
-    ["hpss_percussive", "percussive", "spoon + cup"],
-  ];
-  $("#stems").innerHTML = stems.map(([name, title, sub]) => `
-    <div class="stem" data-stem="${name}">
-      <div class="stem-head">
-        <div><b>${title}</b><span class="mono">${sub}</span></div>
-        <button class="toggle on" data-mute="${name}">on</button>
-      </div>
-      <canvas height="44" data-stemwave="${name}"></canvas>
-    </div>`).join("");
-  stems.forEach(([name]) => {
-    const a = new Audio(`assets/audio/${name}.mp3`);
-    a.preload = "metadata"; a.loop = false;
-    mixerAudios[name] = a;
-    drawWave($(`[data-stemwave="${name}"]`), state.clips[name].peaks, "#2f6f5e", "#fbf7ee", "rgba(27,25,22,.12)");
-  });
-  $$("[data-mute]").forEach((b) => b.addEventListener("click", () => {
-    const k = b.dataset.mute;
-    mixerState[k] = !mixerState[k];
-    mixerAudios[k].volume = mixerState[k] ? 1 : 0;
-    b.textContent = mixerState[k] ? "on" : "muted";
-    b.classList.toggle("on", mixerState[k]);
-  }));
-  $("#mixerPlay").addEventListener("click", () => {
-    const any = Object.values(mixerAudios).some((a) => !a.paused);
-    if (any) { Object.values(mixerAudios).forEach((a) => a.pause()); $("#mixerPlay").classList.remove("playing"); $("#mixerPlay span:last-child").textContent = "Play mix"; return; }
-    const t = 0;
-    Object.values(mixerAudios).forEach((a) => { a.currentTime = t; a.volume = 1; a.play().catch(() => {}); });
-    $("#mixerPlay").classList.add("playing"); $("#mixerPlay span:last-child").textContent = "Pause";
-  });
-}
-
-/* ---------------------------------------------------------------- charts */
-function svgWrap(w, h, body, label = "") {
-  return `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(label)}">${body}</svg>`;
-}
-function arrow(x1, y1, x2, y2, color = "#9a9183") {
-  return `<defs><marker id="ar${x1}${y1}" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="${color}"/></marker></defs>
-  <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="1.4" marker-end="url(#ar${x1}${y1})"/>`;
-}
-function box(x, y, w, h, fill, stroke) {
-  return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="3" fill="${fill}" stroke="${stroke}"/>`;
-}
-function hBars(items, opts) {
-  const {
-    w = 1000, rowH = 30, labelW = 190, pad = 16, max = 1,
-    valueFmt = (v) => fmt(v, 3), color = () => "#7c2b26",
-    chance = null, chanceLabel = "", sort = true,
-  } = opts;
-  const data = sort ? [...items].sort((a, b) => b.value - a.value) : items;
-  const h = pad * 2 + data.length * rowH + 26;
-  const plotW = w - labelW - 78;
-  let b = "";
-  for (let i = 0; i <= 4; i++) {
-    const x = labelW + (i / 4) * plotW;
-    b += `<line x1="${x}" y1="${pad}" x2="${x}" y2="${h - 26}" stroke="#e4dac7"/>`;
-    b += `<text x="${x}" y="${h - 8}" text-anchor="middle" class="svg-mono" fill="#9a9183">${valueFmt((i / 4) * max)}</text>`;
+function drawSpec(cv, spec, playFrac = null) {
+  const { g, w, h } = sizeCanvas(cv);
+  g.imageSmoothingEnabled = true;
+  g.drawImage(specImage(spec), 0, 0, w, h);
+  if (playFrac != null) {
+    g.fillStyle = C.peach; g.fillRect(playFrac * w - 1, 0, 2, h);
   }
-  data.forEach((d, i) => {
-    const y = pad + i * rowH;
-    const bw = Math.max(1.5, (d.value / max) * plotW);
-    b += `<text x="${labelW - 10}" y="${y + 15}" text-anchor="end" class="svg-label">${esc(d.label)}</text>`;
-    b += `<rect x="${labelW}" y="${y + 5}" width="${bw}" height="${rowH - 12}" fill="${color(d)}" rx="1"/>`;
-    b += `<text x="${labelW + bw + 7}" y="${y + 16}" class="svg-mono" fill="#6f675c">${valueFmt(d.value)}</text>`;
-  });
-  if (chance != null) {
-    const x = labelW + (chance / max) * plotW;
-    b += `<line x1="${x}" y1="${pad - 4}" x2="${x}" y2="${h - 26}" stroke="#7c2b26" stroke-dasharray="3 3"/>`;
-    b += `<text x="${x + 4}" y="${pad - 6}" class="svg-mono" fill="#7c2b26">${chanceLabel || "chance"}</text>`;
-  }
-  return svgWrap(w, h, b, opts.aria || "");
 }
+function svg(w, h, body, label) { return `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(label)}">${body}</svg>`; }
 
-function buildG1() {
-  const encs = state.results.encoders;
-  const metrics = [
-    { key: "g1_f1", label: "F1 · change", chance: 0.2, note: "5-way" },
-    { key: "g1_f2", label: "F2 · count", chance: 0.1, note: "exact count" },
-    { key: "g1_f4", label: "F4 · properties", chance: 0.5, note: "joint" },
-  ];
-  const w = 1000, h = 330;
-  let b = "";
-  metrics.forEach((m, ci) => {
-    const x0 = ci * 340 + 10, plotX = x0 + 92, plotW = 190;
-    b += `<text x="${x0}" y="18" class="svg-mono" fill="#7c2b26">${m.label}</text>`;
-    b += `<text x="${x0}" y="34" class="svg-small">${m.note} · chance ${m.chance}</text>`;
-    b += `<line x1="${plotX + m.chance * plotW}" y1="44" x2="${plotX + m.chance * plotW}" y2="${h - 26}" stroke="#7c2b26" stroke-dasharray="3 3"/>`;
-    [...encs].sort((a, z) => z[m.key] - a[m.key]).forEach((e, i) => {
-      const y = 54 + i * 32, bw = Math.max(1, e[m.key] * plotW);
-      b += `<text x="${plotX - 8}" y="${y + 12}" text-anchor="end" class="svg-small">${e.id}</text>`;
-      b += `<rect x="${plotX}" y="${y + 2}" width="${bw}" height="15" fill="${fcolor(e.family)}" opacity=".9" rx="1"/>`;
-      b += `<text x="${plotX + bw + 5}" y="${y + 14}" class="svg-mono" fill="#6f675c">${fmt(e[m.key], 3)}</text>`;
-    });
-  });
-  $("#g1Chart").innerHTML = svgWrap(w, h, b, "G1 results by encoder");
-}
-
-function buildF2() {
-  const items = state.results.encoders.map((e) => ({ label: e.id, value: e.g1_f2, family: e.family }));
-  items.push({ label: "waveform NCC", value: 0.94, family: "dsp" });
-  $("#f2Chart").innerHTML = hBars(items, {
-    w: 520, max: 1, rowH: 26, labelW: 110,
-    color: (d) => d.label === "waveform NCC" ? "#1b1916" : fcolor(d.family),
-    aria: "Counting recurrence by encoder",
-  });
-}
-
-/* ---------------------------------------------------------------- bounce */
-let bounceAudio;
-function buildBounce() {
-  bounceAudio = new Audio("assets/audio/bouncing_ball.mp3");
-  drawBounce(true);
-  $("#bounceHide").addEventListener("click", () => {
-    state.bounceHidden = !state.bounceHidden;
-    $("#bounceHide").textContent = state.bounceHidden ? "show onsets" : "hide onsets";
-    drawBounce(!state.bounceHidden);
-  });
-  $("#bouncePlay").addEventListener("click", () => {
-    if (bounceAudio.paused) bounceAudio.play().catch(() => {});
-    else bounceAudio.pause();
-  });
-}
-function drawBounce(show) {
-  const c = state.clips.bouncing_ball;
-  const cv = $("#bounceWave");
-  drawWave(cv, c.peaks, "#7c2b26", "#fbf7ee", "rgba(27,25,22,.12)");
-  if (!show) return;
-  const g = cv.getContext("2d"), dpr = window.devicePixelRatio || 1;
-  const w = cv.width / dpr, h = cv.height / dpr;
-  g.strokeStyle = "#2f6f5e"; g.lineWidth = 1;
-  state.bounce.onsets.forEach((t) => {
-    const x = (t / c.duration) * w;
-    g.beginPath(); g.moveTo(x, 0); g.lineTo(x, h); g.stroke();
-  });
-}
-
-/* ---------------------------------------------------------------- memory */
-function buildMemory() {
-  const c = state.kettle;
-  const w = 1000, h = 150, labelW = 10, X = (t) => labelW + (t / c.duration) * (w - 20);
-  let b = "";
-  c.stages.forEach((s) => {
-    const x = X(s.start), ww = X(s.end) - x;
-    b += `<rect x="${x}" y="20" width="${ww}" height="46" fill="${STAGE_COLOR[s.kind]}" opacity=".9" rx="2"/>`;
-    const name = stageText(s);
-    if (ww > 80 && name) b += `<text x="${x + 8}" y="49" class="svg-small" fill="#f4efe4">${esc(name)}</text>`;
-    b += `<text x="${x + 4}" y="82" class="svg-mono" fill="#6f675c">${clock(s.start)}</text>`;
-  });
-  // ticks
-  for (let m = 0; m <= 110; m += 20) {
-    b += `<line x1="${X(m)}" y1="92" x2="${X(m)}" y2="100" stroke="#c9bca4"/>`;
-    b += `<text x="${X(m)}" y="116" text-anchor="middle" class="svg-mono" fill="#9a9183">${clock(m)}</text>`;
-  }
-  b += `<line x1="${X(0)}" y1="96" x2="${X(110)}" y2="96" stroke="#c9bca4"/>`;
-  $("#kettleTimeline").innerHTML = svgWrap(w, 130, b, "Kettle state timeline");
-
-  const t = state.results.t1;
-  const typeName = { ago: "how long ago", at: "when", count: "how many", dur: "how long", since: "since when" };
-  const types = Object.entries(t.by_type).map(([k, v]) => ({ label: typeName[k] || k, ours: v.ours, af3: v.af3, n: v.n }));
-  const w2 = 1000, rowH = 34, labelW2 = 210, plotW = 640, h2 = 60 + types.length * rowH + 40;
-  let b2 = "";
-  b2 += `<text x="16" y="18" class="svg-mono" fill="#7c2b26">overall · n = ${t.n}</text>`;
-  [["ours", t.ours, "#2f6f5e"], ["AF3", t.af3, "#7c2b26"], ["constant", t.const, "#c9bca4"]].forEach(([l, v, col], i) => {
-    const y = 30 + i * 24;
-    b2 += `<text x="${labelW2 - 8}" y="${y + 12}" text-anchor="end" class="svg-small">${l}</text>`;
-    b2 += `<rect x="${labelW2}" y="${y + 3}" width="${v * plotW}" height="14" fill="${col}" rx="1"/>`;
-    b2 += `<text x="${labelW2 + v * plotW + 6}" y="${y + 14}" class="svg-mono" fill="#6f675c">${fmt(v, 3)}</text>`;
-  });
-  const y0 = 118;
-  b2 += `<text x="16" y="${y0 - 8}" class="svg-mono" fill="#7c2b26">by question type</text>`;
-  types.forEach((d, i) => {
-    const y = y0 + i * rowH;
-    b2 += `<text x="${labelW2 - 8}" y="${y + 13}" text-anchor="end" class="svg-small">${d.label} · n=${d.n}</text>`;
-    b2 += `<rect x="${labelW2}" y="${y + 2}" width="${d.ours * plotW}" height="11" fill="#2f6f5e" rx="1"/>`;
-    b2 += `<rect x="${labelW2}" y="${y + 16}" width="${d.af3 * plotW}" height="8" fill="#7c2b26" opacity=".8" rx="1"/>`;
-    b2 += `<text x="${labelW2 + d.ours * plotW + 6}" y="${y + 11}" class="svg-mono" fill="#6f675c">${fmt(d.ours, 3)}</text>`;
-  });
-  $("#memoryBars").innerHTML = svgWrap(w2, h2, b2, "Long-horizon memory accuracy");
-}
-
-function buildKettleQuestions() {
-  const qs = state.kettle.questions;
-  const wrap = $("#kettleQuestions");
-  wrap.innerHTML = qs.map((q, i) => `
-    <div class="q" data-i="${i}">
-      <p>${esc(q.q)}</p>
-      <span class="ans">${esc(q.answer)}</span>
-      <button>answer</button>
-    </div>`).join("");
-  $$(".q", wrap).forEach((row) => {
-    row.querySelector("button").addEventListener("click", () => {
-      const on = row.classList.toggle("revealed");
-      row.querySelector("button").textContent = on ? "hide" : "answer";
-      $("#qProgress").textContent = `${$$(".q.revealed", wrap).length} / ${qs.length} answered`;
-    });
-  });
-}
-
-/* ---------------------------------------------------------------- prediction */
-function buildPrediction() {
-  const c = state.kettle;
-  const w = 1000, h = 70, X = (t) => 10 + (t / c.duration) * (w - 20);
-  let b = "";
-  b += `<rect x="${X(0)}" y="12" width="${X(90) - X(0)}" height="34" fill="#dcebe4" stroke="#2f6f5e"/>`;
-  b += `<rect x="${X(90)}" y="12" width="${X(110) - X(90)}" height="34" fill="#f0dfda" stroke="#7c2b26" stroke-dasharray="3 3"/>`;
-  b += `<text x="${X(4)}" y="34" class="svg-small">known: 0:00–1:30</text>`;
-  b += `<text x="${X(92)}" y="34" class="svg-small" fill="#7c2b26">hidden: 1:30–1:50</text>`;
-  b += `<text x="${X(0)}" y="62" class="svg-mono" fill="#9a9183">0:00</text>`;
-  b += `<text x="${X(90)}" y="62" text-anchor="middle" class="svg-mono" fill="#9a9183">1:30</text>`;
-  b += `<text x="${X(110)}" y="62" text-anchor="end" class="svg-mono" fill="#9a9183">1:50</text>`;
-  $("#predictKnown").innerHTML = svgWrap(w, h, b, "Known and hidden regions");
-  $$("[data-pred]").forEach((btn) => btn.addEventListener("click", () => {
-    const out = $("#predictOut");
-    if (btn.dataset.pred === "switches off") {
-      out.textContent = "correct — the auto-off click is at 1:39, then silence.";
-      out.style.background = "#2f6f5e";
-    } else {
-      out.textContent = `not what happened — the kettle ${btn.dataset.pred}, but it switches off at 1:39.`;
-      out.style.background = "#7c2b26";
-    }
+/* ------------------------------------------------------------------ cold open */
+const GUESS = {
+  vacuum: ["You said: a vacuum cleaner", "Hold that thought. You're not the only listener who heard a vacuum cleaner in this recording, and we'll meet the other one later."],
+  tea: ["You said: someone making tea", "Very close. This is the first half of making tea: the kettle, from the moment it's switched on to the moment it switches itself off."],
+  rain: ["You said: rain on a window", "Fair enough. A rolling boil and rain both hiss, because both are thousands of tiny impacts at once. The clicks at the start and the end give the kettle away."],
+  coffee: ["You said: a coffee machine", "Good instinct: a kitchen machine heating water. You'll meet another listener later that made exactly the same guess."],
+};
+let heardMax = 0;
+function buildBlind() {
+  drawBlind();
+  $$("[data-guess]").forEach((b) => b.addEventListener("click", () => {
+    S.guess = b.dataset.guess;
+    const [tag, sub] = GUESS[S.guess];
+    $("#revealTag").textContent = tag;
+    $("#revealSub").textContent = sub;
+    $("#guess").hidden = true;
+    $("#reveal").hidden = false;
+    heardMax = 1; drawBlind();
+    updateCallback();
   }));
 }
-
-/* ---------------------------------------------------------------- speech */
-function buildCremad() {
-  const items = state.results.encoders.map((e) => ({ label: e.id, value: e.cremad, family: e.family }));
-  $("#cremadChart").innerHTML = hBars(items, {
-    w: 520, max: 0.8, rowH: 26, labelW: 110, chance: 0.167, chanceLabel: "chance 0.167",
-    color: (d) => fcolor(d.family), aria: "CREMA-D emotion accuracy",
-  });
+function drawBlind() {
+  drawWave($("#blindWave"), S.k.peaks, { color: C.peach, bg: C.dark, upto: heardMax, ghost: "#26231f" });
+}
+function updateCallback() {
+  const el = $("#guessCallback");
+  const base = "A light switch. Running water. A coffee machine. And then, for most of the boil, a vacuum cleaner.";
+  if (S.guess === "vacuum") el.textContent = `If you guessed a vacuum cleaner at the top, you and the Ear agree. ${base}`;
+  else if (S.guess === "coffee") el.textContent = `If you guessed a coffee machine at the top, so did the Ear, for a while. ${base}`;
+  else el.textContent = base;
 }
 
-/* ---------------------------------------------------------------- cost */
-function buildCost() {
-  const encs = state.results.encoders;
-  const sel = $("#calcEncoder");
-  sel.innerHTML = encs.map((e) => `<option value="${e.id}" ${e.id === "mn10_as" ? "selected" : ""}>${e.id}</option>`).join("");
-  const beats = encs.find((e) => e.id === "beats_iter3");
-  const calc = () => {
-    const hours = Number($("#hours").value);
-    const e = encs.find((x) => x.id === sel.value);
-    $("#hoursOut").textContent = hours;
-    const coreHours = e.rtf_1c * hours * 30.4;
-    $("#coreHours").textContent = coreHours < 10 ? coreHours.toFixed(1) : Math.round(coreHours);
-    $("#shareCore").textContent = `${((coreHours / (24 * 30.4)) * 100).toFixed(1)}%`;
-    $("#vsBeats").textContent = `${(beats.rtf_1c / e.rtf_1c).toFixed(1)}×`;
-  };
-  $("#hours").addEventListener("input", calc);
-  sel.addEventListener("change", calc);
-  calc();
-  buildFrontier();
-}
-
-function buildFrontier() {
-  const encs = state.results.encoders;
-  const w = 1000, h = 400, padL = 64, padR = 30, padT = 30, padB = 48;
-  const xs = (p) => Math.log10(p + 1), xmax = Math.log10(100);
-  const ymin = Math.log10(0.0003), ymax = Math.log10(0.08);
-  const X = (p) => padL + (xs(p) / xmax) * (w - padL - padR);
-  const Y = (r) => padT + (1 - (Math.log10(r) - ymin) / (ymax - ymin)) * (h - padT - padB);
-  let b = "";
-  [0, 0.5, 1, 5, 10, 25, 50, 100].forEach((p) => {
-    const x = X(p);
-    b += `<line x1="${x}" y1="${padT}" x2="${x}" y2="${h - padB}" stroke="#e4dac7"/>`;
-    b += `<text x="${x}" y="${h - padB + 18}" text-anchor="middle" class="svg-mono" fill="#9a9183">${p}M</text>`;
-  });
-  [0.001, 0.003, 0.01, 0.03, 0.07].forEach((r) => {
-    const y = Y(r);
-    b += `<line x1="${padL}" y1="${y}" x2="${w - padR}" y2="${y}" stroke="#e4dac7"/>`;
-    b += `<text x="${padL - 10}" y="${y + 4}" text-anchor="end" class="svg-mono" fill="#9a9183">${r}</text>`;
-  });
-  b += `<text x="${padL}" y="${h - 8}" class="svg-mono" fill="#6f675c">parameters (M, log)</text>`;
-  b += `<text x="14" y="${padT - 10}" class="svg-mono" fill="#6f675c">RTF (log)</text>`;
-  b += `<text x="${padL + 8}" y="${padT + 28}" class="svg-mono" fill="#7c2b26">compact CNNs: 6.8–12.6× faster than BEATs</text>`;
-  encs.forEach((e) => {
-    const x = X(e.params_m), y = Y(e.rtf_1c);
-    const left = ["beats_iter3", "eat_pretrain", "dasheng_base"].includes(e.id);
-    const sel = e.id === state.selectedEncoder;
-    b += `<g class="pt" data-id="${e.id}" style="cursor:pointer">`;
-    b += `<circle cx="${x}" cy="${y}" r="${sel ? 8 : 5.5}" fill="${fcolor(e.family)}" stroke="${sel ? "#1b1916" : "#fbf7ee"}" stroke-width="${sel ? 2 : 1.5}"/>`;
-    b += `<text x="${left ? x - 11 : x + 10}" y="${y + (e.id === "eat_pretrain" ? 14 : e.id === "beats_iter3" ? -8 : 4)}" text-anchor="${left ? "end" : "start"}" class="svg-small" fill="${sel ? "#1b1916" : "#6f675c"}" font-weight="${sel ? 600 : 400}">${e.id}</text>`;
-    b += `<title>${e.id} · ${e.params_m}M · RTF ${e.rtf_1c}</title></g>`;
-  });
-  $("#frontier").innerHTML = svgWrap(w, h, b, "Parameter count versus real-time factor");
-  $$("#frontier .pt").forEach((g) => g.addEventListener("click", () => {
-    state.selectedEncoder = g.dataset.id; buildFrontier();
-  }));
-  buildEncoderCard();
-}
-
-function buildEncoderCard() {
-  const e = state.results.encoders.find((x) => x.id === state.selectedEncoder);
-  const beats = state.results.encoders.find((x) => x.id === "beats_iter3");
-  $("#encoderCard").innerHTML = `
-    <div>
-      <p class="eyebrow">selected encoder</p>
-      <div class="big">${e.id}</div>
-      <p style="margin-top:8px;font-size:12.5px;color:#6f675c">${flabel(e.family)} · ${e.params_m}M params · ${e.dim}-dim</p>
-      <p style="margin-top:12px;font-size:13px;line-height:1.5;color:#6f675c">Click another point to change this row. Real-time factor is one core, fp32. The full table is in the appendix.</p>
-    </div>
-    <div class="kv">
-      <div><span>RTF, 1 core</span><b>${e.rtf_1c}</b></div>
-      <div><span>s / audio hour</span><b>${e.s_per_audio_h_1c}</b></div>
-      <div><span>peak RSS</span><b>${e.rss_gb} GB</b></div>
-      <div><span>speed vs BEATs</span><b>${(beats.rtf_1c / e.rtf_1c).toFixed(1)}×</b></div>
-      <div><span>CREMA-D</span><b>${fmt(e.cremad, 3)}</b></div>
-      <div><span>EPIC dense</span><b>${fmt(e.epic_dense, 3)}</b></div>
-      <div><span>EPIC vocab</span><b>${fmt(e.epic_disc, 3)}</b></div>
-      <div><span>G1 F1 / F2 / F4</span><b>${fmt(e.g1_f1, 3)} / ${fmt(e.g1_f2, 3)} / ${fmt(e.g1_f4, 3)}</b></div>
-    </div>`;
-}
-
-/* ---------------------------------------------------------------- failures */
-const FAILURES = [
-  ["Synthetic drill RL (Gym v1–v3)", "fail", "drills 0.565 → 0.709, STAR-Bench flat or worse", "proxy gain only; killed 2026-11-18"],
-  ["Same-home SSL (ak_ssl1)", "void", "0.746 → 0.783 on the same home", "violates held-out sources; not generalisation"],
-  ["Heart-murmur recipe transfer", "inc", "murmur 0.95–0.96, lung 0.885, valve 0.395", "domain shift broke every method"],
-  ["Short kitchen event heads", "fail", "0.179–0.213 vs linear 0.228", "data-limited at 5 kitchens"],
-  ["Dasheng on short kitchen events", "fail", "0.388 vs BEATs 0.438", "SSL does not rescue a small label set"],
-  ["+AudioSet-Strong aux labels", "fail", "−0.033 on the target", "auxiliary labels hurt"],
-  ["Re-listen when unsure", "fail", "AUC 0.685 vs ear 0.869", "no gain from a second look"],
-  ["Fine-tune to convergence", "inc", "0.466 [0.423, 0.500] vs frozen 0.438", "fold-2 val loss still falling at epoch 4"],
-  ["Embedding recurrence (F2)", "fail", "0.00–0.14 vs NCC 0.940", "keep waveform cross-correlation"],
+/* ------------------------------------------------------------------ kettle views */
+const MOMENTS = [
+  [2.7, "click: switched on", 0], [7, "heating, getting louder", 1], [30, "full boil", 0], [99, "click: switched off", 0, true],
 ];
-function buildFailures() {
-  $("#failureTable").innerHTML = `
-    <thead><tr><th>idea</th><th>verdict</th><th>number</th><th>what replaced it</th></tr></thead>
-    <tbody>${FAILURES.map(([idea, v, num, rep]) => `<tr>
-      <td style="white-space:normal;max-width:280px">${idea}</td>
-      <td><span class="verdict ${v}">${v}</span></td>
-      <td class="num" style="text-align:left;white-space:normal;max-width:260px">${num}</td>
-      <td style="text-align:left;white-space:normal;max-width:260px;color:#6f675c">${rep}</td></tr>`).join("")}</tbody>`;
+const SPEC_NOTES = [
+  [2.7, 6, "the click: a thin vertical line"], [8, 80, "heating: low rumble builds"], [45, 55, "the boil: every pitch at once"], [99, 28, "click off: the water settles", true],
+];
+const LOG = [
+  [2.7, "kettle switched on"], [12.7, "kettle boiling"], [99.0, "kettle switched off"],
+];
+function buildKettleViews() {
+  $("#momentPins").innerHTML = MOMENTS.map(([t, l, row, r]) =>
+    `<div class="pin ${r ? "right" : ""}" data-t="${t}" style="left:${(t / S.k.duration) * 100}%"><span style="top:${row * 28 - 4}px">${l}</span></div>`).join("");
+  $("#specNotes").innerHTML = SPEC_NOTES.map(([t, y, l, r]) =>
+    `<div class="spec-note" data-t="${t}" style="${r ? `right:${100 - (t / S.k.duration) * 100 + 0.6}%` : `left:${(t / S.k.duration) * 100 + 0.6}%`};top:${y}%">${l}</div>`).join("");
+  $$("[data-kettle]").forEach((b) => b.addEventListener("click", () => toggleKettle(b.dataset.kettle)));
+  $$("[data-view] .kwave, [data-view] .kspec").forEach((cv) => cv.addEventListener("click", (e) => {
+    const r = cv.getBoundingClientRect();
+    activeView = cv.closest("[data-view]").dataset.view;
+    kettle.currentTime = ((e.clientX - r.left) / r.width) * kDur();
+    syncKettle();
+  }));
+  drawKettleViews();
+  syncKettle();
+}
+function drawKettleViews() {
+  $$("[data-view]").forEach((v) => {
+    const isDark = v.classList.contains("dark");
+    $$(".kwave", v).forEach((cv) => drawWave(cv, S.k.peaks, { color: isDark ? C.sage : C.blood, bg: isDark ? C.dark : C.card }));
+    $$(".kspec", v).forEach((cv) => drawSpec(cv, S.k.spec));
+  });
+}
+let lastLogT = -1;
+function syncKettle() {
+  if (!S.k) return;
+  const t = kettle.currentTime || 0, d = kDur(), f = Math.min(1, t / d), playing = !kettle.paused;
+  // blind
+  $("#blindTime").textContent = `${clock(t)} / ${clock(d)}`;
+  if (f > heardMax && activeView === "blind") { heardMax = f; drawBlind(); }
+  $$("[data-kettle]").forEach((b) => b.classList.toggle("on", playing && b.dataset.kettle === activeView));
+  $$("[data-view]").forEach((v) => {
+    const mine = v.dataset.view === activeView;
+    v.classList.toggle("playing", mine && (playing || t > 0));
+    $$(".ph", v).forEach((p) => (p.style.left = `calc(${f * 100}% - 1px)`));
+    const tm = $("[data-time]", v); if (tm) tm.textContent = `${clock(t)} / ${clock(d)}`;
+  });
+  $$(".pin").forEach((p) => p.classList.toggle("lit", activeView === "moments" && t >= Number(p.dataset.t)));
+  $$(".spec-note").forEach((p) => { const pt = Number(p.dataset.t); p.classList.toggle("lit", t >= pt - 1 && t <= pt + (pt === 45 ? 50 : 8)); });
+  // ear
+  const now = S.k.events.filter((e) => t >= e.start && t <= e.end).map((e) => EAR_WORDS[e.label] || e.text);
+  if ($("#earNow")) $("#earNow").textContent = activeView === "ear" && t > 0 ? (now.length ? `Ear hears: ${[...new Set(now)].join(" + ")}` : "Ear hears: nothing") : "";
+  // log
+  if (Math.abs(t - lastLogT) > 0.05) { lastLogT = t; drawLog(t); }
+}
+function drawLog(t) {
+  const el = $("#log"); if (!el) return;
+  const done = LOG.filter(([lt]) => t >= lt);
+  const key = done.length + (t >= 99 ? "s" : "");
+  if (el.dataset.key === key) return;
+  el.dataset.key = key;
+  if (!done.length) { el.innerHTML = `<li class="wait">press play: entries appear as they happen</li>`; return; }
+  el.innerHTML = done.map(([lt, l]) => `<li><time>${clockT(lt)}</time><span>${l}</span></li>`).join("") +
+    (t >= 99 ? `<li class="sum"><time></time><span>boiled for 86.3 s · on for 96.3 s in total · switched on once</span></li>` : "");
 }
 
-/* ---------------------------------------------------------------- sources / tables */
-function buildSources() {
-  $("#sourcesTable").innerHTML = `
-    <thead><tr><th>recording</th><th>author</th><th>licence</th><th>source</th></tr></thead>
-    <tbody>${state.sources.map((s) => `<tr>
-      <td>${esc(s.title)}</td><td>${esc(s.author)}</td>
-      <td><span class="verdict ${s.license === "CC0" ? "pass" : "inc"}">${s.license}</span></td>
-      <td class="num" style="text-align:left"><a href="${s.url}" target="_blank" rel="noopener">freesound ${s.freesound}</a></td></tr>`).join("")}</tbody>`;
+/* ------------------------------------------------------------------ zoom */
+let samples = null, zoomCenter = 40;
+async function buildZoom() {
+  const ov = $("#zoomOverview"), sl = $("#zoomSlider");
+  const draw = () => drawZoom();
+  sl.addEventListener("input", draw);
+  ov.addEventListener("click", (e) => {
+    const r = ov.getBoundingClientRect();
+    zoomCenter = ((e.clientX - r.left) / r.width) * S.k.duration;
+    draw();
+  });
+  draw();
+  const io = new IntersectionObserver(async (es) => {
+    if (!es[0].isIntersecting) return;
+    io.disconnect();
+    try {
+      const buf = await fetch("assets/audio/kettle.mp3").then((r) => r.arrayBuffer());
+      const ctx = new OfflineAudioContext(1, 16000, 16000);
+      const ab = await ctx.decodeAudioData(buf);
+      samples = ab.getChannelData(0);
+      draw();
+    } catch { $("#zoomRead").textContent = "This browser couldn't decode the audio, so the deepest zoom isn't available."; }
+  }, { rootMargin: "400px" });
+  io.observe($("#zoom"));
+}
+function zoomWindow() {
+  const z = Number($("#zoomSlider").value) / 1000, D = S.k.duration;
+  const span = D * Math.pow(0.004 / D, z);
+  let a = zoomCenter - span / 2;
+  a = Math.max(0, Math.min(D - span, a));
+  return [a, a + span];
+}
+function drawZoom() {
+  const [a, b] = zoomWindow(), D = S.k.duration, span = b - a;
+  // overview
+  const ov = $("#zoomOverview");
+  drawWave(ov, S.k.peaks, { color: "#c9b9a6", bg: C.card });
+  const g0 = ov.getContext("2d"), w0 = ov.clientWidth, h0 = Number(ov.getAttribute("height"));
+  g0.fillStyle = "rgba(124,43,38,.18)"; g0.strokeStyle = C.blood; g0.lineWidth = 1.5;
+  const x0 = (a / D) * w0, ww = Math.max(3, (span / D) * w0);
+  g0.fillRect(x0, 0, ww, h0); g0.strokeRect(x0 + 0.5, 0.5, ww - 1, h0 - 1);
+  // main
+  const cv = $("#zoomCanvas"), { g, w, h } = sizeCanvas(cv), mid = h / 2, amp = h * 0.44;
+  g.fillStyle = C.card; g.fillRect(0, 0, w, h);
+  g.strokeStyle = C.line; g.beginPath(); g.moveTo(0, mid); g.lineTo(w, mid); g.stroke();
+  const n = Math.round(span * 16000);
+  if (!samples) {
+    // peaks only
+    const P = S.k.peaks, N = P.hi.length;
+    const i0 = Math.floor((a / D) * N), i1 = Math.ceil((b / D) * N);
+    g.fillStyle = C.blood;
+    for (let i = i0; i < i1; i++) {
+      const x = ((i - i0) / (i1 - i0)) * w, y1 = mid + (P.lo[i] / 127) * amp, y2 = mid + (P.hi[i] / 127) * amp;
+      g.fillRect(x, Math.min(y1, y2), Math.max(1, w / (i1 - i0)), Math.max(1, Math.abs(y2 - y1)));
+    }
+  } else {
+    const s0 = Math.floor(a * 16000), s1 = Math.min(samples.length, s0 + n);
+    let peak = 0;
+    for (let i = s0; i < s1; i += Math.max(1, Math.floor(n / 4000))) peak = Math.max(peak, Math.abs(samples[i]));
+    const scale = amp / Math.max(0.02, peak);
+    if (n > w * 1.5) {
+      g.fillStyle = C.blood;
+      for (let px = 0; px < w; px++) {
+        const i0 = s0 + Math.floor((px / w) * n), i1 = s0 + Math.floor(((px + 1) / w) * n);
+        let lo = 1, hi = -1;
+        for (let i = i0; i < i1 && i < s1; i++) { const v = samples[i]; if (v < lo) lo = v; if (v > hi) hi = v; }
+        if (hi < lo) continue;
+        g.fillRect(px, mid - hi * scale, 1, Math.max(1, (hi - lo) * scale));
+      }
+    } else {
+      g.strokeStyle = "rgba(124,43,38,.45)"; g.lineWidth = 1.2; g.beginPath();
+      for (let i = s0; i < s1; i++) { const x = ((i - s0) / n) * w, y = mid - samples[i] * scale; i === s0 ? g.moveTo(x, y) : g.lineTo(x, y); }
+      g.stroke();
+      if (n < w / 3) {
+        g.fillStyle = C.blood;
+        for (let i = s0; i < s1; i++) {
+          const x = ((i - s0) / n) * w, y = mid - samples[i] * scale;
+          g.strokeStyle = "rgba(124,43,38,.25)"; g.beginPath(); g.moveTo(x, mid); g.lineTo(x, y); g.stroke();
+          g.beginPath(); g.arc(x, y, 3.2, 0, 7); g.fill();
+        }
+      }
+    }
+  }
+  const secs = span >= 1 ? `${span.toFixed(span >= 10 ? 0 : 1)} seconds` : span >= 0.01 ? `${(span * 1000).toFixed(0)} milliseconds` : `${(span * 1000).toFixed(1)} milliseconds`;
+  const deep = n < w / 3 && samples ? " · each dot is one measurement, 1/16,000 of a second apart" : "";
+  $("#zoomRead").textContent = `${clock(a)} to ${clock(b)} · ${secs} · ${n.toLocaleString()} numbers${deep}`;
+}
 
-  const rows = [
-    ["EPIC-KITCHENS-100", "kitchen identity · held-out kitchens", "9853 clips · 21 classes"],
-    ["CREMA-D", "vocal prosody · actor-disjoint", "1066 test clips · 6 classes"],
-    ["SINS", "one home · days 4–7 held out", "~1 week · 15 classes"],
-    ["RealDESED", "stitched timelines · consensus labels", "20 timelines · 30 min each"],
-    ["AudioSet-Strong", "distillation source · eval novel events", "200 eval events"],
-    ["PhysioNet / CirCor", "closed medical line · failure ledger", "268 balanced recordings"],
+/* ------------------------------------------------------------------ switchers (codec, hpss) */
+const switchers = [];
+function buildSwitcher(o) {
+  const tabs = $$(`${o.tabs} .tab`);
+  const sw = { ...o, cur: tabs[0].dataset[o.attr], audio: null };
+  sw.audio = makeAudio(`assets/audio/${sw.cur}.mp3`);
+  ["pause", "ended", "seeked"].forEach((e) => sw.audio.addEventListener(e, () => syncSwitchers()));
+  tabs.forEach((b) => b.addEventListener("click", () => {
+    const was = !sw.audio.paused, t = sw.audio.currentTime;
+    sw.cur = b.dataset[o.attr];
+    tabs.forEach((x) => x.classList.toggle("on", x === b));
+    sw.audio.src = `assets/audio/${sw.cur}.mp3`;
+    sw.audio.addEventListener("loadedmetadata", () => { sw.audio.currentTime = t; if (was) sw.audio.play().catch(() => {}); }, { once: true });
+    $(o.meta).textContent = o.metas[sw.cur];
+    drawSwitcher(sw);
+  }));
+  $(o.play).addEventListener("click", () => { if (sw.audio.paused) sw.audio.play().catch(() => {}); else sw.audio.pause(); });
+  $(o.canvas).addEventListener("click", (e) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    sw.audio.currentTime = ((e.clientX - r.left) / r.width) * S.clips[sw.cur].duration;
+    drawSwitcher(sw);
+  });
+  $(o.canvas).style.cursor = "pointer";
+  switchers.push(sw);
+  drawSwitcher(sw);
+}
+function drawSwitcher(sw) {
+  const c = S.clips[sw.cur], t = sw.audio.currentTime || 0;
+  drawSpec($(sw.canvas), c.spec, t > 0 ? Math.min(1, t / c.duration) : null);
+  $(sw.play).classList.toggle("on", !sw.audio.paused);
+}
+function syncSwitchers() { switchers.forEach(drawSwitcher); }
+
+/* ------------------------------------------------------------------ taps + similarity */
+function buildTaps() {
+  const a = makeAudio(null);
+  $("#taps").innerHTML = S.taps.clips.map((c, i) => `
+    <button class="tap" data-tap="${c.name}" aria-label="Play ${esc(c.label)}">
+      <div class="tap-letter">${"ABCD"[i]}</div>
+      <div class="tap-name">${esc(c.label)}</div>
+      <canvas height="36" data-tapwave="${c.name}"></canvas>
+    </button>`).join("");
+  drawTaps();
+  $$("[data-tap]").forEach((b) => b.addEventListener("click", () => {
+    a.src = `assets/audio/${b.dataset.tap}.mp3`; a.play().catch(() => {});
+    b.classList.add("hit"); setTimeout(() => b.classList.remove("hit"), 150);
+  }));
+}
+function drawTaps() { S.taps.clips.forEach((c) => drawWave($(`[data-tapwave="${c.name}"]`), S.taps.peaks[c.name], { color: C.blood, bg: C.card })); }
+
+const SIM_NOTES = {
+  dsp_rich: "The recipe hears materials clearly. The two mug taps are almost identical (0.96), and the soft mug tap and the metal bowl are the furthest apart of any pair (0.56).",
+  beats_iter3: "BEATs puts the mug taps closest (0.98), but everything is bunched between 0.87 and 0.93. It hears a difference, just a smaller one.",
+  eat_pretrain: "EAT barely separates anything: every pair scores 0.96 or higher. To EAT, a china mug and a metal bowl are nearly the same sound.",
+  usad2_small: "USAD sits in between. The mug taps are closest (0.97), and the other pairs land around 0.90 to 0.93.",
+};
+function buildSim() {
+  let cur = "dsp_rich";
+  const draw = () => {
+    const M = S.similarity.matrices[cur], L = ["A", "B", "C", "D"];
+    const off = M.flatMap((r, i) => r.filter((_, j) => j !== i)), lo = Math.min(...off), hi = Math.max(...off);
+    const col = (v, i, j) => {
+      if (i === j) return ["#e9e1d2", C.faint];
+      const t = (v - lo) / (hi - lo || 1), a = [246, 238, 226], b = [124, 43, 38];
+      return [`rgb(${a.map((x, k) => Math.round(x + (b[k] - x) * t)).join(",")})`, t > 0.55 ? "#fff" : C.ink];
+    };
+    $("#simMatrix").innerHTML = `<div class="sim-grid"><div></div>${L.map((l) => `<div class="h">${l}</div>`).join("")}${
+      M.map((row, i) => `<div class="r">${L[i]}</div>${row.map((v, j) => { const [bg, fg] = col(v, i, j); return `<div class="sim-cell" style="background:${bg};color:${fg}">${v.toFixed(2)}</div>`; }).join("")}`).join("")}</div>`;
+    $("#simNote").textContent = SIM_NOTES[cur];
+    $$("#simTabs .tab").forEach((b) => b.classList.toggle("on", b.dataset.sim === cur));
+  };
+  $$("#simTabs .tab").forEach((b) => b.addEventListener("click", () => { cur = b.dataset.sim; draw(); }));
+  draw();
+}
+
+/* ------------------------------------------------------------------ ear */
+function buildEar() {
+  const D = S.k.duration, P = (t) => `${(Math.min(t, D) / D) * 100}%`;
+  const ev = S.k.events.filter((e) => e.start < D);
+  const order = ["light_switch", "running_water", "coffee_machine", "vacuum_cleaner"].filter((l) => ev.some((e) => e.label === l));
+  let html = `<div class="row-label truth">what happened</div><div class="row-track truth" data-seek>${
+    S.k.stages.map((s) => `<i style="left:${P(s.start)};width:calc(${P(s.end)} - ${P(s.start)});background:${STAGE[s.kind].c}">${s.end - s.start > 9 ? `<b>${STAGE[s.kind].name}</b>` : ""}</i>`).join("")}<div class="ph"></div></div>
+    <div class="divider"></div>`;
+  html += order.map((l) => `<div class="row-label">“${EAR_WORDS[l]}”</div><div class="row-track" data-seek>${
+    ev.filter((e) => e.label === l).map((e) => `<i style="left:${P(e.start)};width:max(4px,calc(${P(e.end)} - ${P(e.start)}))" title="${clockT(e.start)}–${clockT(Math.min(e.end, D))}"></i>`).join("")}<div class="ph"></div></div>`).join("");
+  $("#earRows").innerHTML = html;
+  $$("#earRows [data-seek]").forEach((tr) => tr.addEventListener("click", (e) => {
+    const r = tr.getBoundingClientRect();
+    activeView = "ear";
+    kettle.currentTime = ((e.clientX - r.left) / r.width) * kDur();
+    syncKettle();
+  }));
+}
+
+/* ------------------------------------------------------------------ skills */
+function barPanel({ title, sub, rows, max = 1, floor = null, floorLabel = "" }) {
+  const W = 400, rowH = 26, top = 8, labelW = 104, H = top + rows.length * rowH + 22;
+  const X = (v) => labelW + (v / max) * (W - labelW - 44);
+  let b = "";
+  rows.forEach((r, i) => {
+    const y = top + i * rowH;
+    b += `<text x="${labelW - 8}" y="${y + 15}" text-anchor="end" font-size="12" fill="${r.strong ? C.ink : C.muted}" font-weight="${r.strong ? 600 : 400}">${esc(r.label)}</text>`;
+    b += `<rect x="${labelW}" y="${y + 4}" width="${Math.max(2, X(r.v) - labelW)}" height="15" rx="2" fill="${r.color}" opacity="${r.strong ? 1 : 0.85}"/>`;
+    b += `<text x="${X(r.v) + 6}" y="${y + 15}" font-size="12" font-family="IBM Plex Mono" fill="${C.ink}">${r.v.toFixed(2)}</text>`;
+  });
+  if (floor != null) {
+    b += `<line x1="${X(floor)}" x2="${X(floor)}" y1="${top}" y2="${top + rows.length * rowH}" stroke="${C.ink}" stroke-dasharray="3 3" opacity=".55"/>`;
+    b += `<text x="${X(floor) + 4}" y="${H - 6}" font-size="11" fill="${C.muted}">${floorLabel}</text>`;
+  }
+  b += `<line x1="${labelW}" x2="${labelW}" y1="${top}" y2="${top + rows.length * rowH}" stroke="${C.line}"/>`;
+  return `<div class="chart"><p class="chart-title">${title}</p><p class="chart-sub">${sub}</p>${svg(W, H, b, title)}</div>`;
+}
+function buildSkills() {
+  const E = S.results.encoders;
+  const rows = (k) => E.map((e) => ({ label: ENC[e.id][0], v: e[k], color: FAM[ENC[e.id][1]] }));
+  const count = rows("g1_f2");
+  count.push({ label: "Waveform trick", v: S.results.g1.f2_ncc, color: C.ink, strong: true });
+  $("#skillsChart").innerHTML = `<div class="skills">${
+    barPanel({ title: "Did it notice the change?", sub: "345 clips · 1 is perfect", rows: rows("g1_f1"), floor: 0.192, floorLabel: "luck" })}${
+    barPanel({ title: "Could it count the repeats?", sub: "same clips · 1 is perfect", rows: count, floor: 0.13, floorLabel: "luck" })}</div>`;
+}
+
+/* ------------------------------------------------------------------ bounce */
+let bounceShown = false;
+function buildBounce() {
+  const a = makeAudio("assets/audio/bouncing_ball.mp3");
+  $("#bouncePlay").addEventListener("click", () => { a.currentTime = 0; a.play().catch(() => {}); });
+  a.addEventListener("play", () => $("#bouncePlay").classList.add("on"));
+  a.addEventListener("ended", () => $("#bouncePlay").classList.remove("on"));
+  $("#bounceShow").addEventListener("click", () => {
+    bounceShown = !bounceShown;
+    $("#bounceShow").textContent = bounceShown ? "hide the answer" : "show the answer";
+    $("#bounceAnswer").hidden = !bounceShown;
+    drawBounce();
+  });
+  drawBounce();
+}
+function drawBounce() {
+  const c = S.clips.bouncing_ball, cv = $("#bounceWave");
+  drawWave(cv, c.peaks, { color: C.blood, bg: C.card });
+  if (!bounceShown) return;
+  const g = cv.getContext("2d"), w = cv.clientWidth, h = Number(cv.getAttribute("height"));
+  const xs = S.bounce.onsets.map((t) => (t / c.duration) * w), lastX = xs[xs.length - 1];
+  let prev = -99;
+  xs.forEach((x, i) => {
+    g.strokeStyle = C.teal; g.lineWidth = 1.5; g.beginPath(); g.moveTo(x, 14); g.lineTo(x, h); g.stroke();
+    const isLast = i === xs.length - 1;
+    if (isLast || (x - prev > 16 && lastX - x > 16)) {
+      g.fillStyle = C.teal; g.font = "600 11px Inter"; g.textAlign = "center"; g.fillText(i + 1, Math.max(5, x), 11); prev = x;
+    }
+  });
+}
+
+/* ------------------------------------------------------------------ diary */
+function buildDiary() {
+  const D = S.k.duration, st = S.k.stages;
+  $("#diaryStrip").innerHTML = st.map((s) => `<div class="seg" style="width:${((s.end - s.start) / D) * 100}%;background:${STAGE[s.kind].c}">${s.end - s.start > 9 ? STAGE[s.kind].name : ""}</div>`).join("") + `<div class="hl" id="diaryHl"></div>`;
+  $("#diaryStrip").addEventListener("click", (e) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    activeView = "diary"; kettle.currentTime = ((e.clientX - r.left) / r.width) * kDur(); syncKettle();
+  });
+  const HOW = [
+    ["boiling ended − boiling started = 1:39.0 − 0:12.7", 12.7, 99],
+    ["the first “switched on” entry", 2.7, 12.7],
+    ["the last “switched off” entry", 99, 110],
+    ["count the “switched on” entries", 2.7, 12.7],
+    ["look up which entry covers 0:30", 12.7, 99],
+    ["look up which entry covers 1:45", 99, 110],
+    ["switched off − switched on = 1:39.0 − 0:02.7", 2.7, 99],
   ];
-  $("#dataTable").innerHTML = rows.map(([a, b, c]) => `<div class="data-row"><div><b style="font-weight:500">${a}</b><div style="font-size:11.5px;color:#6f675c">${b}</div></div><span>${c}</span></div>`).join("");
+  $("#questions").innerHTML = S.k.questions.map((q, i) => `<button class="q" data-q="${i}">${esc(q.q)}<span class="a">${esc(q.answer)}</span><span class="how"></span></button>`).join("");
+  $$("#questions .q").forEach((b) => b.addEventListener("click", () => {
+    const [how, a, z] = HOW[b.dataset.q];
+    b.classList.add("open"); $(".how", b).textContent = how;
+    const hl = $("#diaryHl");
+    hl.style.left = `${(a / D) * 100}%`; hl.style.width = `${((z - a) / D) * 100}%`; hl.classList.add("on");
+  }));
 }
 
-function buildAllTable() {
-  const rows = [...state.results.encoders].sort((a, b) => a.params_m - b.params_m);
-  const best = (k) => Math.max(...rows.map((r) => r[k]));
-  const B = { cremad: best("cremad"), dense: best("epic_dense"), disc: best("epic_disc"), f1: best("g1_f1"), f4: best("g1_f4") };
-  $("#allTable").innerHTML = `
-    <thead><tr><th>encoder</th><th>family</th><th>params</th><th>dim</th><th>RTF 1c</th><th>s/h 1c</th><th>RSS GB</th><th>CREMA-D</th><th>EPIC dense</th><th>EPIC vocab</th><th>G1 F1</th><th>G1 F2</th><th>G1 F4</th></tr></thead>
-    <tbody>${rows.map((r) => `<tr><td>${r.id}</td><td class="dim" style="text-align:left">${flabel(r.family)}</td>
-      <td class="num">${r.params_m}</td><td class="num">${r.dim}</td><td class="num">${r.rtf_1c}</td>
-      <td class="num">${r.s_per_audio_h_1c}</td><td class="num">${r.rss_gb}</td>
-      <td class="num ${r.cremad === B.cremad ? "best" : ""}">${fmt(r.cremad, 3)}</td>
-      <td class="num ${r.epic_dense === B.dense ? "best" : ""}">${fmt(r.epic_dense, 3)}</td>
-      <td class="num ${r.epic_disc === B.disc ? "best" : ""}">${fmt(r.epic_disc, 3)}</td>
-      <td class="num ${r.g1_f1 === B.f1 ? "best" : ""}">${fmt(r.g1_f1, 3)}</td>
-      <td class="num">${fmt(r.g1_f2, 3)}</td>
-      <td class="num ${r.g1_f4 === B.f4 ? "best" : ""}">${fmt(r.g1_f4, 3)}</td></tr>`).join("")}</tbody>`;
+/* ------------------------------------------------------------------ memory */
+function buildMemory() {
+  const T = S.results.t1;
+  const groups = [
+    ["When did it happen?", T.by_type.at], ["How long did it last?", T.by_type.dur], ["How long since it last happened?", T.by_type.since],
+    ["How long ago was it?", T.by_type.ago], ["How many times?", T.by_type.count], ["All 298 questions", { ours: T.ours, af3: T.af3, const: T.const, n: T.n }, true],
+  ];
+  const series = [["ours", "The diary", C.teal], ["af3", "Audio Flamingo 3", C.blood], ["const", "Same answer each time", "#c9bca4"]];
+  const W = 640, labelW = 226, bh = 11, gap = 3, gh = series.length * (bh + gap) + 16, top = 34, H = top + groups.length * gh + 4;
+  const X = (v) => labelW + v * (W - labelW - 46);
+  let b = "";
+  series.forEach(([, l, c], i) => {
+    const x = labelW + [0, 100, 236][i];
+    b += `<rect x="${x}" y="6" width="11" height="11" rx="2" fill="${c}"/><text x="${x + 17}" y="15.5" font-size="12" fill="${C.muted}">${l}</text>`;
+  });
+  groups.forEach(([label, d, strong], gi) => {
+    const y = top + gi * gh;
+    if (strong) b += `<line x1="0" x2="${W}" y1="${y - 6}" y2="${y - 6}" stroke="${C.line}"/>`;
+    b += `<text x="${labelW - 12}" y="${y + 17}" text-anchor="end" font-size="13" fill="${C.ink}" font-weight="${strong ? 600 : 400}">${label}</text>`;
+    b += `<text x="${labelW - 12}" y="${y + 32}" text-anchor="end" font-size="11" fill="${C.faint}">${d.n} questions</text>`;
+    series.forEach(([k, , c], si) => {
+      const yy = y + si * (bh + gap);
+      b += `<rect x="${labelW}" y="${yy}" width="${Math.max(2, X(d[k]) - labelW)}" height="${bh}" rx="2" fill="${c}"/>`;
+      b += `<text x="${X(d[k]) + 5}" y="${yy + 9.5}" font-size="11" font-family="IBM Plex Mono" fill="${C.ink}">${d[k].toFixed(2)}</text>`;
+    });
+  });
+  $("#memoryChart").innerHTML = `<div class="chart"><p class="chart-title">A week in one home: questions about days 4 to 7</p>${svg(W, H, b, "Memory question scores")}</div>`;
 }
 
-boot().catch((e) => {
-  console.error(e);
-  document.body.insertAdjacentHTML("afterbegin", `<div style="background:#7c2b26;color:#fff;padding:10px 16px;font:12px monospace">Asset load failed: ${esc(e.message)}. Serve over http, not file://.</div>`);
-});
+/* ------------------------------------------------------------------ cost */
+function buildCost() {
+  const E = Object.fromEntries(S.results.encoders.map((e) => [e.id, e]));
+  const rows = [
+    ["Smallest tagger", E.mn04_as.rtf_1c, C.blood],
+    ["Compact tagger (the Ear's size)", E.mn10_as.rtf_1c, C.blood],
+    ["Large model (BEATs)", E.beats_iter3.rtf_1c, C.teal],
+    ["Full diary system", S.results.t4.rtf_1c, C.ink],
+  ];
+  const fmtT = (h) => { const m = Math.round(h * 60); return m < 60 ? `${m} min` : `${Math.floor(m / 60)} h ${m % 60} min`; };
+  const W = 640, labelW = 210, rowH = 44, top = 26, H = top + rows.length * rowH + 20;
+  const X = (hrs) => labelW + (hrs / 24) * (W - labelW - 10);
+  let b = `<text x="${labelW}" y="14" font-size="11" fill="${C.faint}">0 h</text><text x="${W - 10}" y="14" text-anchor="end" font-size="11" fill="${C.faint}">24 h: a whole day of audio</text>`;
+  rows.forEach(([l, rtf, c], i) => {
+    const y = top + i * rowH, hrs = rtf * 24;
+    b += `<text x="${labelW - 12}" y="${y + 15}" text-anchor="end" font-size="13" fill="${C.ink}">${l}</text>`;
+    b += `<rect x="${labelW}" y="${y + 2}" width="${W - labelW - 10}" height="18" rx="3" fill="#f2ece0"/>`;
+    b += `<rect x="${labelW}" y="${y + 2}" width="${Math.max(2, X(hrs) - labelW)}" height="18" rx="3" fill="${c}"/>`;
+    b += `<text x="${X(hrs) + 8}" y="${y + 15.5}" font-size="12" font-family="IBM Plex Mono" fill="${C.ink}">${fmtT(hrs)} · ${(rtf * 100).toFixed(1)}% of a core</text>`;
+  });
+  $("#costChart").innerHTML = `<div class="chart"><p class="chart-title">Processor time to listen to one day</p>${svg(W, H, b, "Compute cost per day")}</div>`;
+}
+
+/* ------------------------------------------------------------------ appendix */
+const FAILURES = [
+  ["Synthetic listening drills (RL)", "fail", "drills 0.565 → 0.709; STAR-Bench flat or worse", "Gains on the drills only."],
+  ["Same-home self-supervised training", "void", "0.746 → 0.783 on the same home", "That home wasn't held out, so it isn't generalisation."],
+  ["Heart-murmur recipe transfer", "inconclusive", "murmur 0.95–0.96, lung 0.885, valve 0.395", "The domain shift broke every method."],
+  ["Heads for short kitchen events", "fail", "0.179–0.213 vs linear 0.228", "Limited by data from five kitchens."],
+  ["Dasheng on short kitchen events", "fail", "0.388 vs BEATs 0.438", "Self-supervision didn't rescue a small label set."],
+  ["Adding AudioSet-Strong labels", "fail", "−0.033 on the target", "The extra labels hurt."],
+  ["Re-listen when unsure", "fail", "AUC 0.685 vs Ear 0.869", "No gain from a second look."],
+  ["Fine-tune to convergence", "inconclusive", "0.466 [0.423, 0.500] vs frozen 0.438", "Fold-2 validation loss was still falling at epoch 4."],
+  ["Counting with embeddings", "fail", "0.00–0.14 vs waveform 0.940", "Kept waveform cross-correlation."],
+  ["Novelty alarm", "fail", "40.9 false alarms a day; hit rate 0.51 at 10 dB", "Not usable as an always-on alert."],
+];
+function buildTables() {
+  const E = S.results.encoders;
+  const cols = [["params_m", "size (M)", 1, null], ["rtf_1c", "speed", 4, "min"], ["g1_f1", "notice", 3, "max"], ["g1_f2", "count", 2, null],
+    ["g1_f4", "describe the change", 3, "max"], ["cremad", "voice emotion", 3, "max"], ["epic_dense", "kitchen", 3, "max"]];
+  const best = Object.fromEntries(cols.map(([k, , , m]) => [k, m === "max" ? Math.max(...E.map((e) => e[k])) : m === "min" ? Math.min(...E.map((e) => e[k])) : null]));
+  $("#allTable").innerHTML = `<thead><tr><th>listener</th><th>model</th>${cols.map((c) => `<th>${c[1]}</th>`).join("")}</tr></thead><tbody>${
+    E.map((e) => `<tr><td>${ENC[e.id][0]}</td><td><code>${e.id}</code></td>${cols.map(([k, , d]) => `<td class="n ${e[k] === best[k] ? "best" : ""}">${e[k].toFixed(d)}</td>`).join("")}</tr>`).join("")}</tbody>`;
+  $("#failTable").innerHTML = `<thead><tr><th>idea</th><th>verdict</th><th>number</th><th>note</th></tr></thead><tbody>${
+    FAILURES.map((r) => `<tr>${r.map((c) => `<td>${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody>`;
+  $("#srcTable").innerHTML = `<thead><tr><th>recording</th><th>author</th><th>licence</th></tr></thead><tbody>${
+    S.sources.map((s) => `<tr><td><a href="${s.url}">${esc(s.title)}</a></td><td>${esc(s.author)}</td><td>${esc(s.license)}</td></tr>`).join("")}</tbody>`;
+}
+
+/* ------------------------------------------------------------------ misc */
+function wireProgress() {
+  const bar = $("#progress");
+  const on = () => { const h = document.documentElement.scrollHeight - innerHeight; bar.style.width = `${h > 0 ? (scrollY / h) * 100 : 0}%`; };
+  addEventListener("scroll", on, { passive: true }); on();
+}
+function redrawAll() {
+  drawBlind(); drawKettleViews(); drawZoom(); syncSwitchers(); drawTaps(); drawBounce();
+}
+
+boot();

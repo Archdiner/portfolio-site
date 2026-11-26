@@ -1,6 +1,8 @@
 # What a Kettle Knows — plan and debrief
 
-**Status:** wireframe v0.3. Hero, opening and sections 01–02 now have real prose; sections
+**Status:** v0.4 narrative rewrite; see [STORYBOARD.md](STORYBOARD.md) for the current flow. The section table below is the v0.3 wireframe and is kept for history.
+
+Previous status: wireframe v0.3. Hero, opening and sections 01–02 now have real prose; sections
 03–15 and the appendix are still bracketed. Branch: `blog/what-a-kettle-knows`. Public
 build: <https://what-a-kettle-knows.vercel.app>.
 
