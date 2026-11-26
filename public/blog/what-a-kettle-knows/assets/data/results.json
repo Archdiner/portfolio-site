@@ -216,10 +216,9 @@
   "af3": 0.188,
   "ours": 0.869,
   "const": 0.262,
-  "ci": [
-   0.628,
-   0.735
-  ],
+  "ours_minus_af3": 0.681,
+  "ours_minus_af3_ci95": [0.628, 0.735],
+  "ci_note": "95% paired bootstrap of ours minus Audio Flamingo on the 298 items. Not an interval for 0.869 or for 0.188.",
   "by_type": {
    "ago": {
     "af3": 0.0,
