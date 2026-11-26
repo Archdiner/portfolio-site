@@ -1,0 +1,23 @@
+{
+ "sr": 16000,
+ "clips": [
+  {
+   "name": "reference",
+   "label": "Kitchen, 12:00-14:00",
+   "duration": 120,
+   "audio": "assets/audio/reference.mp3"
+  },
+  {
+   "name": "other_home_a",
+   "label": "Home B, 05:00-07:00",
+   "duration": 120,
+   "audio": "assets/audio/other_home_a.mp3"
+  },
+  {
+   "name": "other_home_b",
+   "label": "Home C, 02:00-04:00",
+   "duration": 120,
+   "audio": "assets/audio/other_home_b.mp3"
+  }
+ ]
+}
