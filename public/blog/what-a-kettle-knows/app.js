@@ -31,31 +31,34 @@ async function boot() {
   S.k = S.clips.kettle;
 
   initAudio();
-  buildBlind();
+  const run = (sel, fn) => { if ($(sel)) fn(); };
+  run("#blind", buildBlind);
   buildKettleViews();
-  buildZoom();
-  buildSwitcher({ tabs: "#codecTabs", attr: "codec", play: "#codecPlay", canvas: "#codecSpec", meta: "#codecMeta",
-    metas: { codec_original: "16,000 numbers a second", codec_8khz: "8,000 numbers a second · phone quality", codec_4khz: "nothing above 4,000 Hz" } });
-  buildSwitcher({ tabs: "#hpssTabs", attr: "stem", play: "#hpssPlay", canvas: "#hpssSpec", meta: "#hpssMeta",
-    metas: { hpss_mix: "cup, spoon and hot water · 0:14", hpss_harmonic: "the horizontal stripes: water and room", hpss_percussive: "the vertical lines: spoon and cup" } });
-  buildTaps();
-  buildSim();
-  buildEar();
-  if ($("#skillsChart")) buildSkills();
-  buildBounce();
-  buildProbe();
-  buildPatches();
-  buildTiny();
-  buildFlip();
-  buildCurve();
-  buildReal();
-  buildDiary();
-  if ($("#memoryChart")) buildMemory();
-  if ($("#costChart")) buildCost();
+  run("#zoom", buildZoom);
+  run("#codecTabs", () => buildSwitcher({ tabs: "#codecTabs", attr: "codec", play: "#codecPlay", canvas: "#codecSpec", meta: "#codecMeta",
+    metas: { codec_original: "16,000 numbers a second", codec_8khz: "8,000 numbers a second · phone quality", codec_4khz: "nothing above 4,000 Hz" } }));
+  run("#hpssTabs", () => buildSwitcher({ tabs: "#hpssTabs", attr: "stem", play: "#hpssPlay", canvas: "#hpssSpec", meta: "#hpssMeta",
+    metas: { hpss_mix: "cup, spoon and hot water · 0:14", hpss_harmonic: "the horizontal stripes: water and room", hpss_percussive: "the vertical lines: spoon and cup" } }));
+  run("#taps", buildTaps);
+  run("#simTabs", buildSim);
+  run("#earRows", buildEar);
+  run("#skillsChart", buildSkills);
+  run("#bounceWave", buildBounce);
+  run("#probeCurve", buildProbe);
+  run("#patches", buildPatches);
+  run("#tiny", buildTiny);
+  run("#flipChart", buildFlip);
+  run("#curve", buildCurve);
+  run("#realMaps", buildReal);
+  run("#diaryStrip", buildDiary);
+  run("#memoryChart", buildMemory);
+  run("#costChart", buildCost);
+  run(".bench", buildBenches);
+  run("#report", buildReport);
   buildTables();
   wireProgress();
   const plan = $("#plan");
-  new IntersectionObserver((es, io) => { if (es[0].isIntersecting) { plan.classList.add("go"); io.disconnect(); } }, { threshold: 0.4 }).observe(plan);
+  if (plan) new IntersectionObserver((es, io) => { if (es[0].isIntersecting) { plan.classList.add("go"); io.disconnect(); } }, { threshold: 0.4 }).observe(plan);
   addEventListener("resize", debounce(redrawAll, 150));
 }
 
@@ -154,10 +157,10 @@ function svg(w, h, body, label) { return `<svg viewBox="0 0 ${w} ${h}" role="img
 
 /* ------------------------------------------------------------------ cold open */
 const GUESS = {
-  vacuum: ["You said: a vacuum cleaner", "Hold that thought. You're not the only listener who heard a vacuum cleaner in this recording, and we'll meet the other one later."],
+  vacuum: ["You said: a vacuum cleaner", "Hold that thought. In part two, one of my own models hears a vacuum cleaner in this recording too."],
   tea: ["You said: someone making tea", "Very close. This is the first half of making tea: the kettle, from the moment it's switched on to the moment it switches itself off."],
   rain: ["You said: rain on a window", "Fair enough. A rolling boil and rain both hiss, because both are thousands of tiny impacts at once. The clicks at the start and the end give the kettle away."],
-  coffee: ["You said: a coffee machine", "Good instinct: a kitchen machine heating water. You'll meet another listener later that made exactly the same guess."],
+  coffee: ["You said: a coffee machine", "Good instinct: a kitchen machine heating water. In part two, one of my own models makes the same guess."],
 };
 let heardMax = 0;
 function buildBlind() {
@@ -178,6 +181,7 @@ function drawBlind() {
 }
 function updateCallback() {
   const el = $("#guessCallback");
+  if (!el) return;
   const base = "A light switch. Running water. A coffee machine. And then, for most of the boil, a vacuum cleaner.";
   if (S.guess === "vacuum") el.textContent = `If you guessed a vacuum cleaner at the top, you and the Ear agree. ${base}`;
   else if (S.guess === "coffee") el.textContent = `If you guessed a coffee machine at the top, so did the Ear, for a while. ${base}`;
@@ -592,7 +596,7 @@ function buildTables() {
   const best = Object.fromEntries(cols.map(([k, , , m]) => [k, m === "max" ? Math.max(...E.map((e) => e[k])) : m === "min" ? Math.min(...E.map((e) => e[k])) : null]));
   $("#allTable").innerHTML = `<thead><tr><th>listener</th><th>model</th>${cols.map((c) => `<th>${c[1]}</th>`).join("")}</tr></thead><tbody>${
     E.map((e) => `<tr><td>${ENC[e.id][0]}</td><td><code>${e.id}</code></td>${cols.map(([k, , d]) => `<td class="n ${e[k] === best[k] ? "best" : ""}">${e[k].toFixed(d)}</td>`).join("")}</tr>`).join("")}</tbody>`;
-  $("#failTable").innerHTML = `<thead><tr><th>idea</th><th>verdict</th><th>number</th><th>note</th></tr></thead><tbody>${
+  if ($("#failTable")) $("#failTable").innerHTML = `<thead><tr><th>idea</th><th>verdict</th><th>number</th><th>note</th></tr></thead><tbody>${
     FAILURES.map((r) => `<tr>${r.map((c) => `<td>${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody>`;
   $("#srcTable").innerHTML = `<thead><tr><th>recording</th><th>author</th><th>licence</th></tr></thead><tbody>${
     S.sources.map((s) => `<tr><td><a href="${s.url}">${esc(s.title)}</a></td><td>${esc(s.author)}</td><td>${esc(s.license)}</td></tr>`).join("")}</tbody>`;
@@ -605,7 +609,8 @@ function wireProgress() {
   addEventListener("scroll", on, { passive: true }); on();
 }
 function redrawAll() {
-  drawBlind(); drawKettleViews(); drawZoom(); syncSwitchers(); drawTaps(); drawBounce(); drawProbe(); drawPatches(); drawTiny(); drawRealMap(); drawSelf(); drawRepeats();
+  [drawBlind, drawKettleViews, drawZoom, syncSwitchers, drawTaps, drawBounce, drawProbe, drawPatches, drawTiny, drawRealMap, drawSelf, drawRepeats, redrawBenches]
+    .forEach((f) => { try { f(); } catch (e) { /* that figure isn't on this page */ } });
 }
 
 
@@ -620,7 +625,7 @@ async function buildPatches() {
   $$("#patchSteps .tab").forEach((b) => b.addEventListener("click", () => {
     PT.step = b.dataset.step; if (PT.step !== "hide") PT.goal = null;
     $$("#patchSteps .tab").forEach((x) => x.classList.toggle("on", x === b));
-    $("#patchGoals").hidden = PT.step !== "hide";
+    if ($("#patchGoals")) $("#patchGoals").hidden = PT.step !== "hide";
     $$("#patchGoals .tab").forEach((x) => x.classList.remove("on"));
     drawPatches();
   }));
@@ -846,13 +851,17 @@ async function buildReal() {
   RM.d = await json("real_models");
   $("#realLegend").innerHTML = RM.d.maps.classes.map((c, i) => `<span><i style="background:${TINY_COLORS[i]}"></i>${esc(c)}</span>`).join("");
   $$("#realTabs .tab").forEach((b) => b.addEventListener("click", () => { RM.map = b.dataset.m; $$("#realTabs .tab").forEach((x) => x.classList.toggle("on", x === b)); drawRealMap(); }));
-  $$("#simModelTabs .tab").forEach((b) => b.addEventListener("click", () => { RM.self = b.dataset.m; $$("#simModelTabs .tab").forEach((x) => x.classList.toggle("on", x === b)); drawSelf(); }));
+  if ($("#simModelTabs")) $$("#simModelTabs .tab").forEach((b) => b.addEventListener("click", () => { RM.self = b.dataset.m; $$("#simModelTabs .tab").forEach((x) => x.classList.toggle("on", x === b)); drawSelf(); }));
   $$("#repMode .tab").forEach((b) => b.addEventListener("click", () => { RM.mode = b.dataset.mode; $$("#repMode .tab").forEach((x) => x.classList.toggle("on", x === b)); drawRepeats(); }));
+  if ($("#repeats")) {
   RM.audio = makeAudio("assets/audio/repeats.mp3");
   $("#repPlay").addEventListener("click", () => { if (RM.audio.paused) RM.audio.play().catch(() => {}); else RM.audio.pause(); });
   RM.audio.addEventListener("play", () => { $("#repPlay").classList.add("on"); const tick = () => { drawRepeatHead(); if (!RM.audio.paused) requestAnimationFrame(tick); }; tick(); });
   RM.audio.addEventListener("pause", () => $("#repPlay").classList.remove("on"));
-  drawRealMap(); drawSelf(); drawRepeats();
+  }
+  drawRealMap();
+  if ($("#selfSim")) drawSelf();
+  if ($("#repeats")) drawRepeats();
 }
 function drawRealMap() {
   if (!RM.d) return;
@@ -921,6 +930,137 @@ function drawRepeatHead() {
   drawRepeats();
   const f = RM.audio.currentTime / RM.d.repeats.duration;
   $$("[data-rep]").forEach((cv) => { const g = cv.getContext("2d"); g.fillStyle = C.blood; g.fillRect(f * cv.clientWidth - 1, 0, 2, cv.clientHeight); });
+}
+
+
+/* ------------------------------------------------------------------ the lab: five objectives */
+const LAB = { d: null, st: {} };
+const LAB_CODE = {
+  labels: { hide: "nothing", loss: ["loss = cross_entropy(guess_label(z), window.label)"] },
+  redraw: { hide: "random(patches, 75%)", loss: ["loss = mse(redraw(z, hidden), hidden.pixels)"] },
+  code: { hide: "random(patches, 75%)", loss: ["loss = cross_entropy(name_code(z, hidden), codebook[hidden])"] },
+  teacher: { hide: "random(patches, 75%)", loss: ["target = teacher(patches)[hidden]   # sees everything", "loss = mse(guess(z, hidden), target)", "teacher.follow(encoder, slowly=0.99)"] },
+  expert: { hide: "nothing", loss: ["loss = mse(copy(z), dasheng(window))   # a real model"] },
+};
+function labCode(goal) {
+  const c = LAB_CODE[goal], hideChanged = c.hide === "nothing";
+  const line = (t, chg) => `<span class="${chg ? "chg" : ""}">${esc(t)}${chg ? '  <b class="arrow">◀</b>' : ""}</span>`;
+  return [
+    line("for window in kitchen_sounds:", false),
+    line("    patches = cut_into_patches(window)   # 8 of them", false),
+    line(`    hidden  = ${c.hide}`, hideChanged),
+    line("    z = encoder(patches, hide=hidden)    # two numbers", false),
+    ...c.loss.map((t) => line("    " + t, true)),
+    line("    loss.backward(); optimizer.step()", false),
+  ].join("\n");
+}
+function benchPatch(cv, goal) {
+  const d = PT.data; if (!d || !cv) return;
+  const { g, w, h } = sizeCanvas(cv);
+  g.fillStyle = C.card; g.fillRect(0, 0, w, h);
+  const bar = 20, gap = 2, ph = (h - bar - 4 - gap * (d.nF - 1)) / d.nF, pw = (w - gap * (d.nT - 1)) / d.nT;
+  const hideOn = !["labels", "expert"].includes(goal);
+  const tmp = document.createElement("canvas"); tmp.width = 3; tmp.height = 3; const tg = tmp.getContext("2d");
+  let sum = [0, 0, 0], n = 0;
+  for (let f = 0; f < d.nF; f++) for (let t = 0; t < d.nT; t++) {
+    const x = t * (pw + gap), y = f * (ph + gap), sx = t * d.pt, sy = f * d.pf, hid = hideOn && PT.hidden[f][t];
+    tg.clearRect(0, 0, 3, 3); tg.drawImage(PT.img, sx, sy, d.pt, d.pf, 0, 0, 1, 1);
+    const px = tg.getImageData(0, 0, 1, 1).data; sum[0] += px[0]; sum[1] += px[1]; sum[2] += px[2]; n++;
+    if (!hid) { g.imageSmoothingEnabled = true; g.drawImage(PT.img, sx, sy, d.pt, d.pf, x, y, pw, ph); continue; }
+    if (goal === "redraw") {
+      tg.drawImage(PT.img, sx, sy, d.pt, d.pf, 0, 0, 3, 3); g.drawImage(tmp, 0, 0, 3, 3, x, y, pw, ph);
+      g.strokeStyle = C.peach; g.setLineDash([3, 2]); g.strokeRect(x + 0.5, y + 0.5, pw - 1, ph - 1); g.setLineDash([]);
+    } else if (goal === "code") {
+      const c = d.codes[f][t]; g.fillStyle = CODE_COLORS[c % CODE_COLORS.length]; g.fillRect(x, y, pw, ph);
+      g.fillStyle = "#fff"; g.font = `600 ${Math.min(11, pw * 0.45)}px "IBM Plex Mono"`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(c, x + pw / 2, y + ph / 2);
+    } else {
+      g.fillStyle = `rgb(${px[0]},${px[1]},${px[2]})`; g.fillRect(x, y, pw, ph);
+      g.strokeStyle = C.ink; g.lineWidth = 1.2; g.strokeRect(x + 1, y + 1, pw - 2, ph - 2); g.lineWidth = 1;
+    }
+  }
+  const y = h - bar; g.font = "500 11px Inter"; g.textBaseline = "middle"; g.textAlign = "left";
+  const seg = (x0, x1, col, txt) => { g.fillStyle = col; g.fillRect(x0, y, x1 - x0 - 2, bar); g.fillStyle = "#fff"; g.fillText(txt, x0 + 6, y + bar / 2); };
+  if (goal === "labels") { const cut = (12.7 / 24) * w; seg(0, cut, C.gold, "label: kettle heating"); seg(cut, w, C.teal, "label: kettle boiling"); }
+  else if (goal === "expert") seg(0, w, C.ink, "target: what the real Dasheng outputs for each window");
+  else if (goal === "teacher") seg(0, w, `rgb(${Math.round(sum[0] / n)},${Math.round(sum[1] / n)},${Math.round(sum[2] / n)})`, "the teacher sees every patch; its view of the hidden ones is the target");
+  else if (goal === "code") seg(0, w, "#5f5a52", "target: the code word of each hidden patch, from a small codebook");
+  else seg(0, w, "#5f5a52", "target: the hidden patches themselves, pixel by pixel");
+}
+async function buildBenches() {
+  const benches = $$(".bench"); if (!benches.length) return;
+  if (!PT.data) {
+    PT.data = await json("patches");
+    PT.img = specImage({ b64: PT.data.b64, frames: PT.data.frames, n_mels: PT.data.n_mels });
+    let seed = 11; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    PT.hidden = Array.from({ length: PT.data.nF }, () => Array.from({ length: PT.data.nT }, () => rnd() < 0.75));
+  }
+  LAB.d = await json("lab");
+  if ($("#labLegend")) $("#labLegend").innerHTML = LAB.d.classes.map((c, i) => `<span><i style="background:${TINY_COLORS[i]}"></i>${esc(c)}</span>`).join("");
+  benches.forEach((el) => {
+    const goal = el.dataset.bench, run = LAB.d.runs[goal], last = run.frames.length - 1;
+    const st = (LAB.st[goal] = { i: 0, timer: null, view: null, el, run, last });
+    $(".bench-code", el).innerHTML = labCode(goal);
+    const sl = $("input[type=range]", el), btn = $(".bench-ctl .play", el);
+    sl.max = last;
+    sl.addEventListener("input", () => { stopBench(st); st.i = Number(sl.value); drawBench(goal); });
+    btn.addEventListener("click", () => {
+      if (st.timer) { stopBench(st); return; }
+      if (st.i >= last) { st.i = 0; st.view = null; }
+      btn.classList.add("on");
+      st.timer = setInterval(() => { st.i++; drawBench(goal); if (st.i >= last) stopBench(st); }, 90);
+    });
+    new IntersectionObserver((es, io) => { if (es[0].isIntersecting) { io.disconnect(); if (st.i === 0) btn.click(); } }, { threshold: 0.55 }).observe(el);
+    benchPatch($(".bench-patch", el), goal);
+    drawBench(goal);
+  });
+}
+function stopBench(st) { clearInterval(st.timer); st.timer = null; $(".bench-ctl .play", st.el).classList.remove("on"); }
+function drawBench(goal) {
+  const st = LAB.st[goal]; if (!st) return;
+  const pts = st.run.frames[st.i], cv = $(".bench-map", st.el), { g, w, h } = sizeCanvas(cv);
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  pts.forEach(([x, y]) => { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); });
+  const tgt = { x0, x1, y0, y1 }, v = st.view && st.i > 0 ? st.view : { ...tgt };
+  for (const q of ["x0", "x1", "y0", "y1"]) v[q] += (tgt[q] - v[q]) * 0.45;
+  st.view = v;
+  const pad = 14, sx = (x) => pad + ((x - v.x0) / (v.x1 - v.x0 || 1)) * (w - 2 * pad), sy = (y) => pad + ((y - v.y0) / (v.y1 - v.y0 || 1)) * (h - 2 * pad);
+  g.fillStyle = "#faf6ee"; g.fillRect(0, 0, w, h);
+  pts.forEach(([x, y], i) => { g.fillStyle = TINY_COLORS[LAB.d.labels[i]]; g.globalAlpha = 0.85; g.beginPath(); g.arc(sx(x), sy(y), 3.6, 0, 7); g.fill(); });
+  g.globalAlpha = 1;
+  const step = Math.round((st.i / st.last) * LAB.d.steps);
+  $(".bench-step", st.el).textContent = `step ${step} of ${LAB.d.steps}`;
+  $("input[type=range]", st.el).value = st.i;
+  $(".bench-score", st.el).innerHTML = st.i >= st.last
+    ? `<b>${Math.round(st.run.acc * 100)}%</b> of new windows land closest to their own kind.`
+    : `training… error ${st.run.loss[st.i].toFixed(3)}`;
+}
+function redrawBenches() { Object.keys(LAB.st).forEach((g) => { benchPatch($(".bench-patch", LAB.st[g].el), g); drawBench(g); }); }
+
+/* ------------------------------------------------------------------ report card */
+function buildReport() {
+  const E = Object.fromEntries(S.results.encoders.map((e) => [e.id, e])), M = S.similarity.matrices;
+  const rows = [
+    ["The recipe", "no training", "dsp_rich"], ["AudioSet tagger", "labels, plus copying a bigger model", "mn10_as"],
+    ["Dasheng", "redraw what's hidden", "dasheng_base"], ["BEATs", "name the code", "beats_iter3"],
+    ["EAT", "match a teacher", "eat_pretrain"], ["USAD", "copy two experts", "usad2_small"],
+  ];
+  const cols = [
+    ["china vs metal", "lower = hears the difference", (id) => (M[id] ? M[id][0][3] : null), "min"],
+    ["kitchen events", "EPIC-SOUNDS", (id) => E[id].epic_dense, "max"],
+    ["emotion in a voice", "CREMA-D", (id) => E[id].cremad, "max"],
+    ["notices a change", "345 clips", (id) => E[id].g1_f1, "max"],
+    ["size", "million parameters", (id) => E[id].params_m, null],
+  ];
+  const cell = (v, col) => {
+    if (v == null) return `<td class="rc-na">not measured</td>`;
+    if (!col[3]) return `<td class="rc-n">${v < 1 ? "0" : v.toFixed(v < 10 ? 1 : 0)}</td>`;
+    const vals = rows.map((r) => col[2](r[2])).filter((x) => x != null), lo = Math.min(...vals), hi = Math.max(...vals);
+    let t = (v - lo) / (hi - lo || 1); if (col[3] === "min") t = 1 - t;
+    const bg = `rgba(47,111,94,${(0.08 + t * 0.72).toFixed(2)})`;
+    return `<td class="rc-n" style="background:${bg};color:${t > 0.6 ? "#fff" : C.ink}">${v.toFixed(2)}</td>`;
+  };
+  $("#report").innerHTML = `<p class="chart-title">The report card</p><div class="table-scroll"><table class="rc"><thead><tr><th>listener</th><th>trained by</th>${cols.map((c) => `<th>${c[0]}<small>${c[1]}</small></th>`).join("")}</tr></thead><tbody>${
+    rows.map(([name, how, id]) => `<tr><td><b>${name}</b></td><td class="rc-how">${how}</td>${cols.map((c) => cell(c[2](id), c)).join("")}</tr>`).join("")}</tbody></table></div>`;
 }
 
 boot();

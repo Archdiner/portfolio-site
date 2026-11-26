@@ -8,22 +8,24 @@ footnotes and the appendix.
 The idea it builds towards: hearing is mostly solved, and remembering is not. A useful
 listener keeps a diary of what turned on and off, and when, instead of captioning clips.
 
-## v0.7: how models learn to hear (current)
+## v0.8: two posts (current)
 
-**Audience:** technical readers who have never looked inside an audio model (CS/ML students,
-engineers), plus researchers and recruiters skimming for understanding.
-**Message:** a model hears what its training taught it to care about. The results are evidence
-for that, not the point.
+**Part 1 (index.html): How machines learn to hear.** Message: a model hears what its training
+objective taught it to care about. Shown first in a controlled lab, then checked against real models.
 
-| Part | Sections | Widgets |
-|---|---|---|
-| Opening | Cold open, how did you know, the thesis, the pipeline | Blind guess, moments, five-step pipeline |
-| Sound to tokens | 1.76 million numbers, how much can we throw away, a picture of sound, smooth and sharp, cutting into patches | Zoom, codec ladder, spectrogram, HPSS, patches (cut, hide, redraw/code/teacher) |
-| Six ways to train | Recipe, AudioSet taggers, Dasheng, BEATs, EAT, USAD | Six cards |
-| Training shapes hearing | Watching training happen (tiny model, labels vs masked redraw), taps, rank flip | Live-trained tiny model, similarity grids, kitchen vs emotion slope chart |
-| From hearing to doing | Fine-tuning the Ear, finding repeats, audio-language models, Whisper | Real training curve, Ear rows, live waveform matching, skills chart, ALM diagram |
-| Remembering | Keeping a diary | Kettle diary, SINS memory chart |
-| Close | What each listener knows, bitter lesson, SSL and diffusion next | Final log |
+| Section | Figure |
+|---|---|
+| Cold open, how did you know, the two skills | Blind guess, moments |
+| The path every model follows | Five-step pipeline |
+| 1.76 million numbers, a picture of sound, patches | Zoom, spectrogram, patches (whole / cut / hide) |
+| Five ways to teach a model to hear | Family tree (learns? labels? what does it predict?) |
+| The lab: one tiny transformer, five objectives, one changed line each | Five benches: patch view + code with the changed line + live training map (build/lab.py) |
+| Do the real models agree? | Real EAT / Dasheng / USAD maps, taps grid, report card |
+| What none of them can tell you | Hand-off to part 2 |
+
+**Part 2 (part-2/index.html, draft): What a kettle knows.** Hearing is not keeping time: the Ear's
+fine-tune and vacuum cleaner, finding repeats (dips not peaks), window position, Audio Flamingo,
+Whisper, the diary. Not yet restructured.
 
 ## Voice rules
 
