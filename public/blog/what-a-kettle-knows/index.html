@@ -177,10 +177,10 @@
 </figure>
 
 <section class="col">
-  <p>That last step, hiding most of the patches, is how most modern audio models teach themselves with no labels at all. You can't fill in a missing chunk of boil without learning what a boil sounds like. But "fill it in" can mean several different things, and that's where models start to differ.</p>
+  <p>The figure's last step, hiding most of the patches, is how most modern audio models teach themselves with no labels at all. You can't fill in a missing chunk of boil without learning what a boil sounds like. But "fill it in" can mean several different things, and that's where models start to differ.</p>
 
   <h2>Meet the listeners</h2>
-  <p>Before asking anything about time, it's worth meeting the models. Most of the ones here taught themselves: nobody ever told them what any sound was. They learned by hiding most of the patches and guessing what was missing, and what exactly they guess differs from model to model. Sorted by how they were trained:</p>
+  <p>Before asking anything about time, it's worth meeting the models. Most of the ones here taught themselves that way: nobody ever told them what any sound was. What exactly they guess about the hidden patches differs from model to model. Sorted by how they were trained:</p>
 </section>
 
 <figure class="wide">
@@ -188,7 +188,7 @@
     <div class="tq">Does it learn at all?</div>
     <div class="tb"><span class="tn">no</span><div class="tl gold">The recipe<small>70 hand-picked measurements</small></div></div>
     <div class="tq">Does it get labels?</div>
-    <div class="tb"><span class="tn">yes</span><div class="tl blood">AudioSet taggers<small>two million labelled YouTube clips</small></div></div>
+    <div class="tb"><span class="tn">yes</span><div class="tl blood">AudioSet taggers<small>two million labeled YouTube clips</small></div></div>
     <div class="tq">No labels. So what does it predict about the patches it can't see?</div>
     <div class="tb four">
       <div class="tl teal">the pixels<small>Dasheng</small></div>
@@ -204,7 +204,7 @@
   <p>You only need to remember three of these. <b>EAT</b>, which learned by matching a slowly updated copy of itself, is the one I'll teach to name sounds. <b>Dasheng</b>, which learned by redrawing hidden patches, and <b>USAD</b>, which learned by copying two expert models, turn out to hear repeats best. (How each one learns, and why it matters, is the subject of the <a href="learning-to-hear/">next post</a>.)</p>
 
   <h2>Teaching it fifteen words</h2>
-  <p>None of these models outputs a name out of the box, and a name is the first thing a home listener needs. To get names, you <em>fine-tune</em>: add a small layer on top that turns the model's view of each moment into labels, then keep training on labelled examples. I did this with EAT, on RealDESED, a set of real home recordings labelled with fifteen everyday sounds: footsteps, dishes, doors, a light switch, a vacuum, a coffee machine and the rest. It took under an hour on one rented GPU.</p>
+  <p>None of these models outputs a name out of the box, and a name is the first thing a home listener needs. To get names, you <em>fine-tune</em>: add a small layer on top that turns the model's view of each moment into labels, then keep training on labeled examples. I did this with EAT, on RealDESED, a set of real home recordings labeled with fifteen everyday sounds: footsteps, dishes, doors, a light switch, a vacuum, a coffee machine and the rest. It took under an hour on one rented GPU.</p>
   <p>On recordings it hadn't trained on, it gets about nine in ten right. That score is per ten-second window, asking only whether each sound happened at all, not exactly when, which will matter in a moment. I'll call the result the Ear. Here's everything it reported while listening to our kettle:</p>
 </section>
 
@@ -226,7 +226,7 @@
   <p>The more interesting part is what it <em>didn't</em> say. After about 53 seconds it goes quiet, even though the kettle keeps boiling for another 45. And nothing in its output connects the click at the start to the quiet at the end, or says that one object was on the whole time.</p>
 
   <h2>Counting</h2>
-  <p>Some of the questions from the start are really about counting. How many times did the kettle boil today? How many times did someone open the fridge? So before building anything, I tested whether the models could count a sound that repeats.</p>
+  <p>Some of the questions from the start are really about counting. How many times did the kettle boil today? How many times did someone open the fridge? So I tested whether the models could count a sound that repeats.</p>
   <p>The test works like this. Take a two-second example of the sound, turn it into a single summary by averaging the model's view of it, then slide that summary along the recording and count the moments where the two match.<sup><a href="#fn3" id="r3">3</a></sup> You can try the same idea on the raw waveform of a bouncing ball:</p>
 </section>
 
@@ -300,7 +300,7 @@
 </figure>
 
 <section class="col">
-  <p>The spectrogram's map follows the sound: one big block while the boil is loudest, then another once the roar dulls and the kettle switches off. EAT and Dasheng show a grid instead. Their outputs remember where each moment sat inside its ten-second stretch: during the steady boil, two EAT frames from the same spot in different stretches are 0.98 alike, against 0.89 for frames half a stretch apart. Transformers are told each patch's position so they can keep track of order, and some of that survives all the way to the output. For naming a sound it barely matters. For matching moments against each other, it's noise.</p>
+  <p>The spectrogram's map follows the sound: one big block while the boil is loudest, then another once the roar dulls and the kettle switches off. EAT and Dasheng show a grid instead. Their outputs remember where each moment sat inside its ten-second stretch: during the steady boil, two EAT outputs from the same spot in different stretches are 0.98 alike, against 0.89 for outputs half a stretch apart. Transformers are told each patch's position so they can keep track of order, and some of that survives all the way to the output. For naming a sound it barely matters. For matching moments against each other, it's noise.</p>
   <p>Reading from a middle layer instead doesn't fix it. In EAT's middle layer the effect is even stronger (0.94 against 0.55). What does fix it is simple: work out each position's average and subtract it, which flattens the grid completely.</p>
   <p>One re-creation isn't proof, so I rebuilt the counting test at a bigger scale: 120 clips of the boil with a short sound repeated two to eight times. I tuned each counting rule on half of them and scored it on the other half:</p>
 </section>
@@ -355,7 +355,7 @@
 </figure>
 
 <section class="col">
-  <p>Back in the week-long home recording, a listener built on BEATs, frozen, with a small layer on top for household activities, wrote the diary itself. The same 298 questions were then answered from that diary:</p>
+  <p>Back in the week-long home recording, a listener built on BEATs (another of the self-taught models from the family tree), with a small layer on top for household activities, wrote the diary itself. The same 298 questions were then answered from that diary:</p>
 </section>
 
 <figure class="wide">
@@ -364,14 +364,14 @@
 </figure>
 
 <section class="col">
-  <p>The diary gets 0.87 overall, and it's weakest on "how many times?", which is the counting problem again. The surprising part was which half did the work. Handing the same diary to a general language model (Qwen) and asking in plain English only moved its score from 0.25 to 0.34. What got 0.87 was answering with small exact queries that look things up and subtract, like this one:</p>
+  <p>The diary gets 0.87 overall, against Audio Flamingo's 0.19 on the same questions. That's a gap of 0.68, and resampling the questions puts it between 0.63 and 0.74. The diary is weakest on "how many times?", which is the counting problem again. The surprising part was which half did the work. Handing the same diary to a general language model (Qwen) and asking in plain English only moved its score from 0.25 to 0.34. What got 0.87 was answering with small exact queries that look things up and subtract, like this one:</p>
   <pre class="snippet">def how_long(diary, thing):
     stretches = [e for e in diary if e.thing == thing]
     return sum(e.end - e.start for e in stretches)
 
 how_long(kettle_diary, "boiling")   # 86.3 seconds</pre>
   <p> Writing things down turned out to be only half of it. The other half was doing the arithmetic properly.</p>
-  <p>Treat this as a demonstration rather than a benchmark. It's one home, and the diary's vocabulary was set up for that home's activities, which Audio Flamingo didn't get. The whole system runs on an ordinary laptop processor, using about 7% of one core to keep up with a home around the clock. Plenty didn't work along the way, including a test where I'd swapped "added" and "removed", and a result that turned out to be a home memorising itself. The full list is in the appendix.</p>
+  <p>Treat this as a demonstration rather than a benchmark. It's one home, and the diary's vocabulary was set up for that home's activities, which Audio Flamingo didn't get. The whole system runs on an ordinary laptop processor, using about 7% of one core to keep up with a home around the clock. Plenty didn't work along the way, including a test where I'd swapped "added" and "removed", and a result that turned out to be a home memorizing itself. The full list is in the appendix.</p>
 
   <h2>Back to the kettle</h2>
   <p>Let's play it one last time, and this time watch the diary:</p>
@@ -392,8 +392,8 @@ how_long(kettle_diary, "boiling")   # 86.3 seconds</pre>
 </figure>
 
 <section class="col">
-  <p>So what does a kettle know? It depends who's listening. To the list of numbers it's 1.76 million values. The self-taught models know what a boil sounds like, but not when this one started. The Ear, taught fifteen words, calls it a vacuum cleaner for fifty seconds. And the diary knows it switched on at 0:02.7, boiled for 86 seconds and switched itself off, which is all anyone was going to ask it.</p>
-  <p>The diary is a choice I made by hand, about what to write down and how. Rich Sutton's bitter lesson says hand-made choices like that tend to lose, eventually, to models that learn for themselves what's worth keeping. Which raises the question the <a href="learning-to-hear/">next post</a> is about: how do these models learn to hear in the first place, and why do different ways of teaching them produce such different ears? After that, I want to go the other way, to diffusion models that generate sound instead of describing it.</p>
+  <p>So what does a kettle know? It depends who's listening. To the list of numbers it's 1.76 million values. The self-taught models know what a boil sounds like, but on their own they don't keep track of when this one started. The Ear, taught fifteen words, calls it a vacuum cleaner for fifty seconds. And the diary knows it switched on at 0:02.7, boiled for 86 seconds and switched itself off, which is all anyone was going to ask it.</p>
+  <p>The diary's format is a choice I made by hand: what to write down, and how. Rich Sutton's bitter lesson says hand-made choices like that tend to lose, eventually, to models that learn for themselves what's worth keeping. Which raises the question the <a href="learning-to-hear/">next post</a> is about: how do these models learn to hear in the first place, and why do different ways of teaching them produce such different ears? After that, I want to go the other way, to diffusion models that generate sound instead of describing it.</p>
   <p>Thanks for reading!</p>
   <p class="sign">Asad</p>
 </section>
@@ -405,9 +405,9 @@ how_long(kettle_diary, "boiling")   # 86.3 seconds</pre>
     <li id="fn1">Your inner ear does something similar. The cochlea is a coiled tube that vibrates at different places for different pitches, so your brain receives sound already split up roughly the way a spectrogram is. The spectrograms here use 64 bands spaced the way hearing is, closer together at low pitches. <a href="#r1">↩</a></li>
     <li id="fn2">Real audio transformers typically use 16 × 16 patches on spectrograms with 128 pitch bands and 10 ms time steps, so each patch covers about a sixth of a second. <a href="#r2">↩</a></li>
     <li id="fn3">My original test kept each recording's full sequence of moments; only the two-second example was averaged into one summary. Peaks had to be at least 1.5 seconds apart, and the threshold was chosen on the first 50 items and scored on the last 50. <a href="#r3">↩</a></li>
-    <li id="fn4">The re-creation uses 22 seconds of the kettle's boil with a hard mug tap added six times, about twice as loud as the boil's peaks. The example is the two seconds from 1.0 to 3.0, around the first tap. "Stands well clear" means more than 2.5 robust standard deviations from the curve's median. The models are EAT, Dasheng and USAD2-Small run on CPU, and the script is in the post's folder. <a href="#r4">↩</a></li>
+    <li id="fn4">The re-creation uses 22 seconds of the kettle's boil with a hard mug tap added six times, about twice as loud as the boil's peaks. The example is the two seconds from 1.0 to 3.0, around the first tap. "Stands well clear" means more than 2.5 robust standard deviations from the curve's median. The models are EAT, Dasheng and USAD2-Small run on CPU, and the script is build/real_models.py. <a href="#r4">↩</a></li>
     <li id="fn5">The rebuilt test has 120 items, each 20 seconds of the kettle's boil with one short sound (a mug, glass or metal tap, a ball bounce, or a spoon clink) repeated 2 to 8 times, at least 1.5 seconds apart and at varying loudness. As in the original, the example is two seconds around the first event and repeats must be 1.5 seconds apart. Each rule's threshold is tuned on the first 60 items and scored on the other 60. "Position removed" subtracts the average output at each of the 64 (EAT) or 250 (Dasheng) positions in a stretch. The script is build/repeats_bench.py. <a href="#r5">↩</a></li>
-    <li id="fn6">SINS, a public dataset recorded continuously in one home for a week, with daily activities like cooking, washing up and vacuuming labelled. The questions cover days four to seven. <a href="#r6">↩</a></li>
+    <li id="fn6">SINS, a public dataset recorded continuously in one home for a week, with daily activities like cooking, washing up and vacuuming labeled. The questions cover days four to seven. <a href="#r6">↩</a></li>
     <li id="fn7">The smoothing is a Viterbi pass. Given second-by-second guesses about whether something is on, it finds the most likely sequence of on and off stretches, so a single noisy second can't split one boil into two. <a href="#r7">↩</a></li>
   </ol>
 </section>
@@ -457,7 +457,7 @@ how_long(kettle_diary, "boiling")   # 86.3 seconds</pre>
   <details>
     <summary>Every listener, every number</summary>
     <div class="table-scroll"><table id="allTable"></table></div>
-    <p class="small">Speed is the share of real time one CPU core needs (fp32, not quantised). "Notice", "count" and "describe the change" are F1, F2 and F4 on my test battery (125 change clips, 100 counting clips scored on the last 50, and 120 property clips); shuffled controls score 0.192, 0.130 and 0.467. "Voice emotion" is CREMA-D accuracy on 1,066 test clips with the actors held out (chance 0.167). "Kitchen" is the frame-level score on EPIC-SOUNDS, 21 classes.</p>
+    <p class="small">Speed is the share of real time one CPU core needs (fp32, not quantized). "Notice", "count" and "describe the change" are F1, F2 and F4 on my test battery (125 change clips, 100 counting clips scored on the last 50, and 120 property clips); shuffled controls score 0.192, 0.130 and 0.467. "Voice emotion" is CREMA-D accuracy on 1,066 test clips with the actors held out (chance 0.167). "Kitchen" is the frame-level score on EPIC-SOUNDS, 21 classes.</p>
   </details>
   <details>
     <summary>What failed, in full</summary>
@@ -465,9 +465,9 @@ how_long(kettle_diary, "boiling")   # 86.3 seconds</pre>
     <p class="small">"Void" means the test didn't measure what it was meant to (the same-home run used a home that wasn't held out). "Inconclusive" means the comparison didn't finish.</p>
   </details>
   <details>
-    <summary>Recordings and licences</summary>
+    <summary>Recordings and licenses</summary>
     <div class="table-scroll"><table id="srcTable"></table></div>
-    <p class="small">All recordings are from Freesound, transcoded to 16 kHz mono. The glass clink is CC BY 4.0 (KVV_Audio); everything else is CC0. The kettle's four states were picked out automatically from the recording's loudness envelope and checked against its description. The bouncing ball is synthesised.</p>
+    <p class="small">All recordings are from Freesound, transcoded to 16 kHz mono. The glass clink is CC BY 4.0 (KVV_Audio); everything else is CC0. The kettle's four states were picked out automatically from the recording's loudness envelope and checked against its description. The bouncing ball is synthesized.</p>
   </details>
   <details>
     <summary>Method</summary>

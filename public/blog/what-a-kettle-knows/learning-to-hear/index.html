@@ -202,11 +202,11 @@
 
 <section class="col">
   <p>The trouble with comparing the real models directly is that they differ in everything at once: training data, size, architecture and training goal. So I set up a small lab where only the goal changes. There's one tiny transformer of about 20,000 parameters, and five kinds of kitchen sound cut into half-second windows: the kettle heating, the kettle boiling, pouring, stirring, and a spoon tapping a cup. It gets trained five times, and between runs exactly one line of the training loop changes.<sup><a href="#fn3" id="r3">3</a></sup></p>
-  <p>To make the result visible, every version has to squeeze each window down to just two numbers, so we can plot it directly. Each dot below is one window, coloured by what it really is. The model never sees those colours, except in step 1. All of this is real training, run on a laptop processor.</p>
+  <p>To make the result visible, every version has to squeeze each window down to just two numbers, so we can plot it directly. Each dot below is one window, colored by what it really is. The model never sees those colors, except in step 1. All of this is real training, run on a laptop processor.</p>
   <div class="lab-legend" id="labLegend"></div>
 
   <h3 class="lab-step">Step 1: learn from labels</h3>
-  <p>The most direct way is to tell the model what each window is and let it learn to guess the label. This is how the AudioSet taggers were trained, on two million YouTube clips labelled by people.</p>
+  <p>The most direct way is to tell the model what each window is and let it learn to guess the label. This is how the AudioSet taggers were trained, on two million YouTube clips labeled by people.</p>
 </section>
 
 <figure class="wide">
@@ -304,7 +304,7 @@
 </figure>
 
 <section class="col">
-  <p>This is the messiest map, sorting 69% of new windows, and it does something none of the others do. Every half-second of boil gets squeezed onto almost the same point, and so does every half-second of pouring, while the spoon sounds stay spread out. That's what this goal rewards: two views of the same steady sound should get the same answer. It's a tidy way to learn what doesn't change. It's also a risk, because a model can satisfy this goal by giving <em>everything</em> the same answer, which is called collapse. Real methods add safeguards against it (here, normalising the teacher's answers), and the boil and pour are a mild version of it.</p>
+  <p>This is the messiest map, sorting 69% of new windows, and it does something none of the others do. Every half-second of boil gets squeezed onto almost the same point, and so does every half-second of pouring, while the spoon sounds stay spread out. That's what this goal rewards: two views of the same steady sound should get the same answer. It's a tidy way to learn what doesn't change. It's also a risk, because a model can satisfy this goal by giving <em>everything</em> the same answer, which is called collapse. Real methods add safeguards against it (here, normalizing the teacher's answers), and the boil and pour are a mild version of it.</p>
 
   <h3 class="lab-step">Step 5: copy an expert</h3>
   <p>The last way skips the guessing game and copies a model that already exists. The target is simply what a big trained model says about each window. Here the expert is the real Dasheng, run on the same windows. USAD learns this way from two experts at once, one for speech and one for general sound, and the small AudioSet taggers also learn partly by copying a bigger model.</p>
@@ -348,7 +348,7 @@
     <p class="patch-note" id="realNote"></p>
     <div class="tiny-legend" id="realLegend"></div>
   </div>
-  <figcaption>Real pretrained models, run on this post's recordings. Each dot is half a second of sound, coloured by what it really is. None of these models was ever told the labels. The plot shows the two directions along which the dots differ most, so some separation is hidden. The percentage is measured in the model's full space: how often a window is closest to the average of its own kind.</figcaption>
+  <figcaption>Real pretrained models, run on this post's recordings. Each dot is half a second of sound, colored by what it really is. None of these models was ever told the labels. The plot shows the two directions along which the dots differ most, so some separation is hidden. The percentage is measured in the model's full space: how often a window is closest to the average of its own kind.</figcaption>
 </figure>
 
 <section class="col">
@@ -391,7 +391,7 @@
 </figure>
 
 <section class="col">
-  <p>No single way of training wins. The recipe is best at telling materials apart and does well at noticing a change, but knows nothing about voices. The label-trained tagger is cheap and good at kitchen events, the kind of thing it was labelled with, and weak at emotion in a voice, which no label described. Dasheng, trained to redraw, is best at that emotion. EAT is best at noticing when a scene changes, and worst at telling china from metal.</p>
+  <p>No single way of training wins. The recipe is best at telling materials apart and does well at noticing a change, but knows nothing about voices. The label-trained tagger is cheap and good at kitchen events, the kind of thing it was labeled with, and weak at emotion in a voice, which no label described. Dasheng, trained to redraw, is best at that emotion. EAT is best at noticing when a scene changes, and worst at telling china from metal.</p>
   <p>That's what I mean by models hearing differently. They share the same pipeline, and often the same kind of network. What sets them apart is mostly what they were asked to do while they learned.</p>
 
   <h2>What none of them can tell you</h2>
@@ -406,7 +406,7 @@
   <ol>
     <li id="fn1">Your inner ear does something similar. The cochlea is a coiled tube that vibrates at different places for different pitches, so your brain receives sound already split up roughly the way a spectrogram is. The spectrograms here use 64 bands spaced the way hearing is, closer together at low pitches. <a href="#r1">↩</a></li>
     <li id="fn2">Real audio transformers typically use 16 × 16 patches on spectrograms with 128 pitch bands and 10 ms time steps, so each patch covers about a sixth of a second. <a href="#r2">↩</a></li>
-    <li id="fn3">The lab model is a two-layer transformer with 32-number tokens, about 20,000 parameters, ending in two numbers per window. Each window is half a second of spectrogram (8 time steps × 64 bands) cut into 8 patches. Each run is 1,500 steps of 128 windows with Adam. "Hiding" masks 75% of the patches. The codebook has 16 entries from k-means over all patches. The teacher is a moving average of the student (0.99 per step), with its outputs normalised across each batch. The expert targets are the real Dasheng's outputs averaged over each window. Scores are on 180 windows held out from training, and count how often a window's two numbers sit closest to the average of its own kind. The script is build/lab.py. <a href="#r3">↩</a></li>
+    <li id="fn3">The lab model is a two-layer transformer with 32-number tokens, about 20,000 parameters, ending in two numbers per window. Each window is half a second of spectrogram (8 time steps × 64 bands) cut into 8 patches. Each run is 1,500 steps of 128 windows with Adam. "Hiding" masks 75% of the patches. The codebook has 16 entries from k-means over all patches. The teacher is a moving average of the student (0.99 per step), with its outputs normalized across each batch. The expert targets are the real Dasheng's outputs averaged over each window. Scores are on 180 windows held out from training, and count how often a window's two numbers sit closest to the average of its own kind. The script is build/lab.py. <a href="#r3">↩</a></li>
     <li id="fn4">These are the cosine similarities between clip embeddings, each averaged over its patches. Each tap was loudness-matched and trimmed to three quarters of a second first. <a href="#r4">↩</a></li>
     <li id="fn5">Materials is the similarity between the soft mug tap and the metal bowl, where lower means it hears more difference (only measured for four listeners). Kitchen events is the frame-level score on EPIC-SOUNDS (21 classes). Voice emotion is CREMA-D accuracy with the actors held out (chance 0.17). Noticing a change is the change-detection score on 125 clips (luck 0.19). Every number is in the appendix. <a href="#r5">↩</a></li>
   </ol>
@@ -439,12 +439,12 @@
   <details>
     <summary>Every listener, every number</summary>
     <div class="table-scroll"><table id="allTable"></table></div>
-    <p class="small">Speed is the share of real time one CPU core needs (fp32, not quantised). "Notice", "count" and "describe the change" are F1, F2 and F4 on my test battery (125 change clips, 100 counting clips scored on the last 50, and 120 property clips); shuffled controls score 0.192, 0.130 and 0.467. "Voice emotion" is CREMA-D accuracy on 1,066 test clips with the actors held out (chance 0.167). "Kitchen" is the frame-level score on EPIC-SOUNDS, 21 classes.</p>
+    <p class="small">Speed is the share of real time one CPU core needs (fp32, not quantized). "Notice", "count" and "describe the change" are F1, F2 and F4 on my test battery (125 change clips, 100 counting clips scored on the last 50, and 120 property clips); shuffled controls score 0.192, 0.130 and 0.467. "Voice emotion" is CREMA-D accuracy on 1,066 test clips with the actors held out (chance 0.167). "Kitchen" is the frame-level score on EPIC-SOUNDS, 21 classes.</p>
   </details>
   <details>
-    <summary>Recordings and licences</summary>
+    <summary>Recordings and licenses</summary>
     <div class="table-scroll"><table id="srcTable"></table></div>
-    <p class="small">All recordings are from Freesound, transcoded to 16 kHz mono. The glass clink is CC BY 4.0 (KVV_Audio); everything else is CC0. The kettle's four states were picked out automatically from the recording's loudness envelope and checked against its description. The bouncing ball is synthesised.</p>
+    <p class="small">All recordings are from Freesound, transcoded to 16 kHz mono. The glass clink is CC BY 4.0 (KVV_Audio); everything else is CC0. The kettle's four states were picked out automatically from the recording's loudness envelope and checked against its description. The bouncing ball is synthesized.</p>
   </details>
   <details>
     <summary>Method</summary>
