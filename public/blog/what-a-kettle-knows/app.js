@@ -37,7 +37,7 @@ const state = {
   results: null, kettle: null, taps: null, similarity: null, sources: null,
   bounce: null, clips: {}, clip: "kettle",
   simModel: "dsp_rich", codec: "codec_original", selectedEncoder: "mn10_as",
-  revealed: false, heard: false, dockDismissed: false,
+  heard: false, dockDismissed: false,
 };
 
 /* ---------------------------------------------------------------- loading */
@@ -58,22 +58,17 @@ async function boot() {
   loaded.forEach((c) => (state.clips[c.name] = c));
 
   buildRail();
-  buildHero();
   buildDesk();
-  buildMiniClips();
   buildDock();
   buildRecognition();
-  buildPhysics();
   buildCodec();
   buildTaps();
   buildSimilarity();
-  buildMixer();
   buildG1();
   buildBounce();
   buildF2();
   buildMemory();
   buildKettleQuestions();
-  buildPrediction();
   buildCremad();
   buildCost();
   buildFailures();
@@ -89,12 +84,8 @@ function buildRail() {
   rail.className = "rail";
   rail.setAttribute("aria-label", "Sections");
   const items = [
-    ["s01", "01 recording"], ["s02", "02 recognition"], ["s03", "03 signal"],
-    ["s04", "04 resolution"], ["s05", "05 similarity"], ["s06", "06 separation"],
-    ["s07", "07 detection"], ["s08", "08 recurrence"], ["s09", "09 memory"],
-    ["s10", "10 prediction"], ["s11", "11 speech"], ["s12", "12 cost"],
-    ["s13", "13 failures"], ["s14", "14 open"], ["s15", "15 reproduce"],
-    ["appendix", "appendix"],
+    ["s01", "01 waveform"], ["s02", "02 sample rate"], ["s03", "03 embedding"],
+    ["s04", "04 episodes"], ["s05", "05 interface"], ["appendix", "appendix"],
   ];
   rail.innerHTML = items.map(([id, l]) => `<a href="#${id}" data-for="${id}">${l}</a>`).join("");
   document.body.appendChild(rail);
@@ -139,47 +130,6 @@ function bakeWave(cv, peaks, bg) {
   return { base, accent };
 }
 
-function buildHero() {
-  const cv = $("#heroWave");
-  const baked = bakeWave(cv, state.kettle.peaks, "#171614");
-  heroBase = baked.base; heroAccent = baked.accent;
-  $("#heroPlay").addEventListener("click", () => { togglePlay(); });
-  $("#heroReveal").addEventListener("click", revealHero);
-  addEventListener("scroll", debounce(() => {
-    if ($("#heroListen").getBoundingClientRect().bottom > 0) {
-      const again = bakeWave(cv, state.kettle.peaks, "#171614");
-      heroBase = again.base; heroAccent = again.accent; progressWaves();
-    }
-  }, 200));
-}
-
-function revealHero() {
-  if (state.revealed) return;
-  state.revealed = true;
-  $("#heroTitle").innerHTML = "What a<br>Kettle Knows";
-  $("#heroDek").textContent = "From the click on, through the boil, to the click off.";
-  const el = $("#heroLabel");
-  el.textContent = "an electric kettle, coming to the boil";
-  el.classList.remove("blind");
-  $("#heroReveal").textContent = "named";
-  $("#heroReveal").disabled = true;
-  const pill = $("#heroPill");
-  if (pill) pill.textContent = "1 kettle · 4 taps · 8 encoders";
-  $("#s01Title").textContent = "One kettle, four states";
-  $("#s01Lead").textContent = "The recording is ordinary on purpose. A kettle switches on at 0:02.7, heats for ten seconds, boils for 86.3 seconds, and clicks off at 1:39. Four states, two transients, one object. Everything the rest of this essay asks about is already in that cycle: a sustained sound that changes slowly, short events with sharp edges, and a sequence that only means anything if you were there for all of it.";
-  $("#s01Caption").textContent = "Two clicks and a texture. The switch-on is a transient. The boil is a sustained sound whose energy falls as the water settles. The auto-off is a second transient, then silence. Once you can hear the states, every later section is a different question about them.";
-  $("#s01Note").textContent = "The longer recording of making tea is in the sources table. It is not the spine: its opening is room tone. The kettle is the cleanest complete cycle in the set. The cup, the spoon, and the pour are close-ups from the same activity, and they come back when one long sound is not enough.";
-  const chip = document.querySelector(".chip[data-clip='kettle']");
-  if (chip) chip.textContent = "kettle";
-  const mini = document.querySelector(".mini[data-clip='kettle'] b");
-  if (mini) mini.textContent = "Electric kettle";
-  $("#stageStrip").setAttribute("aria-label", "Kettle states");
-  drawDesk();
-  buildRecognition();
-  buildMemory();
-  scheduleDock();
-}
-
 function buildDesk() {
   audio = new Audio("assets/audio/kettle.mp3");
   audio.preload = "metadata";
@@ -189,7 +139,7 @@ function buildDesk() {
   audio.addEventListener("ended", () => setPlaying(false));
   audio.addEventListener("loadedmetadata", syncAll);
 
-  $("#playBtn").addEventListener("click", togglePlay);
+  $$("[data-play-main]").forEach((b) => b.addEventListener("click", togglePlay));
   $("#wave").addEventListener("click", seekMain);
   $("#wave").addEventListener("mousemove", hoverMain);
   $("#wave").addEventListener("mouseleave", () => ($("#hoverTime").style.opacity = 0));
@@ -210,11 +160,10 @@ function drawDesk() {
   drawLane(c);
   $("#clipLabel").textContent = publicClipLabel(c);
   syncDockLabel();
-  $("#deskFoot").textContent = `${clock(c.duration)} · 16 kHz · ${c.events.length} predicted episode${c.events.length === 1 ? "" : "s"} · ${c.stages.length} annotated state${c.stages.length === 1 ? "" : "s"}`;
+  $("#deskFoot").textContent = `${clock(c.duration)} · 16 kHz · 16,000 samples a second`;
 }
 
 function publicClipLabel(c) {
-  if (!state.revealed && c.name === "kettle") return "the recording";
   return c.label;
 }
 
@@ -222,7 +171,7 @@ function syncDockLabel() {
   const el = $("#dockLabel");
   const c = clip();
   if (!el || !c) return;
-  el.textContent = (!state.revealed && c.name === "kettle") ? "the recording" : c.label;
+  el.textContent = c.label;
 }
 
 function clip(name = state.clip) { return state.clips[name]; }
@@ -245,7 +194,7 @@ function togglePlay() {
 }
 
 function setPlaying(on) {
-  $$("#playBtn, #heroPlay").forEach((b) => {
+  $$("[data-play-main]").forEach((b) => {
     b.classList.toggle("playing", on);
     const label = b.querySelector("span:last-child");
     if (label) label.textContent = on ? "Pause" : "Play";
@@ -365,9 +314,7 @@ function specLUT() {
 
 /* stage strip */
 const STAGE_COLOR = { off: "#3b362d", heat: "#a8792f", boil: "#2f6f5e" };
-function stageText(s, clipName = "kettle") {
-  const named = s.label === "heating" || s.label === "boiling" || s.kind === "heat" || s.kind === "boil";
-  if (!state.revealed && clipName === "kettle" && named) return "";
+function stageText(s) {
   return s.label;
 }
 function drawStages(c) {
@@ -425,8 +372,8 @@ function scheduleDock() {
   requestAnimationFrame(() => { dockQueued = false; syncDock(); });
 }
 
-function heroPlayerGone() {
-  const el = $("#heroListen");
+function sourcePlayerGone() {
+  const el = $("#desk");
   return !!el && el.getBoundingClientRect().bottom <= 8;
 }
 
@@ -453,7 +400,7 @@ function dockCoversEvidence() {
 function syncDock() {
   const dock = $("#dock");
   if (!dock) return;
-  const show = !state.dockDismissed && (state.heard || state.revealed) && heroPlayerGone() && !dockCoversEvidence();
+  const show = !state.dockDismissed && state.heard && sourcePlayerGone() && !dockCoversEvidence();
   dock.classList.toggle("on", show);
   dock.setAttribute("aria-hidden", show ? "false" : "true");
   document.body.classList.toggle("dock-live", show);
@@ -814,13 +761,13 @@ function buildKettleQuestions() {
     <div class="q" data-i="${i}">
       <p>${esc(q.q)}</p>
       <span class="ans">${esc(q.answer)}</span>
-      <button>reveal</button>
+      <button>answer</button>
     </div>`).join("");
   $$(".q", wrap).forEach((row) => {
     row.querySelector("button").addEventListener("click", () => {
       const on = row.classList.toggle("revealed");
-      row.querySelector("button").textContent = on ? "hide" : "reveal";
-      $("#qProgress").textContent = `${$$(".q.revealed", wrap).length} / ${qs.length} revealed`;
+      row.querySelector("button").textContent = on ? "hide" : "answer";
+      $("#qProgress").textContent = `${$$(".q.revealed", wrap).length} / ${qs.length} answered`;
     });
   });
 }
