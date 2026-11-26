@@ -201,7 +201,7 @@
 </figure>
 
 <section class="col">
-  <p>Here's the short version. The recipe isn't trained at all. It measures a few dozen things a sound engineer would pick, like brightness and how quickly a sound dies away. The AudioSet taggers learned from people's labels on two million YouTube clips. Dasheng learned by redrawing hidden patches, BEATs by naming them from a codebook, EAT by matching a slowly updated copy of itself, and USAD by copying two expert models. (The <a href="learning-to-hear/">next post</a> goes inside each of these, with a small lab where you can watch them train.)</p>
+  <p>Here's the short version. The recipe isn't trained at all. It measures a few dozen things a sound engineer would pick, like brightness and how quickly a sound dies away. The AudioSet taggers learned from people's labels on two million YouTube clips. Dasheng learned by redrawing hidden patches, BEATs by naming them from a codebook, EAT by matching a slowly updated copy of itself, and USAD by copying two expert models. (The <a href="learning-to-hear/">next post</a> goes inside each of these.)</p>
   <p>Those different goals give them different ears. Here are three of the real models listening to five kitchen sounds, next to the raw spectrogram with no model at all:</p>
 </section>
 
@@ -412,7 +412,7 @@
 
 <section class="col">
   <p>So what does a kettle know? It depends who's listening. To the list of numbers it's 1.76 million values. The self-taught models know what a boil sounds like, but not when this one started. The Ear, taught fifteen words, calls it a vacuum cleaner for fifty seconds. And the diary knows it switched on at 0:02.7, boiled for 86 seconds and switched itself off, which is all anyone was going to ask it.</p>
-  <p>The diary is a choice I made by hand, about what to write down and how. Rich Sutton's bitter lesson says hand-made choices like that tend to lose, eventually, to models that learn for themselves what's worth keeping. Which raises the question the <a href="learning-to-hear/">next post</a> is about: how do these models learn to hear in the first place, and why do different ways of teaching them produce such different ears? In it, I build a small lab where you can watch five of those ways train side by side. After that, I want to go the other way, to diffusion models that generate sound instead of describing it.</p>
+  <p>The diary is a choice I made by hand, about what to write down and how. Rich Sutton's bitter lesson says hand-made choices like that tend to lose, eventually, to models that learn for themselves what's worth keeping. Which raises the question the <a href="learning-to-hear/">next post</a> is about: how do these models learn to hear in the first place, and why do different ways of teaching them produce such different ears? After that, I want to go the other way, to diffusion models that generate sound instead of describing it.</p>
   <p>Thanks for reading!</p>
   <p class="sign">Asad</p>
 </section>
