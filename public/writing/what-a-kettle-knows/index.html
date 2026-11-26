@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<base href="/writing/what-a-kettle-knows/">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%237c2b26'/%3E%3Cpath d='M10 13h12v7a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4z' fill='none' stroke='%23f4efe4' stroke-width='2'/%3E%3Cpath d='M22 15l4 2-4 2' fill='none' stroke='%23f4efe4' stroke-width='2'/%3E%3C/svg%3E">
+<title>What a Kettle Knows</title>
+<meta name="description" content="I tried to teach a computer to listen to a kitchen. Hearing turned out to be the easy part. The hard part was remembering.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="progress" id="progress" aria-hidden="true"></div>
+
+<header class="masthead">
+  <a class="wordmark" href="/">Asad Rizvi</a>
+  <a class="mono masthead-link" href="/writing/">Writing</a>
+</header>
+
+<main>
+
+<header class="title">
+  <p class="eyebrow">November 2026 · about 20 minutes · best with sound on</p>
+  <h1>What a Kettle Knows</h1>
+  <p class="dek">I tried to teach a computer to listen to a kitchen. Hearing turned out to be the easy part. The hard part was remembering.</p>
+</header>
+
+<!-- ======================================================= COLD OPEN -->
+<section class="col">
+  <p>Before you read anything else, put on headphones if you have them and press play. Don't look for clues, just listen and make a guess. (Fair warning: it gets fairly loud around the ten-second mark.)</p>
+</section>
+
+<figure class="wide">
+  <div class="blind" id="blind">
+    <div class="blind-top">
+      <button class="play big" data-kettle="blind" aria-label="Play the mystery recording"><span class="play-icon"></span></button>
+      <div>
+        <div class="mono dim">mystery recording</div>
+        <div class="blind-time mono" id="blindTime">0:00 / 1:50</div>
+      </div>
+    </div>
+    <canvas id="blindWave" height="120" aria-label="Waveform, drawn as the recording plays"></canvas>
+    <div class="guess" id="guess">
+      <p class="guess-q">What do you think it is?</p>
+      <div class="guess-opts">
+        <button data-guess="vacuum">A vacuum cleaner</button>
+        <button data-guess="tea">Someone making tea</button>
+        <button data-guess="rain">Rain on a window</button>
+        <button data-guess="coffee">A coffee machine</button>
+      </div>
+    </div>
+    <div class="reveal" id="reveal" hidden>
+      <p class="reveal-tag mono" id="revealTag"></p>
+      <p class="reveal-big">It's an electric kettle.</p>
+      <p class="reveal-sub" id="revealSub"></p>
+    </div>
+  </div>
+</figure>
+
+<section class="col">
+  <h2>How did you know?</h2>
+  <p>Someone flicks the kettle on about three seconds in. It rumbles, builds to a roar, boils for a minute and a half and clicks itself off at 1:39. Most people get it, or get close, within a few seconds, which is a little strange when you think about it. Nobody said the word "kettle" and there was no picture. All that reached you was air pushing on your eardrums for a couple of minutes.</p>
+  <p>You also picked up a lot more than a name. Without really trying, you probably noticed that it started with a click, that the noise grew for a while before settling into a steady roar, and that it stopped by itself with another click. If I asked you how long it boiled, you could give me a rough answer, and if I asked whether anyone poured the water afterwards you'd say no.</p>
+  <p>Play it again and watch those moments go by:</p>
+</section>
+
+<figure class="wide">
+  <div class="player card" data-view="moments">
+    <div class="player-top">
+      <button class="play" data-kettle="moments" aria-label="Play the kettle"><span class="play-icon"></span></button>
+      <span class="mono dim" data-time></span>
+    </div>
+    <div class="wave-box">
+      <canvas class="kwave" height="120"></canvas>
+      <div class="pins" id="momentPins"></div>
+      <div class="ph"></div>
+    </div>
+  </div>
+  <figcaption>The whole recording. Click anywhere to jump there. The labels pop up as the playhead reaches each moment.</figcaption>
+</figure>
+
+<section class="col">
+  <p>Those are two different skills: hearing what a sound is, and keeping track of what happened and for how long. People do both without noticing they're separate. A computer gets neither for free.</p>
+  <p>This is my first real dive into audio research. This post follows the kettle: how a model hears it, and why knowing what a sound is turns out to be very different from keeping track of it over time. A second post goes deeper into how these models learn to hear in the first place. Every model here follows roughly the same path:</p>
+</section>
+
+<figure class="wide">
+  <div class="card plan" id="plan" aria-label="The path every listener follows: numbers, a picture, patches, a trained model, an output">
+    <div class="plan-step"><p class="plan-k mono">1 · numbers</p>
+      <svg viewBox="0 0 120 40" class="plan-wave" preserveAspectRatio="xMinYMid meet" aria-hidden="true"><path d="M0 20 L6 20 L8 4 L10 36 L12 20 L22 20 L24 14 L26 26 L28 12 L30 28 L32 10 L34 30 L36 11 L38 29 L40 12 L42 28 L44 13 L46 27 L48 14 L50 26 L52 15 L54 25 L56 15 L58 25 L60 16 L62 24 L64 16 L66 24 L68 17 L70 23 L72 17 L74 23 L76 18 L78 22 L80 18 L82 22 L84 18 L86 22 L88 6 L90 34 L92 20 L120 20"/></svg>
+      <p class="plan-d">16,000 a second</p></div>
+    <div class="plan-arrow">→</div>
+    <div class="plan-step"><p class="plan-k mono">2 · a picture</p>
+      <div class="plan-spec" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <p class="plan-d">Which pitches, when</p></div>
+    <div class="plan-arrow">→</div>
+    <div class="plan-step"><p class="plan-k mono">3 · patches</p>
+      <div class="plan-grid" aria-hidden="true"><i></i><i class="m"></i><i></i><i class="m"></i><i class="m"></i><i></i><i class="m"></i><i></i></div>
+      <p class="plan-d">Cut into tokens</p></div>
+    <div class="plan-arrow">→</div>
+    <div class="plan-step"><p class="plan-k mono">4 · a model</p>
+      <div class="plan-model">trained how?</div>
+      <p class="plan-d">The part that differs most</p></div>
+    <div class="plan-arrow">→</div>
+    <div class="plan-step"><p class="plan-k mono">5 · an answer</p>
+      <div class="plan-tags"><span>a point</span><span>labels</span><span>a diary</span></div>
+      <p class="plan-d">What it hands back</p></div>
+  </div>
+  <figcaption>The path every listener in this post follows. The first three steps are much the same for all of them. Step four, how the model was trained, is where they part ways.</figcaption>
+</figure>
+
+<section class="col">
+  <h2>1.76 million numbers</h2>
+  <p>A microphone measures how hard the air is pushing on it, over and over again. This recording took that measurement 16,000 times every second, and each measurement is just a single number, so the whole 1:50 clip is a list of about 1.76 million of them. Drag the slider to zoom in:</p>
+</section>
+
+<figure class="wide">
+  <div class="zoom card" id="zoom">
+    <canvas id="zoomOverview" height="46" aria-label="Whole recording, with the zoom window marked"></canvas>
+    <canvas id="zoomCanvas" height="200" aria-label="Zoomed view of the samples"></canvas>
+    <div class="zoom-controls">
+      <span class="mono dim">whole clip</span>
+      <input type="range" id="zoomSlider" min="0" max="1000" value="0" aria-label="Zoom level">
+      <span class="mono dim">single numbers</span>
+    </div>
+    <div class="zoom-read mono" id="zoomRead">loading…</div>
+  </div>
+  <figcaption>The top strip is the whole clip, and the shaded box is the stretch you're looking at. Click the strip to move it. At full zoom, each dot is one number.</figcaption>
+</figure>
+
+<section class="col">
+  <p>From far away you can see the shape of the event. Zoom into the boil and it turns to fuzz, and if you keep going you reach the individual numbers, each one a dot swinging up and down around zero. Nothing in this list says "kettle". There isn't even a number that means "loud". Loudness is how far the dots swing across hundreds of them.</p>
+
+  <h2>A picture of sound</h2>
+  <p>Almost every model in this post reads sound as a picture instead. Any sound can be treated as a mix of pitches playing at once, from low rumble to high hiss. A <em>spectrogram</em> splits the sound into those pitches and shows how strong each one is over time. Time runs left to right, pitch runs from low at the bottom to high at the top, and brighter means louder. Here's the kettle drawn both ways:</p>
+</section>
+
+<figure class="wide">
+  <div class="player card dark" data-view="spec">
+    <div class="player-top">
+      <button class="play" data-kettle="spec" aria-label="Play the kettle"><span class="play-icon"></span></button>
+      <span class="mono dim" data-time></span>
+    </div>
+    <div class="wave-box">
+      <canvas class="kwave" height="70"></canvas>
+      <div class="ph"></div>
+    </div>
+    <div class="wave-box">
+      <canvas class="kspec" height="170"></canvas>
+      <div class="spec-notes" id="specNotes"></div>
+      <div class="ph"></div>
+    </div>
+  </div>
+  <figcaption>Top: the waveform, which only tells you how loud things are. Bottom: the spectrogram of the same recording, which tells you what kind of loud.</figcaption>
+</figure>
+
+<section class="col">
+  <p>The switch shows up as a thin vertical line. A click is so short that it contains a bit of every pitch at once, so it lights up a whole column. The boil is a broad smear, because thousands of bursting bubbles make noise at every pitch all the time. Over the boil the top of the picture slowly dims as the roar gets duller.<sup><a href="#fn1" id="r1">1</a></sup></p>
+
+  <h2>Cutting the picture into patches</h2>
+  <p>Most modern audio models are transformers, the same kind of network behind chatbots like ChatGPT. A transformer reads a sequence of tokens, so the picture has to become one. The standard trick, borrowed from image models, is to cut the spectrogram into small squares called <em>patches</em>, flatten each one into a list of numbers, and treat each list as one token:</p>
+</section>
+
+<figure class="wide">
+  <div class="card patches" id="patches">
+    <div class="tabs" id="patchSteps" role="tablist">
+      <button class="tab on" data-step="whole">the picture</button>
+      <button class="tab" data-step="cut">cut into patches</button>
+      <button class="tab" data-step="hide">hide 75% of them</button>
+    </div>
+    <canvas id="patchCanvas" height="210" aria-label="The kettle's spectrogram, cut into patches"></canvas>
+    <p class="patch-note" id="patchNote"></p>
+  </div>
+  <figcaption>The patches are drawn much bigger than real ones so you can see them.<sup><a href="#fn2" id="r2">2</a></sup></figcaption>
+</figure>
+
+<section class="col">
+  <p>The figure's last step, hiding most of the patches, is how most modern audio models teach themselves with no labels at all. You can't fill in a missing chunk of boil without learning what a boil sounds like. But "fill it in" can mean several different things, and that's where models start to differ.</p>
+
+  <h2>Meet the listeners</h2>
+  <p>Before asking anything about time, it's worth meeting the models. Most of the ones here taught themselves that way: nobody ever told them what any sound was. What exactly they guess about the hidden patches differs from model to model. Sorted by how they were trained:</p>
+</section>
+
+<figure class="wide">
+  <div class="card tree" aria-label="A family tree of training objectives">
+    <div class="tq">Does it learn at all?</div>
+    <div class="tb"><span class="tn">no</span><div class="tl gold">The recipe<small>70 hand-picked measurements</small></div></div>
+    <div class="tq">Does it get labels?</div>
+    <div class="tb"><span class="tn">yes</span><div class="tl blood">AudioSet taggers<small>two million labelled YouTube clips</small></div></div>
+    <div class="tq">No labels. So what does it predict about the patches it can't see?</div>
+    <div class="tb four">
+      <div class="tl teal">the pixels<small>Dasheng</small></div>
+      <div class="tl teal">a code word<small>BEATs</small></div>
+      <div class="tl teal">a teacher's view<small>EAT</small></div>
+      <div class="tl teal">an expert's view<small>USAD</small></div>
+    </div>
+  </div>
+  <figcaption>Every listener in this post, sorted by two questions about how it was trained. The next post goes inside each one.</figcaption>
+</figure>
+
+<section class="col">
+  <p>You only need to remember three of these. <b>EAT</b>, which learned by matching a slowly updated copy of itself, is the one I'll teach to name sounds. <b>Dasheng</b>, which learned by redrawing hidden patches, and <b>USAD</b>, which learned by copying two expert models, turn out to hear repeats best. (How each one learns, and why it matters, is the subject of my next post.)</p>
+
+  <h2>Teaching it fifteen words</h2>
+  <p>None of these models outputs a name out of the box, and a name is the first thing a home listener needs. To get names, you <em>fine-tune</em>: add a small layer on top that turns the model's view of each moment into labels, then keep training on labelled examples. I did this with EAT, on RealDESED, a set of real home recordings labelled with fifteen everyday sounds: footsteps, dishes, doors, a light switch, a vacuum, a coffee machine and the rest. It took under an hour on one rented GPU.</p>
+  <p>On recordings it hadn't trained on, it gets about nine in ten right. That score is per ten-second window, asking only whether each sound happened at all, not exactly when, which will matter in a moment. I'll call the result the Ear. Here's everything it reported while listening to our kettle:</p>
+</section>
+
+<figure class="wide">
+  <div class="player card" data-view="ear">
+    <div class="player-top">
+      <button class="play" data-kettle="ear" aria-label="Play the kettle"><span class="play-icon"></span></button>
+      <span class="mono dim" data-time></span>
+      <span class="now-label" id="earNow"></span>
+    </div>
+    <div class="rows" id="earRows"></div>
+  </div>
+  <figcaption>Top: what actually happened. Below: every label the Ear produced, and when.</figcaption>
+</figure>
+
+<section class="col">
+  <p id="guessCallback">A light switch, then running water, then a coffee machine, and then, for most of the boil, a vacuum cleaner.</p>
+  <p>It's easy to laugh, but look at the timing. "Light switch" lands at 2.7 seconds, exactly when the kettle clicks on. "Running water" and "coffee machine" cover the heating, when a kettle really does sound like water being churned around. "Kettle" isn't one of the Ear's fifteen words, so it reached for the nearest ones it had. That's fine-tuning's trade: you get names, but only the ones you taught.</p>
+  <p>The more interesting part is what it <em>didn't</em> say. After about 53 seconds it goes quiet, even though the kettle keeps boiling for another 45. And nothing in its output connects the click at the start to the quiet at the end, or says that one object was on the whole time.</p>
+
+  <h2>Counting</h2>
+  <p>Some of the questions from the start are really about counting. How many times did the kettle boil today? How many times did someone open the fridge? So I tested whether the models could count a sound that repeats.</p>
+  <p>The test works like this. Take a two-second example of the sound, turn it into a single summary by averaging the model's view of it, then slide that summary along the recording and count the moments where the two match.<sup><a href="#fn3" id="r3">3</a></sup> You can try the same idea on the raw waveform of a bouncing ball:</p>
+</section>
+
+<figure class="wide">
+  <div class="bounce card" id="bounce">
+    <div class="player-top">
+      <button class="play" id="bouncePlay" aria-label="Play the bouncing ball"><span class="play-icon"></span></button>
+      <span class="mono dim">a bouncing ball · 2.5 s</span>
+      <button class="ghost" id="bounceShow">show the answer</button>
+    </div>
+    <canvas id="bounceWave" height="110" aria-label="Waveform of a bouncing ball"></canvas>
+    <p class="bounce-answer mono" id="bounceAnswer" hidden>11 bounces, each marked where it lands</p>
+    <p class="chart-title" style="margin-top:16px">Sliding the first bounce along the recording</p>
+    <canvas id="probeCurve" height="100" aria-label="How well the first bounce matches each moment of the recording"></canvas>
+    <div class="zoom-controls">
+      <span class="mono dim">less picky</span>
+      <input type="range" id="probeThr" min="20" max="95" value="55" aria-label="Peak threshold">
+      <span class="mono dim">more picky</span>
+    </div>
+    <p class="zoom-read mono" id="probeRead">decoding…</p>
+  </div>
+  <figcaption>Computed live in your browser from the raw waveform. Drag the slider to change how picky the count is.</figcaption>
+</figure>
+
+<section class="col">
+  <p>On a clean recording, matching the raw waveform works almost perfectly. Each bounce lines up with the first one and makes a sharp peak. I ran this over 100 counting clips, tuning on the first 50 and scoring on the last 50. On another 125 clips I checked something easier: whether each model noticed that the scene changed at all.</p>
+</section>
+
+<figure class="wide">
+  <div class="card" id="skillsChart"></div>
+  <figcaption>Scores from my test, using its original counting rule. Dashed lines mark luck.</figcaption>
+</figure>
+
+<section class="col">
+  <p>Noticing a change is fine. Counting was a wipeout: waveform matching got 0.94, and no model got above 0.14, barely better than luck. Bigger didn't help either: the 90-million-parameter models did no better than the one with a million. For a while I took this to mean the models couldn't count. It turns out the counting rule was a big part of the problem.</p>
+  <p>Here's a small re-creation, a mug tapped six times over our kettle boiling:</p>
+</section>
+
+<figure class="wide">
+  <div class="card" id="repeats">
+    <div class="player-top">
+      <button class="play" id="repPlay" aria-label="Play the re-created test"><span class="play-icon"></span></button>
+      <span class="mono dim">a mug tapped six times over a boiling kettle · 22 s</span>
+    </div>
+    <div class="tabs" id="repMode" role="tablist">
+      <button class="tab on" data-mode="peaks">count the peaks (what the test did)</button>
+      <button class="tab" data-mode="dips">count the dips</button>
+    </div>
+    <div id="repRows"></div>
+  </div>
+  <figcaption>Each row matches the shaded two-second example against every moment. Gold marks are the real taps.<sup><a href="#fn4" id="r4">4</a></sup></figcaption>
+</figure>
+
+<section class="col">
+  <p>Look at where the taps are. In every model's curve they're <em>dips</em>, not peaks. The two-second example is mostly boil with a fraction of a second of tap in it, so its summary looks like boil, and the moments that match it least are the taps. Count peaks, as my test did, and every model finds nothing. Count dips, and USAD finds all six taps and Dasheng all six plus two false alarms. The waveform has the opposite problem: with a kettle boiling underneath, the noise on top of each tap is different, and the later taps barely match the first.</p>
+  <p>EAT finds no taps at all. Its dips sit at the start of each ten-second stretch of audio I fed it, and comparing every moment of the kettle with every other moment shows why:</p>
+</section>
+
+<figure class="wide">
+  <div class="card" id="selfSim">
+    <div class="tabs" id="simModelTabs" role="tablist">
+      <button class="tab on" data-m="spectrogram">raw spectrogram</button>
+      <button class="tab" data-m="EAT">EAT</button>
+      <button class="tab" data-m="Dasheng">Dasheng</button>
+      <button class="tab" data-m="USAD">USAD</button>
+    </div>
+    <div class="selfsim-wrap"><canvas id="selfCanvas" height="340" aria-label="Every moment of the kettle compared with every other moment"></canvas></div>
+    <p class="patch-note" id="selfNote"></p>
+  </div>
+  <figcaption>The kettle compared with itself, moment by moment. Both axes are time; brighter means more alike. Hover to see which two moments a point compares.</figcaption>
+</figure>
+
+<section class="col">
+  <p>The spectrogram's map follows the sound: one big block while the boil is loudest, then another once the roar dulls and the kettle switches off. EAT and Dasheng show a grid instead. Their outputs remember where each moment sat inside its ten-second stretch: during the steady boil, two EAT outputs from the same spot in different stretches are 0.98 alike, against 0.89 for outputs half a stretch apart. Transformers are told each patch's position so they can keep track of order, and some of that survives all the way to the output. For naming a sound it barely matters. For matching moments against each other, it's noise.</p>
+  <p>Reading from a middle layer instead doesn't fix it. In EAT's middle layer the effect is even stronger (0.94 against 0.55). What does fix it is simple: work out each position's average and subtract it, which flattens the grid completely.</p>
+  <p>One re-creation isn't proof, so I rebuilt the counting test at a bigger scale: 120 clips of the boil with a short sound repeated two to eight times. I tuned each counting rule on half of them and scored it on the other half:</p>
+</section>
+
+<figure class="wide">
+  <div class="card" id="benchTable"></div>
+  <figcaption>Share of 60 rebuilt test items where the count comes out exactly right (each bar is good to about ±0.12). The dashed line is always guessing the most common count.<sup><a href="#fn5" id="r5">5</a></sup></figcaption>
+</figure>
+
+<section class="col">
+  <p>The original rule fails here too, just as it did in my test. Change only the rule and Dasheng's score roughly triples, to 0.57 by counting dips and 0.60 by matching the start of the sound with the position effect removed, ahead of raw waveform matching in the same noise. USAD improves as well. EAT stays weak, partly because it produces only about six moments per second, which is coarse for a tap.</p>
+  <p>So the models mostly <em>heard</em> the repeats. What failed was how I asked them to keep count. That's the theme for the rest of this post: hearing is the easy part, and keeping track is where things go wrong. (This is a rebuilt version of my test, on one kind of background. I haven't yet rescored the original 100 counting clips with the fixed rules.)</p>
+
+  <h2>What about a bigger model?</h2>
+  <p>At this point you might reasonably ask why I'm fiddling with listeners like these at all. There are now large audio-language models that you can hand a recording and question in plain English. They're built like this:</p>
+</section>
+
+<figure class="wide">
+  <div class="card alm" aria-label="An audio-language model: audio goes into an encoder, the encoder's output goes into a language model, which writes an answer">
+    <div class="alm-box"><b>ten minutes of audio</b><span>plus a question</span></div><div class="alm-arrow">→</div>
+    <div class="alm-box"><b>audio encoder</b><span>turns sound into tokens, like the models above</span></div><div class="alm-arrow">→</div>
+    <div class="alm-box"><b>language model</b><span>reads them alongside the question, like words</span></div><div class="alm-arrow">→</div>
+    <div class="alm-box out"><b>"none"</b><span>its most common answer</span></div>
+  </div>
+  <figcaption>How an audio-language model like Audio Flamingo 3 is put together. The encoder does the hearing, and the language model does the talking.</figcaption>
+</figure>
+
+<section class="col">
+  <p>So I tried one, Audio Flamingo 3, on a much harder version of the kettle question: a week of audio recorded continuously in one person's home,<sup><a href="#fn6" id="r6">6</a></sup> with 298 questions like whether the vacuum was on at a given moment, since when, for how long, and how many times. Each question came with ten minutes of audio.</p>
+  <p>It mostly answered "none". Overall it scored 0.19, below the 0.26 you get from a baseline that ignores the audio and always gives the most common answer. Some of that was my prompt and my scoring, so I wouldn't read much into the exact number. But it shows something about the design: the language model only sees what the encoder hands it, and nothing in either half was trained to keep time across ten minutes. I didn't test the biggest commercial models, some of which now take hours of audio at once, but a recent long-audio benchmark, TAG-Bench, finds the same weakness: when a sound repeats, even the best model it tested gets the count right only 13.2% of the time.</p>
+
+  <h2>Knowing when to listen</h2>
+  <p>Training data leaves fingerprints in other ways, too. Whisper, a popular speech-to-text model, learned from hundreds of thousands of hours of internet audio paired with whatever text came with it, much of it subtitles. I ran the small version over an hour of that same home with nobody in it, and in 49 of those 60 minutes it produced text. It kept writing the same sentence:</p>
+  <blockquote>Thank you very much for watching this video and I will see you in much for watching.</blockquote>
+  <p>This is a well-known problem, with papers written about it. A common explanation is that the end of an online video is often quiet, and the subtitles over that quiet often say exactly this, so to Whisper an empty room sounds like the end of a video. Putting a small voice-activity detector in front of it, so that Whisper only hears the parts where someone is actually talking, made the invented words disappear. That's the standard fix, and popular Whisper tools do the same. With speech mixed into the home's background noise, the word error rate fell from 25% to 4%. Whisper itself didn't change at all.</p>
+
+  <h2>Keeping a diary</h2>
+  <p>Which brings us back to the questions about time. The approach I ended up with doesn't ask a model to remember audio at all. A listener writes a diary instead: every time something changes, it notes what turned on or off, and when, and it smooths over the flicker so that one long boil becomes one entry rather than thirty.<sup><a href="#fn7" id="r7">7</a></sup></p>
+  <p>This isn't a new idea, and I didn't come up with it. In audio, it's close to what researchers call sound event detection, which has had its own yearly challenge (DCASE) for a decade: detect each sound, with a start and an end. The diary adds the smoothing and a way to ask it questions. In video, Socratic Models (2022) turned first-person footage into a running text log and answered questions by reading it, and a 2026 paper does the same with long audio recordings. (Links are in the further reading.) Once the diary exists, questions about time become arithmetic on a list. Ask the kettle's diary something:</p>
+</section>
+
+<figure class="wide">
+  <div class="card diary" data-view="diary">
+    <div class="player-top">
+      <button class="play" data-kettle="diary" aria-label="Play the kettle"><span class="play-icon"></span></button>
+      <span class="mono dim" data-time></span>
+    </div>
+    <div class="diary-strip" id="diaryStrip"></div>
+    <div class="questions" id="questions"></div>
+  </div>
+  <figcaption>Click a question to see the answer and the bit of the diary it came from. This diary comes from a simple loudness-tracking system, not the Ear.</figcaption>
+</figure>
+
+<section class="col">
+  <p>Back in the week-long home recording, a listener built on BEATs (another of the self-taught models from the family tree), with a small layer on top for household activities, wrote the diary itself. The same 298 questions were then answered from that diary:</p>
+</section>
+
+<figure class="wide">
+  <div class="card" id="memoryChart"></div>
+  <figcaption>Share of the 298 questions answered correctly, by kind of question. "Same answer each time" ignores the audio and always gives the most common answer. The diary's perfect score on "is it happening?" is too easy, because some of the "no" cases are silence.</figcaption>
+</figure>
+
+<section class="col">
+  <p>The diary gets 0.87 overall, against Audio Flamingo's 0.19 on the same questions. That's a gap of 0.68, and resampling the questions puts it between 0.63 and 0.74. The diary is weakest on "how many times?", which is the counting problem again. The surprising part was which half did the work. Handing the same diary to a general language model (Qwen) and asking in plain English only moved its score from 0.25 to 0.34. What got 0.87 was answering with small exact queries that look things up and subtract, like this one:</p>
+  <pre class="snippet">def how_long(diary, thing):
+    stretches = [e for e in diary if e.thing == thing]
+    return sum(e.end - e.start for e in stretches)
+
+how_long(kettle_diary, "boiling")   # 86.3 seconds</pre>
+  <p> Writing things down turned out to be only half of it. The other half was doing the arithmetic properly.</p>
+  <p>Treat this as a demonstration rather than a benchmark. It's one home, and the diary's vocabulary was set up for that home's activities, which Audio Flamingo didn't get. The whole system runs on an ordinary laptop processor, using about 7% of one core to keep up with a home around the clock. Plenty didn't work along the way, including a test where I'd swapped "added" and "removed", and a result that turned out to be a home memorising itself. The full list is in the appendix.</p>
+
+  <h2>Back to the kettle</h2>
+  <p>Let's play it one last time, and this time watch the diary:</p>
+</section>
+
+<figure class="wide">
+  <div class="player card dark" data-view="final">
+    <div class="player-top">
+      <button class="play" data-kettle="final" aria-label="Play the kettle"><span class="play-icon"></span></button>
+      <span class="mono dim" data-time></span>
+    </div>
+    <div class="wave-box">
+      <canvas class="kwave" height="60"></canvas>
+      <div class="ph"></div>
+    </div>
+    <ol class="log" id="log"></ol>
+  </div>
+</figure>
+
+<section class="col">
+  <p>So what does a kettle know? It depends who's listening. To the list of numbers it's 1.76 million values. The self-taught models know what a boil sounds like, but on their own they don't keep track of when this one started. The Ear, taught fifteen words, calls it a vacuum cleaner for fifty seconds. And the diary knows it switched on at 0:02.7, boiled for 86 seconds and switched itself off, which is all anyone was going to ask it.</p>
+  <p>The diary's format is a choice I made by hand: what to write down, and how. Rich Sutton's bitter lesson says hand-made choices like that tend to lose, eventually, to models that learn for themselves what's worth keeping. Which raises the question my next post is about: how do these models learn to hear in the first place, and why do different ways of teaching them produce such different ears? After that, I want to go the other way, to diffusion models that generate sound instead of describing it.</p>
+  <p>Thanks for reading!</p>
+  <p class="sign">Asad</p>
+</section>
+
+<!-- ======================================================= NOTES -->
+<section class="col notes">
+  <h3>Notes</h3>
+  <ol>
+    <li id="fn1">Your inner ear does something similar. The cochlea is a coiled tube that vibrates at different places for different pitches, so your brain receives sound already split up roughly the way a spectrogram is. The spectrograms here use 64 bands spaced the way hearing is, closer together at low pitches. <a href="#r1">↩</a></li>
+    <li id="fn2">Real audio transformers typically use 16 × 16 patches on spectrograms with 128 pitch bands and 10 ms time steps, so each patch covers about a sixth of a second. <a href="#r2">↩</a></li>
+    <li id="fn3">My original test kept each recording's full sequence of moments; only the two-second example was averaged into one summary. Peaks had to be at least 1.5 seconds apart, and the threshold was chosen on the first 50 items and scored on the last 50. <a href="#r3">↩</a></li>
+    <li id="fn4">The re-creation uses 22 seconds of the kettle's boil with a hard mug tap added six times, about twice as loud as the boil's peaks. The example is the two seconds from 1.0 to 3.0, around the first tap. "Stands well clear" means more than 2.5 robust standard deviations from the curve's median. The models are EAT, Dasheng and USAD2-Small run on CPU, and the script is build/real_models.py. <a href="#r4">↩</a></li>
+    <li id="fn5">The rebuilt test has 120 items, each 20 seconds of the kettle's boil with one short sound (a mug, glass or metal tap, a ball bounce, or a spoon clink) repeated 2 to 8 times, at least 1.5 seconds apart and at varying loudness. As in the original, the example is two seconds around the first event and repeats must be 1.5 seconds apart. Each rule's threshold is tuned on the first 60 items and scored on the other 60. "Position removed" subtracts the average output at each of the 64 (EAT) or 250 (Dasheng) positions in a stretch. The script is build/repeats_bench.py. <a href="#r5">↩</a></li>
+    <li id="fn6">SINS, a public dataset recorded continuously in one home for a week, with daily activities like cooking, washing up and vacuuming labelled. The questions cover days four to seven. <a href="#r6">↩</a></li>
+    <li id="fn7">The smoothing is a Viterbi pass. Given second-by-second guesses about whether something is on, it finds the most likely sequence of on and off stretches, so a single noisy second can't split one boil into two. <a href="#r7">↩</a></li>
+  </ol>
+</section>
+
+<section class="col reading">
+  <h3>Further reading</h3>
+  <p>Here are the papers and datasets behind this post if you want to go deeper. It's not a survey of the field, just the things I actually used or leaned on.</p>
+  <ul>
+    <li><b>Volhejn, 2025.</b> <a href="https://kyutai.org/codec-explainer/">Neural audio codecs: how to get audio into LLMs</a>. The other half of this story: how to turn audio into tokens a language model can continue. This post is about hearing and remembering; that one is about speaking.</li>
+    <li><b>Dosovitskiy et al., 2020.</b> An image is worth 16x16 words: transformers for image recognition at scale. Where cutting pictures into patches comes from.</li>
+    <li><b>Gong, Chung &amp; Glass, 2021.</b> AST: Audio Spectrogram Transformer. The same patch trick applied to spectrograms.</li>
+    <li><b>Huang et al., 2022.</b> Masked autoencoders that listen. Hide most of the patches and redraw them: the idea behind Dasheng.</li>
+    <li><b>Baevski et al., 2022.</b> Efficient self-supervised learning with contextualized target representations for vision, speech and language (data2vec 2.0). The "match the teacher" recipe that EAT builds on.</li>
+    <li><b>Koutini et al., 2021.</b> Efficient training of audio transformers with patchout (PaSST). The big transformer the small AudioSet taggers learn to copy.</li>
+    <li><b>Gemmeke et al., 2017.</b> Audio Set: an ontology and human-labeled dataset for audio events. Two million YouTube clips with sound labels, which is what the small taggers learned from.</li>
+    <li><b>Schmid, Koutini &amp; Widmer, 2023.</b> Efficient large-scale audio tagging via transformer-to-CNN knowledge distillation. The compact taggers (mn04, mn10, mn20) in the charts.</li>
+    <li><b>Chen et al., 2022.</b> BEATs: audio pre-training with acoustic tokenizers. One of the large self-taught listeners, and the one the diary system builds on.</li>
+    <li><b>Chen et al., 2024.</b> EAT: self-supervised pre-training with efficient audio transformer. The model that hears every tap as nearly the same, and the one the Ear is fine-tuned from.</li>
+    <li><b>Dinkel et al., 2024.</b> Scaling up masked audio encoder learning for general audio classification. Dasheng. (Its 0.74 emotion score in these posts is from my own test on acted voices, not from this paper.)</li>
+    <li><b>Goel et al., 2025.</b> Audio Flamingo 3: advancing audio intelligence with fully open large audio language models. The big model we asked about the week.</li>
+    <li><b>Dekkers et al., 2017.</b> The SINS database for detection of daily activities in a home environment using an acoustic sensor network. The week in one home.</li>
+    <li><b>Radford et al., 2022.</b> Robust speech recognition via large-scale weak supervision. Whisper.</li>
+    <li><b>Fitzgerald, 2010.</b> Harmonic/percussive separation using median filtering. The smooth-and-sharp trick.</li>
+    <li><b>Rabiner, 1989.</b> A tutorial on hidden Markov models and selected applications in speech recognition. Still the friendliest introduction to the Viterbi smoothing behind the diary.</li>
+    <li><b>Huh et al., 2023.</b> EPIC-SOUNDS: a large-scale dataset of actions that sound. The kitchen recordings behind the short-events results.</li>
+    <li><b>Cao et al., 2014.</b> CREMA-D: crowd-sourced emotional multimodal actors dataset. The acted voices behind the emotion scores in the appendix.</li>
+    <li><b>Mesaros, Heittola &amp; Virtanen, 2016.</b> Metrics for polyphonic sound event detection. How the sound event detection field scores "what happened, and when".</li>
+    <li><b>Bilen et al., 2020.</b> A framework for the robust evaluation of sound event detection (PSDS). The field's main metric today.</li>
+    <li><b>Koenecke et al., 2024.</b> Careless Whisper: speech-to-text hallucination harms. Whisper's invented sentences, studied properly.</li>
+    <li><b>Bain et al., 2023.</b> WhisperX: time-accurate speech transcription of long-form audio. Puts a voice detector in front of Whisper, as I did.</li>
+    <li><b>Huang et al., 2026.</b> <a href="https://arxiv.org/abs/2608.26431">LongAudioSpan</a>. Finds that perception, especially of timing, gets harder as recordings get longer.</li>
+  </ul>
+  <p>On writing things down instead of remembering:</p>
+  <ul>
+    <li><b>Zeng et al., 2022.</b> <a href="https://arxiv.org/abs/2204.00598">Socratic Models: composing zero-shot multimodal reasoning with language</a>. Turns first-person video into a text log and answers questions by reading it. The earliest clear version of the diary idea I know of.</li>
+    <li><b>2024.</b> <a href="https://arxiv.org/abs/2408.03160">User-in-the-loop evaluation of multimodal LLMs for activity assistance</a>. In a live cooking study, an assistant reading a text log of the video beat one looking at the frames directly (27.8% against 16.7% of tasks completed), although the frame-based model scored higher offline.</li>
+    <li><b>2024.</b> <a href="https://www.ecva.net/papers/eccv_2024/papers_ECCV/papers/03241.pdf">VideoAgent: a memory-augmented multimodal agent for video understanding</a> (ECCV). A structured memory of events and objects that a language model queries with tools.</li>
+    <li><b>Hegde et al., 2026.</b> <a href="https://arxiv.org/abs/2602.14612">Event-grounded question answering over long audio via structured retrieval</a>. The audio version: long recordings become timestamped events in a database, with smart-home monitoring as a target use. The closest thing to this post's diary.</li>
+    <li><b>Dai et al., 2026.</b> <a href="https://arxiv.org/abs/2609.01542">TAG-Bench: benchmarking temporal audio grounding in large audio language models</a>. Twenty-one systems asked when sounds happen. On queries where a sound occurs more than once, the best gets the count right only 13.2% of the time. Independent evidence for the counting problem.</li>
+    <li><b>Sutton, 2019.</b> <a href="http://www.incompleteideas.net/IncIdeas/BitterLesson.html">The bitter lesson</a>. Why a diary format designed by a person is probably a stepping stone, not the destination.</li>
+  </ul>
+</section>
+
+<!-- ======================================================= APPENDIX -->
+<section class="col appendix" id="appendix">
+  <h3>Appendix</h3>
+  <details>
+    <summary>Every listener, every number</summary>
+    <div class="table-scroll"><table id="allTable"></table></div>
+    <p class="small">Speed is the share of real time one CPU core needs (fp32, not quantised). "Notice", "count" and "describe the change" are F1, F2 and F4 on my test battery (125 change clips, 100 counting clips scored on the last 50, and 120 property clips); shuffled controls score 0.192, 0.130 and 0.467. "Voice emotion" is CREMA-D accuracy on 1,066 test clips with the actors held out (chance 0.167). "Kitchen" is the frame-level score on EPIC-SOUNDS, 21 classes.</p>
+  </details>
+  <details>
+    <summary>What failed, in full</summary>
+    <div class="table-scroll"><table id="failTable"></table></div>
+    <p class="small">"Void" means the test didn't measure what it was meant to (the same-home run used a home that wasn't held out). "Inconclusive" means the comparison didn't finish.</p>
+  </details>
+  <details>
+    <summary>Recordings and licences</summary>
+    <div class="table-scroll"><table id="srcTable"></table></div>
+    <p class="small">All recordings are from Freesound, transcoded to 16 kHz mono. The glass clink is CC BY 4.0 (KVV_Audio); everything else is CC0. The kettle's four states were picked out automatically from the recording's loudness envelope and checked against its description. The bouncing ball is synthesised.</p>
+  </details>
+  <details>
+    <summary>Method</summary>
+    <p class="small">Three seeds, or a confidence interval reported with the number. Sources in the test set are held out from training. Thresholds, calibration and the test pass go through one code path, and sealed test sets are opened once, inside the runner, not while exploring. The SINS memory result is one home; the cost numbers are one core in fp32, not a phone. Audio Flamingo 3 was run on an A100 on the same 298 items. The real-model figures (the five sound types, the repeat re-creation and the self-comparison maps) use the public checkpoints worstchan/EAT-base_epoch30_pretrain, mispeech/dasheng-base and MIT-SLS/USAD2-Small, run on a CPU with build/real_models.py. The tiny-model animation is build/tiny.py.</p>
+  </details>
+</section>
+
+</main>
+
+<footer class="foot">
+  <span>Asad Rizvi · 2026</span>
+  <a href="/writing/">More writing</a>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

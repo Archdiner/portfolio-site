@@ -1,0 +1,190 @@
+{
+ "n_items": 120,
+ "n_scored": 60,
+ "chance_exact": 0.25,
+ "results": {
+  "spectrogram last": {
+   "peaks": {
+    "acc": 0.117,
+    "mae": 3.4,
+    "thr": 1.5
+   },
+   "dips": {
+    "acc": 0.167,
+    "mae": 2.33,
+    "thr": 1.0
+   },
+   "onset": {
+    "acc": 0.167,
+    "mae": 3.08,
+    "thr": 2.0
+   }
+  },
+  "EAT last": {
+   "peaks": {
+    "acc": 0.017,
+    "mae": 4.45,
+    "thr": 1.0
+   },
+   "dips": {
+    "acc": 0.1,
+    "mae": 2.08,
+    "thr": 3.25
+   },
+   "onset": {
+    "acc": 0.083,
+    "mae": 2.17,
+    "thr": 1.0
+   }
+  },
+  "EAT mid": {
+   "peaks": {
+    "acc": 0.117,
+    "mae": 2.85,
+    "thr": 1.0
+   },
+   "dips": {
+    "acc": 0.317,
+    "mae": 1.07,
+    "thr": 1.0
+   },
+   "onset": {
+    "acc": 0.183,
+    "mae": 1.87,
+    "thr": 1.5
+   }
+  },
+  "EAT last, position removed": {
+   "peaks": {
+    "acc": 0.15,
+    "mae": 3.47,
+    "thr": 1.5
+   },
+   "dips": {
+    "acc": 0.167,
+    "mae": 2.1,
+    "thr": 1.0
+   },
+   "onset": {
+    "acc": 0.333,
+    "mae": 1.65,
+    "thr": 2.0
+   }
+  },
+  "Dasheng last": {
+   "peaks": {
+    "acc": 0.2,
+    "mae": 1.7,
+    "thr": 1.0
+   },
+   "dips": {
+    "acc": 0.567,
+    "mae": 0.55,
+    "thr": 4.5
+   },
+   "onset": {
+    "acc": 0.333,
+    "mae": 1.85,
+    "thr": 2.0
+   }
+  },
+  "Dasheng mid": {
+   "peaks": {
+    "acc": 0.083,
+    "mae": 1.87,
+    "thr": 1.0
+   },
+   "dips": {
+    "acc": 0.467,
+    "mae": 0.7,
+    "thr": 3.5
+   },
+   "onset": {
+    "acc": 0.133,
+    "mae": 2.17,
+    "thr": 1.75
+   }
+  },
+  "Dasheng last, position removed": {
+   "peaks": {
+    "acc": 0.1,
+    "mae": 2.13,
+    "thr": 1.0
+   },
+   "dips": {
+    "acc": 0.133,
+    "mae": 3.62,
+    "thr": 3.25
+   },
+   "onset": {
+    "acc": 0.6,
+    "mae": 0.9,
+    "thr": 3.25
+   }
+  },
+  "USAD last": {
+   "peaks": {
+    "acc": 0.083,
+    "mae": 2.67,
+    "thr": 1.0
+   },
+   "dips": {
+    "acc": 0.35,
+    "mae": 2.12,
+    "thr": 4.25
+   },
+   "onset": {
+    "acc": 0.367,
+    "mae": 2.27,
+    "thr": 2.5
+   }
+  },
+  "waveform": {
+   "peaks": {
+    "acc": 0.433,
+    "mae": 1.95,
+    "thr": 4.5
+   }
+  }
+ },
+ "position": {
+  "EAT": {
+   "last": {
+    "same": 0.984,
+    "half": 0.893
+   },
+   "mid": {
+    "same": 0.941,
+    "half": 0.547
+   },
+   "last, position removed": {
+    "same": -0.154,
+    "half": 0.001
+   }
+  },
+  "Dasheng": {
+   "last": {
+    "same": 0.767,
+    "half": 0.544
+   },
+   "mid": {
+    "same": 0.751,
+    "half": 0.549
+   },
+   "last, position removed": {
+    "same": -0.139,
+    "half": -0.036
+   }
+  }
+ },
+ "events": [
+  "tap_mug_soft",
+  "tap_mug_hard",
+  "tap_glass",
+  "tap_metal",
+  "ball",
+  "spoon0",
+  "spoon1",
+  "spoon2"
+ ]
+}

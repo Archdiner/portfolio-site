@@ -176,6 +176,9 @@ const App = () => (
           <a href="mailto:sar367@cornell.edu" className="group inline-flex items-center gap-1.5 text-[15px] font-medium text-blood">
             <Mail size={15} /> <span className="link-ul">sar367@cornell.edu</span>
           </a>
+          <a href="/writing/" className="inline-flex items-center gap-1 text-[14px] text-ink/80 hover:text-blood transition-colors">
+            <span className="link-ul">Writing</span>
+          </a>
           {CONTACTS.map(({ label, href }) => (
             <NavLink key={label} href={href}>{label}</NavLink>
           ))}
