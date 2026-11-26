@@ -408,7 +408,7 @@
     <li id="fn2">Real audio transformers typically use 16 × 16 patches on spectrograms with 128 pitch bands and 10 ms time steps, so each patch covers about a sixth of a second. <a href="#r2">↩</a></li>
     <li id="fn3">The lab model is a two-layer transformer with 32-number tokens, about 20,000 parameters, ending in two numbers per window. Each window is half a second of spectrogram (8 time steps × 64 bands) cut into 8 patches. Each run is 1,500 steps of 128 windows with Adam. "Hiding" masks 75% of the patches. The codebook has 16 entries from k-means over all patches. The teacher is a moving average of the student (0.99 per step), with its outputs normalised across each batch. The expert targets are the real Dasheng's outputs averaged over each window. Scores are on 180 windows held out from training, and count how often a window's two numbers sit closest to the average of its own kind. The script is build/lab.py. <a href="#r3">↩</a></li>
     <li id="fn4">These are the cosine similarities between clip embeddings, each averaged over its patches. Each tap was loudness-matched and trimmed to three quarters of a second first. <a href="#r4">↩</a></li>
-    <li id="fn5">Materials is the similarity between the soft mug tap and the metal bowl, where lower means it hears more difference (only measured for four listeners). Kitchen events is the frame-level score on EPIC-SOUNDS (21 classes). Voice emotion is CREMA-D accuracy with the actors held out (chance 0.17). Noticing a change is the change-detection score on 345 clips (luck 0.19). Every number is in the appendix. <a href="#r5">↩</a></li>
+    <li id="fn5">Materials is the similarity between the soft mug tap and the metal bowl, where lower means it hears more difference (only measured for four listeners). Kitchen events is the frame-level score on EPIC-SOUNDS (21 classes). Voice emotion is CREMA-D accuracy with the actors held out (chance 0.17). Noticing a change is the change-detection score on 125 clips (luck 0.19). Every number is in the appendix. <a href="#r5">↩</a></li>
   </ol>
 </section>
 
@@ -427,7 +427,7 @@
     <li><b>Schmid, Koutini &amp; Widmer, 2023.</b> Efficient large-scale audio tagging via transformer-to-CNN knowledge distillation. The compact taggers (mn04, mn10, mn20) in the charts.</li>
     <li><b>Chen et al., 2022.</b> BEATs: audio pre-training with acoustic tokenizers. The "name the code" model.</li>
     <li><b>Chen et al., 2024.</b> EAT: self-supervised pre-training with efficient audio transformer. The model that hears every tap as nearly the same, and the one the Ear is fine-tuned from.</li>
-    <li><b>Dinkel et al., 2024.</b> Scaling up masked audio encoder learning for general audio classification. Dasheng, the best of the bunch at hearing emotion in a voice.</li>
+    <li><b>Dinkel et al., 2024.</b> Scaling up masked audio encoder learning for general audio classification. Dasheng. (Its 0.74 emotion score in these posts is from my own test on acted voices, not from this paper.)</li>
     <li><b>Huh et al., 2023.</b> EPIC-SOUNDS: a large-scale dataset of actions that sound. The kitchen events column of the report card.</li>
     <li><b>Cao et al., 2014.</b> CREMA-D: crowd-sourced emotional multimodal actors dataset. The emotion-in-a-voice column of the report card.</li>
   </ul>
@@ -439,7 +439,7 @@
   <details>
     <summary>Every listener, every number</summary>
     <div class="table-scroll"><table id="allTable"></table></div>
-    <p class="small">Speed is the share of real time one CPU core needs (fp32, not quantised). "Notice", "count" and "describe the change" are F1, F2 and F4 on the 345-clip change test; shuffled controls score 0.192, 0.130 and 0.467. "Voice emotion" is CREMA-D accuracy on 1,066 test clips with the actors held out (chance 0.167). "Kitchen" is the frame-level score on EPIC-SOUNDS, 21 classes.</p>
+    <p class="small">Speed is the share of real time one CPU core needs (fp32, not quantised). "Notice", "count" and "describe the change" are F1, F2 and F4 on my test battery (125 change clips, 100 counting clips scored on the last 50, and 120 property clips); shuffled controls score 0.192, 0.130 and 0.467. "Voice emotion" is CREMA-D accuracy on 1,066 test clips with the actors held out (chance 0.167). "Kitchen" is the frame-level score on EPIC-SOUNDS, 21 classes.</p>
   </details>
   <details>
     <summary>Recordings and licences</summary>

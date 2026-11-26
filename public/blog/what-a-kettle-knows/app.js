@@ -460,8 +460,8 @@ function buildSkills() {
   const count = rows("g1_f2");
   count.push({ label: "Waveform match", v: S.results.g1.f2_ncc, color: C.ink, strong: true });
   $("#skillsChart").innerHTML = `<div class="skills">${
-    barPanel({ title: "Did it notice the change?", sub: "345 clips · 1 is perfect", rows: rows("g1_f1"), floor: 0.192, floorLabel: "luck" })}${
-    barPanel({ title: "Could it find the repeats?", sub: "same clips · 1 is perfect", rows: count, floor: 0.13, floorLabel: "luck" })}</div>`;
+    barPanel({ title: "Did it notice the change?", sub: "125 clips · 1 is perfect", rows: rows("g1_f1"), floor: 0.192, floorLabel: "luck" })}${
+    barPanel({ title: "Could it find the repeats?", sub: "100 clips, last 50 scored", rows: count, floor: 0.13, floorLabel: "luck" })}</div>`;
 }
 
 /* ------------------------------------------------------------------ bounce */
@@ -1049,7 +1049,7 @@ function buildReport() {
     ["china vs metal", "lower = hears the difference", (id) => (M[id] ? M[id][0][3] : null), "min"],
     ["kitchen events", "EPIC-SOUNDS", (id) => E[id].epic_dense, "max"],
     ["emotion in a voice", "CREMA-D", (id) => E[id].cremad, "max"],
-    ["notices a change", "345 clips", (id) => E[id].g1_f1, "max"],
+    ["notices a change", "125 clips", (id) => E[id].g1_f1, "max"],
     ["size", "million parameters", (id) => E[id].params_m, null],
   ];
   const cell = (v, col) => {

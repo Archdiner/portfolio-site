@@ -252,12 +252,12 @@
 </figure>
 
 <section class="col">
-  <p>On a clean recording, matching the raw waveform works almost perfectly. Each bounce lines up with the first one and makes a sharp peak. I ran this over 345 short test clips. Alongside it, I checked something easier: whether each model noticed that the scene changed at all.</p>
+  <p>On a clean recording, matching the raw waveform works almost perfectly. Each bounce lines up with the first one and makes a sharp peak. I ran this over 100 counting clips, tuning on the first 50 and scoring on the last 50. On another 125 clips I checked something easier: whether each model noticed that the scene changed at all.</p>
 </section>
 
 <figure class="wide">
   <div class="card" id="skillsChart"></div>
-  <figcaption>Scores on my 345-clip test, using its original counting rule. Dashed lines mark luck.</figcaption>
+  <figcaption>Scores from my test, using its original counting rule. Dashed lines mark luck.</figcaption>
 </figure>
 
 <section class="col">
@@ -312,7 +312,7 @@
 
 <section class="col">
   <p>The original rule fails here too, just as it did in my test. Change only the rule and Dasheng's score roughly triples, to 0.57 by counting dips and 0.60 by matching the start of the sound with the position effect removed, ahead of raw waveform matching in the same noise. USAD improves as well. EAT stays weak, partly because it produces only about six moments per second, which is coarse for a tap.</p>
-  <p>So the models mostly <em>heard</em> the repeats. What failed was how I asked them to keep count. That's the theme for the rest of this post: hearing is the easy part, and keeping track is where things go wrong. (This is a rebuilt version of my test, on one kind of background. I haven't yet rerun the original 345 clips with the fixed rules.)</p>
+  <p>So the models mostly <em>heard</em> the repeats. What failed was how I asked them to keep count. That's the theme for the rest of this post: hearing is the easy part, and keeping track is where things go wrong. (This is a rebuilt version of my test, on one kind of background. I haven't yet rescored the original 100 counting clips with the fixed rules.)</p>
 
   <h2>What about a bigger model?</h2>
   <p>At this point you might reasonably ask why I'm fiddling with listeners like these at all. There are now large audio-language models that you can hand a recording and question in plain English. They're built like this:</p>
@@ -330,7 +330,7 @@
 
 <section class="col">
   <p>So I tried one, Audio Flamingo 3, on a much harder version of the kettle question: a week of audio recorded continuously in one person's home,<sup><a href="#fn6" id="r6">6</a></sup> with 298 questions like whether the vacuum was on at a given moment, since when, for how long, and how many times. Each question came with ten minutes of audio.</p>
-  <p>It mostly answered "none". Overall it scored 0.19, below the 0.26 you get from a baseline that ignores the audio and always gives the most common answer. Some of that was my prompt and my scoring, so I wouldn't read much into the exact number. But it shows something about the design: the language model only sees what the encoder hands it, and nothing in either half was trained to keep time across ten minutes. I didn't test the biggest commercial models, some of which now take hours of audio at once, but recent benchmarks of long audio find the same weakness: even the best models get the count right less than 14% of the time when a sound repeats.</p>
+  <p>It mostly answered "none". Overall it scored 0.19, below the 0.26 you get from a baseline that ignores the audio and always gives the most common answer. Some of that was my prompt and my scoring, so I wouldn't read much into the exact number. But it shows something about the design: the language model only sees what the encoder hands it, and nothing in either half was trained to keep time across ten minutes. I didn't test the biggest commercial models, some of which now take hours of audio at once, but a recent long-audio benchmark, TAG-Bench, finds the same weakness: when a sound repeats, even the best model it tested gets the count right only 13.2% of the time.</p>
 
   <h2>Knowing when to listen</h2>
   <p>Training data leaves fingerprints in other ways, too. Whisper, a popular speech-to-text model, learned from hundreds of thousands of hours of internet audio paired with whatever text came with it, much of it subtitles. I ran the small version over an hour of that same home with nobody in it, and in 49 of those 60 minutes it produced text. It kept writing the same sentence:</p>
@@ -426,7 +426,7 @@ how_long(kettle_diary, "boiling")   # 86.3 seconds</pre>
     <li><b>Schmid, Koutini &amp; Widmer, 2023.</b> Efficient large-scale audio tagging via transformer-to-CNN knowledge distillation. The compact taggers (mn04, mn10, mn20) in the charts.</li>
     <li><b>Chen et al., 2022.</b> BEATs: audio pre-training with acoustic tokenizers. One of the large self-taught listeners, and the one the diary system builds on.</li>
     <li><b>Chen et al., 2024.</b> EAT: self-supervised pre-training with efficient audio transformer. The model that hears every tap as nearly the same, and the one the Ear is fine-tuned from.</li>
-    <li><b>Dinkel et al., 2024.</b> Scaling up masked audio encoder learning for general audio classification. Dasheng, the best of the bunch at hearing emotion in a voice.</li>
+    <li><b>Dinkel et al., 2024.</b> Scaling up masked audio encoder learning for general audio classification. Dasheng. (Its 0.74 emotion score in these posts is from my own test on acted voices, not from this paper.)</li>
     <li><b>Goel et al., 2025.</b> Audio Flamingo 3: advancing audio intelligence with fully open large audio language models. The big model we asked about the week.</li>
     <li><b>Dekkers et al., 2017.</b> The SINS database for detection of daily activities in a home environment using an acoustic sensor network. The week in one home.</li>
     <li><b>Radford et al., 2022.</b> Robust speech recognition via large-scale weak supervision. Whisper.</li>
@@ -438,16 +438,15 @@ how_long(kettle_diary, "boiling")   # 86.3 seconds</pre>
     <li><b>Bilen et al., 2020.</b> A framework for the robust evaluation of sound event detection (PSDS). The field's main metric today.</li>
     <li><b>Koenecke et al., 2024.</b> Careless Whisper: speech-to-text hallucination harms. Whisper's invented sentences, studied properly.</li>
     <li><b>Bain et al., 2023.</b> WhisperX: time-accurate speech transcription of long-form audio. Puts a voice detector in front of Whisper, as I did.</li>
-    <li><b>2026.</b> <a href="https://arxiv.org/abs/2609.01542">TAG-Bench: benchmarking temporal audio grounding in large audio language models</a>. Even the best of 21 systems counts repeated sounds correctly less than 14% of the time.</li>
-    <li><b>2026.</b> <a href="https://arxiv.org/abs/2608.26431">LongAudioSpan</a>. Another long-audio benchmark that finds models losing track as recordings get longer.</li>
+    <li><b>Huang et al., 2026.</b> <a href="https://arxiv.org/abs/2608.26431">LongAudioSpan</a>. Finds that perception, especially of timing, gets harder as recordings get longer.</li>
   </ul>
   <p>On writing things down instead of remembering:</p>
   <ul>
     <li><b>Zeng et al., 2022.</b> <a href="https://arxiv.org/abs/2204.00598">Socratic Models: composing zero-shot multimodal reasoning with language</a>. Turns first-person video into a text log and answers questions by reading it. The earliest clear version of the diary idea I know of.</li>
-    <li><b>2024.</b> <a href="https://arxiv.org/abs/2408.03160">User-in-the-loop evaluation of multimodal LLMs for activity assistance</a>. Finds that the text-log approach beats models looking at frames directly when a task needs a long history, including in a live cooking study.</li>
+    <li><b>2024.</b> <a href="https://arxiv.org/abs/2408.03160">User-in-the-loop evaluation of multimodal LLMs for activity assistance</a>. In a live cooking study, an assistant reading a text log of the video beat one looking at the frames directly (27.8% against 16.7% of tasks completed), although the frame-based model scored higher offline.</li>
     <li><b>2024.</b> <a href="https://www.ecva.net/papers/eccv_2024/papers_ECCV/papers/03241.pdf">VideoAgent: a memory-augmented multimodal agent for video understanding</a> (ECCV). A structured memory of events and objects that a language model queries with tools.</li>
-    <li><b>2026.</b> <a href="https://arxiv.org/abs/2602.14612">Event-grounded question answering over long audio via structured retrieval</a>. The audio version: long recordings become timestamped events in a database, with smart-home monitoring as a target use. The closest thing to this post's diary.</li>
-    <li><b>2026.</b> <a href="https://arxiv.org/abs/2609.01542">TAG-Bench: benchmarking temporal audio grounding in large audio language models</a>. Twenty-one systems asked when sounds happen, with the best model counting repeated sounds correctly under 14% of the time. Independent evidence for the counting problem.</li>
+    <li><b>Hegde et al., 2026.</b> <a href="https://arxiv.org/abs/2602.14612">Event-grounded question answering over long audio via structured retrieval</a>. The audio version: long recordings become timestamped events in a database, with smart-home monitoring as a target use. The closest thing to this post's diary.</li>
+    <li><b>Dai et al., 2026.</b> <a href="https://arxiv.org/abs/2609.01542">TAG-Bench: benchmarking temporal audio grounding in large audio language models</a>. Twenty-one systems asked when sounds happen. On queries where a sound occurs more than once, the best gets the count right only 13.2% of the time. Independent evidence for the counting problem.</li>
     <li><b>Sutton, 2019.</b> <a href="http://www.incompleteideas.net/IncIdeas/BitterLesson.html">The bitter lesson</a>. Why a diary format designed by a person is probably a stepping stone, not the destination.</li>
   </ul>
 </section>
@@ -458,7 +457,7 @@ how_long(kettle_diary, "boiling")   # 86.3 seconds</pre>
   <details>
     <summary>Every listener, every number</summary>
     <div class="table-scroll"><table id="allTable"></table></div>
-    <p class="small">Speed is the share of real time one CPU core needs (fp32, not quantised). "Notice", "count" and "describe the change" are F1, F2 and F4 on the 345-clip change test; shuffled controls score 0.192, 0.130 and 0.467. "Voice emotion" is CREMA-D accuracy on 1,066 test clips with the actors held out (chance 0.167). "Kitchen" is the frame-level score on EPIC-SOUNDS, 21 classes.</p>
+    <p class="small">Speed is the share of real time one CPU core needs (fp32, not quantised). "Notice", "count" and "describe the change" are F1, F2 and F4 on my test battery (125 change clips, 100 counting clips scored on the last 50, and 120 property clips); shuffled controls score 0.192, 0.130 and 0.467. "Voice emotion" is CREMA-D accuracy on 1,066 test clips with the actors held out (chance 0.167). "Kitchen" is the frame-level score on EPIC-SOUNDS, 21 classes.</p>
   </details>
   <details>
     <summary>What failed, in full</summary>
