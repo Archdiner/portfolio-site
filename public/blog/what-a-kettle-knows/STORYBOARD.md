@@ -55,3 +55,4 @@ listener keeps a diary of what turned on and off, and when, instead of captionin
 - End on an open question about the field, then annotated further reading.
 - Credit prior work where the idea comes up (Kyutai does this with RVQ): Socratic Models, the 2024 activity-assistance study, VideoAgent, LA-RAG.
 - Close on the bitter lesson: the diary format is designed by a person, so treat it as the bar for end-to-end models to beat, not the destination.
+- Frame it as a first exploratory dive into audio research: the labeling/diary idea felt intuitive, building it showed its limits, and the post closes by pointing to self-supervised training and diffusion as what comes next.
