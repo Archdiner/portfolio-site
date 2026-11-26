@@ -31,7 +31,7 @@
     <div class="hero-copy">
       <p class="eyebrow">Research note 01 · November 2026 · draft wireframe</p>
       <h1>What a<br>Kettle Knows</h1>
-      <p class="dek">[DEK — one sentence. Candidate: “You recognise this sound in half a second. The hard part is everything that comes after recognition.”]</p>
+      <p class="dek">You recognise this sound in half a second. Everything interesting happens after that.</p>
       <div class="byline">
         <span>Asad Rizvi</span>
         <span class="dot">·</span>
@@ -39,7 +39,8 @@
         <span class="dot">·</span>
         <span class="pill good">1 kettle · 4 taps · 8 encoders</span>
       </div>
-      <p class="bracket">[OPENING — Do not explain the project yet. Press play on the kettle below and let the reader recognise it. Then the turn: you know what this is, but how? What did the microphone actually receive, what would a model call it, and what would it have to remember ten minutes later?]</p>
+      <p class="prose">Press play. You will know what it is before the first second is over: a kettle, coming to the boil, switching itself off.</p>
+      <p class="prose">That recognition is not one act. It is a stack of inferences — about an object, an action, a state, and a likely future — compressed into a feeling of obviousness. This essay takes the stack apart, one layer at a time, using the same recording throughout. What did the microphone actually receive? What would a model call it? And what would a machine have to remember ten minutes later to answer a question about it?</p>
     </div>
 
     <div class="hero-listen" id="heroListen">
@@ -54,7 +55,7 @@
       </div>
       <canvas id="heroWave" height="120"></canvas>
       <div class="hero-listen-foot">
-        <span class="mono">0:00 / 1:50</span>
+        <span class="mono" id="heroTime">0:00 / 1:50</span>
         <button id="heroReveal" class="reveal-btn">reveal what it is</button>
       </div>
     </div>
@@ -71,7 +72,7 @@
     <div class="section-head">
       <p class="eyebrow">01 · the recording</p>
       <h2>One kettle, three states</h2>
-      <p class="bracket">[SECTION INTENT — Establish the spine. One continuous CC0 recording: silence, a switch, a ramp, a long boil, a click, silence. The reader should hear a state machine before seeing any model. The next twelve sections all return to this waveform.]</p>
+      <p class="prose">The recording is ordinary on purpose. A kettle is switched on, heats for ten seconds, boils for a minute and a half, and clicks off. Four states, two transients, one object. Everything the rest of this essay asks about is already present in that cycle: a sustained sound that changes slowly, short events with sharp edges, and a sequence that only means anything if you were there for all of it.</p>
     </div>
 
     <div class="desk" id="desk">
@@ -120,10 +121,10 @@
       </div>
     </div>
 
-    <div class="caption bracket">[CAPTION — Name the three states and the two clicks. The switch is a transient; the boil is a sustained texture that decays; the auto-off is a second transient followed by silence. Everything later is a different way of asking about those four things.]</div>
+    <div class="caption prose">Two clicks and a texture. The switch-on is a transient; the boil is a sustained sound whose energy decays as the water settles; the auto-off is a second transient followed by silence. Once you can hear the states, every later section is a different way of asking what they were.</div>
 
     <div class="asset-note">
-      <p class="bracket">[ASSET PLAN — The full 3:27 “making tea” recording is linked in the sources table, not used as the spine: its first two minutes are room tone. The kettle is the cleanest complete state cycle. Cup, stir and pour are close-ups from the same activity.]</p>
+      <p class="prose">The full three-and-a-half-minute recording of making tea is in the sources table. It is not the spine: its first two minutes are room tone. The kettle is the cleanest complete cycle in the set. The cup, the spoon and the pour are close-ups from the same activity, and they come back later when one long sound is not enough to ask the question.</p>
       <div class="mini-clips" id="miniClips"></div>
     </div>
   </section>
@@ -133,25 +134,25 @@
     <div class="section-head">
       <p class="eyebrow">02 · recognition</p>
       <h2>You know what it is. The model has a different vocabulary.</h2>
-      <p class="bracket">[SECTION INTENT — The gap is not perception, it is naming. A human says “kettle” or “making tea”; the ear says light switch, running water, coffee machine, vacuum cleaner. Neither is wrong. Show the labels side by side and make the reader ask what a label is for.]</p>
+      <p class="prose">The gap between you and the model is not perception. It is naming. Asked what is happening, you say “making tea” — an object, an action, a goal and a social script in two words. Asked the same question, the ear offers the only vocabulary it has: a light switch, running water, a coffee machine, a vacuum cleaner.</p>
     </div>
 
     <div class="tag-compare">
       <div class="card human">
         <p class="eyebrow">human label</p>
         <div class="big-label">making tea</div>
-        <p class="bracket">[NOTE — One label covers an object, an action, a goal, and a social script. The label is not in the audio.]</p>
+        <p class="prose">None of those four ingredients is in the audio. “Making tea” is a label about a person, a kitchen and an intention. The model’s labels are about sounds.</p>
       </div>
       <div class="card">
         <p class="eyebrow">Ear v1 · 15 home classes</p>
         <div id="earTags" class="ear-tags"></div>
-        <p class="bracket">[NOTE — The model was trained on home sound events, not rituals. It has no class for “kettle” or “tea”. The switch is heard as a light switch; the boil as a vacuum cleaner.]</p>
+        <p class="prose">The ear was trained on home sound events, not rituals. It has no class for kettle or tea, so the switch becomes a light switch and the boil becomes a vacuum cleaner. This is not a failure of hearing. It is a mismatch of vocabularies — and the first hint that a useful listener needs more than a classifier.</p>
       </div>
     </div>
 
     <figure class="card">
       <div id="tagTimeline"></div>
-      <figcaption class="bracket">[FIGURE 1 — The same 1:50, two label sets. Human states on top, ear predictions below. The reader should see that the events line up even when the words do not.]</figcaption>
+      <figcaption class="prose">The same minute fifty, labelled twice. Human states on top, ear predictions below. The events line up even where the words do not — which is the point: timing survives, vocabulary does not.</figcaption>
     </figure>
 
     <div class="callout card">

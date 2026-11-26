@@ -125,18 +125,28 @@ function wireKeys() {
 }
 
 /* ---------------------------------------------------------------- audio core */
-let audio, heroBase, deskBase;
+let audio, heroBase, deskBase, heroAccent, deskAccent;
+
+function bakeWave(cv, peaks, bg) {
+  const midline = "rgba(241,234,220,.10)";
+  drawWave(cv, peaks, "#6fbfa8", bg, midline);
+  const base = snapshot(cv);
+  drawWave(cv, peaks, "#f3a27f", bg, midline);
+  const accent = snapshot(cv);
+  drawWave(cv, peaks, "#6fbfa8", bg, midline);
+  return { base, accent };
+}
 
 function buildHero() {
   const cv = $("#heroWave");
-  drawWave(cv, state.kettle.peaks, "#6fbfa8", "#171614", "rgba(241,234,220,.10)");
-  heroBase = snapshot(cv);
+  const baked = bakeWave(cv, state.kettle.peaks, "#171614");
+  heroBase = baked.base; heroAccent = baked.accent;
   $("#heroPlay").addEventListener("click", () => { togglePlay(); });
   $("#heroReveal").addEventListener("click", revealHero);
   addEventListener("scroll", debounce(() => {
     if ($("#heroListen").getBoundingClientRect().bottom > 0) {
-      drawWave(cv, state.kettle.peaks, "#6fbfa8", "#171614", "rgba(241,234,220,.10)");
-      heroBase = snapshot(cv); progressWaves();
+      const again = bakeWave(cv, state.kettle.peaks, "#171614");
+      heroBase = again.base; heroAccent = again.accent; progressWaves();
     }
   }, 200));
 }
@@ -172,8 +182,8 @@ function buildDesk() {
 
 function drawDesk() {
   const c = clip();
-  drawWave($("#wave"), c.peaks, "#6fbfa8", "#171614", "rgba(241,234,220,.10)");
-  deskBase = snapshot($("#wave"));
+  const baked = bakeWave($("#wave"), c.peaks, "#171614");
+  deskBase = baked.base; deskAccent = baked.accent;
   drawSpec($("#spec"), c.spec);
   drawStages(c);
   drawLane(c);
@@ -231,6 +241,7 @@ function syncAll() {
   $("#playhead").style.left = `${f * 100}%`;
   $("#dockProgress").style.width = `${f * 100}%`;
   $("#dockTime").textContent = `${clock(t)} / ${clock(d)}`;
+  if ($("#heroTime")) $("#heroTime").textContent = `${clock(t)} / ${clock(d)}`;
   const active = clip().events.filter((e) => t >= e.start && t <= e.end);
   const label = active.length ? [...new Set(active.map((e) => e.text || e.label))].join(" · ") : "—";
   $("#nowEvent").textContent = label;
@@ -245,12 +256,13 @@ function progressWaves(f = Math.min(1, (audio.currentTime || 0) / (audio.duratio
     const cv = $(sel);
     if (!cv) return;
     const base = sel === "#heroWave" ? heroBase : deskBase;
+    const accent = sel === "#heroWave" ? heroAccent : deskAccent;
     const g = cv.getContext("2d");
     const dpr = window.devicePixelRatio || 1;
     if (base) g.drawImage(base, 0, 0, cv.width / dpr, cv.height / dpr);
-    if (f > 0) {
+    if (f > 0 && accent) {
       g.save(); g.beginPath(); g.rect(0, 0, (cv.width / dpr) * f, cv.height / dpr); g.clip();
-      g.fillStyle = "#f3a27f"; g.fillRect(0, 0, (cv.width / dpr) * f, cv.height / dpr); g.restore();
+      g.drawImage(accent, 0, 0, cv.width / dpr, cv.height / dpr); g.restore();
     }
   });
 }

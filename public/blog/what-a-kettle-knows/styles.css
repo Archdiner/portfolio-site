@@ -50,6 +50,16 @@ button{cursor:pointer}
   padding:2px 0 2px 12px;
 }
 .bracket p + p{margin-top:8px}
+.prose{
+  font:400 16.5px/1.72 var(--f-body);
+  color:#2c2923;
+  max-width:66ch;
+  margin-top:18px;
+  letter-spacing:-.003em;
+}
+.prose + .prose{margin-top:14px}
+.caption.prose{max-width:72ch;color:var(--muted);font-size:14.5px;line-height:1.6;margin-top:16px}
+figcaption.prose{max-width:72ch;color:var(--muted);font-size:14.5px;line-height:1.6;margin-top:14px}
 
 /* progress */
 .progress{position:fixed;top:0;left:0;height:2px;background:var(--blood);width:0;z-index:80}

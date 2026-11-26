@@ -1,8 +1,8 @@
 # What a Kettle Knows — plan and debrief
 
-**Status:** wireframe v0.2 (tea cut). Prose is deliberately placeheld; all assets and
-interactions are real. Branch: `blog/what-a-kettle-knows`. Public build:
-<https://what-a-kettle-knows.vercel.app>.
+**Status:** wireframe v0.3. Hero, opening and sections 01–02 now have real prose; sections
+03–15 and the appendix are still bracketed. Branch: `blog/what-a-kettle-knows`. Public
+build: <https://what-a-kettle-knows.vercel.app>.
 
 ## 1. The thesis
 

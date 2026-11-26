@@ -1,13 +1,21 @@
 # What a Kettle Knows — wireframe
 
-A standalone, static wireframe for the first research post. The prose is deliberately
-placeheld in bracketed notes; every chart, player, spectrogram and interaction is real.
+A standalone, static wireframe for the first research post. Most prose is still placeheld
+in bracketed notes; every chart, player, spectrogram and interaction is real. The first
+prose pass covers the hero, the opening and sections 01–02; everything after that is
+still bracketed.
 
 **Live path:** `/blog/what-a-kettle-knows/`
 
 **Public build:** <https://what-a-kettle-knows.vercel.app>
 
 **Plan and debrief:** [PLAN.md](PLAN.md)
+
+## Lineage
+
+This copy supersedes `drafts/what-a-kettle-knows/` on the parked branch
+`wireframe/what-a-kettle-knows`. That folder was an earlier snapshot kept so a cloud
+session could keep editing; it is now a pointer only. Edit here, not there.
 
 ## What is real
 
