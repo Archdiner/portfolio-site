@@ -319,3 +319,6 @@ table.rc td.rc-how{color:var(--muted)}
 }
 .bench>div{min-width:0}
 .tb.four .tl{min-width:0}
+
+.snippet{margin:0 0 1.05em;background:#1b1916;color:#e9e1d2;border-radius:8px;padding:12px 16px;font:400 13px/1.6 var(--mono);overflow-x:auto;white-space:pre}
+#selfCanvas{cursor:crosshair}

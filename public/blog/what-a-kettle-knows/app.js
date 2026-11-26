@@ -49,7 +49,8 @@ async function boot() {
   run("#tiny", buildTiny);
   run("#flipChart", buildFlip);
   run("#curve", buildCurve);
-  run("#realMaps", buildReal);
+  run("#realMaps, #selfSim, #repeats", buildReal);
+  run("#benchTable", buildBenchTable);
   run("#diaryStrip", buildDiary);
   run("#memoryChart", buildMemory);
   run("#costChart", buildCost);
@@ -849,8 +850,8 @@ const SELF_NOTES = {
 };
 async function buildReal() {
   RM.d = await json("real_models");
-  $("#realLegend").innerHTML = RM.d.maps.classes.map((c, i) => `<span><i style="background:${TINY_COLORS[i]}"></i>${esc(c)}</span>`).join("");
-  $$("#realTabs .tab").forEach((b) => b.addEventListener("click", () => { RM.map = b.dataset.m; $$("#realTabs .tab").forEach((x) => x.classList.toggle("on", x === b)); drawRealMap(); }));
+  if ($("#realLegend")) $("#realLegend").innerHTML = RM.d.maps.classes.map((c, i) => `<span><i style="background:${TINY_COLORS[i]}"></i>${esc(c)}</span>`).join("");
+  if ($("#realTabs")) $$("#realTabs .tab").forEach((b) => b.addEventListener("click", () => { RM.map = b.dataset.m; $$("#realTabs .tab").forEach((x) => x.classList.toggle("on", x === b)); drawRealMap(); }));
   if ($("#simModelTabs")) $$("#simModelTabs .tab").forEach((b) => b.addEventListener("click", () => { RM.self = b.dataset.m; $$("#simModelTabs .tab").forEach((x) => x.classList.toggle("on", x === b)); drawSelf(); }));
   $$("#repMode .tab").forEach((b) => b.addEventListener("click", () => { RM.mode = b.dataset.mode; $$("#repMode .tab").forEach((x) => x.classList.toggle("on", x === b)); drawRepeats(); }));
   if ($("#repeats")) {
@@ -860,11 +861,11 @@ async function buildReal() {
   RM.audio.addEventListener("pause", () => $("#repPlay").classList.remove("on"));
   }
   drawRealMap();
-  if ($("#selfSim")) drawSelf();
+  if ($("#selfSim")) { drawSelf(); wireSelfHover(); }
   if ($("#repeats")) drawRepeats();
 }
 function drawRealMap() {
-  if (!RM.d) return;
+  if (!RM.d || !$("#realCanvas")) return;
   const m = RM.d.maps.models[RM.map], y = RM.d.maps.labels, cv = $("#realCanvas"), { g, w, h } = sizeCanvas(cv);
   let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
   m.z.forEach(([a, b]) => { x0 = Math.min(x0, a); x1 = Math.max(x1, a); y0 = Math.min(y0, b); y1 = Math.max(y1, b); });
@@ -875,7 +876,7 @@ function drawRealMap() {
   $("#realNote").innerHTML = `<b>${Math.round(m.acc * 100)}% of windows sit closest to their own kind.</b> ${esc(REAL_NOTES[RM.map])}`;
 }
 function drawSelf() {
-  if (!RM.d) return;
+  if (!RM.d || !$("#selfCanvas")) return;
   const s = RM.d.selfsim.maps[RM.self], cv = $("#selfCanvas");
   const side = Math.min(cv.parentElement.clientWidth || 340, 340);
   cv.style.width = side + "px"; cv.setAttribute("height", side);
@@ -1061,6 +1062,49 @@ function buildReport() {
   };
   $("#report").innerHTML = `<p class="chart-title">The report card</p><div class="table-scroll"><table class="rc"><thead><tr><th>listener</th><th>trained by</th>${cols.map((c) => `<th>${c[0]}<small>${c[1]}</small></th>`).join("")}</tr></thead><tbody>${
     rows.map(([name, how, id]) => `<tr><td><b>${name}</b></td><td class="rc-how">${how}</td>${cols.map((c) => cell(c[2](id), c)).join("")}</tr>`).join("")}</tbody></table></div>`;
+}
+
+
+/* ------------------------------------------------------------------ every-moment map: hover readout */
+function wireSelfHover() {
+  const cv = $("#selfCanvas"); if (!cv || cv.dataset.hover) return; cv.dataset.hover = 1;
+  cv.addEventListener("mousemove", (e) => {
+    if (!RM.d) return;
+    const s = RM.d.selfsim.maps[RM.self], r = cv.getBoundingClientRect(), n = s.n;
+    const i = Math.min(n - 1, Math.floor(((e.clientY - r.top) / r.height) * n)), j = Math.min(n - 1, Math.floor(((e.clientX - r.left) / r.width) * n));
+    const raw = (RM.raw = RM.raw || {}), key = RM.self;
+    if (!raw[key]) raw[key] = Uint8Array.from(atob(s.b64), (c) => c.charCodeAt(0));
+    const v = raw[key][i * n + j] / 255, dur = RM.d.selfsim.duration;
+    const word = v > 0.8 ? "very alike" : v > 0.55 ? "fairly alike" : v > 0.3 ? "somewhat different" : "very different";
+    $("#selfNote").textContent = `${clock((i / n) * dur)} and ${clock((j / n) * dur)}: ${word} to ${RM.self === "spectrogram" ? "the raw spectrogram" : RM.self}.`;
+  });
+  cv.addEventListener("mouseleave", () => { $("#selfNote").textContent = SELF_NOTES[RM.self]; });
+}
+
+/* ------------------------------------------------------------------ rebuilt counting test */
+async function buildBenchTable() {
+  const d = await json("repeats_bench"), R = d.results;
+  const rules = [["peaks", "last", "original rule", "#c9bca4"], ["dips", "last", "count the dips", C.teal], ["onset", "last, position removed", "match the start, position removed", C.blood]];
+  const rows = [["Dasheng", "Dasheng"], ["USAD", "USAD"], ["EAT", "EAT"], ["raw spectrogram", "spectrogram"]];
+  const W = 640, labelW = 130, bh = 11, gap = 3, gh = rules.length * (bh + gap) + 14, top = 34, H = top + rows.length * gh + 40;
+  const X = (v) => labelW + v * (W - labelW - 50);
+  let b = rules.map(([, , l, c], i) => `<rect x="${labelW + [0, 120, 250][i]}" y="6" width="11" height="11" rx="2" fill="${c}"/><text x="${labelW + [0, 120, 250][i] + 16}" y="15.5" font-size="12" fill="${C.muted}">${l}</text>`).join("");
+  rows.forEach(([label, key], gi) => {
+    const y = top + gi * gh;
+    b += `<text x="${labelW - 10}" y="${y + 19}" text-anchor="end" font-size="13" fill="${C.ink}">${label}</text>`;
+    rules.forEach(([rule, layer, , c], ri) => {
+      const res = (R[`${key} ${layer}`] || R[`${key} last`])[rule], yy = y + ri * (bh + gap);
+      const note = layer !== "last" && !R[`${key} ${layer}`] ? "*" : "";
+      b += `<rect x="${labelW}" y="${yy}" width="${Math.max(2, X(res.acc) - labelW)}" height="${bh}" rx="2" fill="${c}"/>`;
+      b += `<text x="${X(res.acc) + 5}" y="${yy + 9.5}" font-size="11" font-family="IBM Plex Mono" fill="${C.ink}">${res.acc.toFixed(2)}${note}</text>`;
+    });
+  });
+  const wy = top + rows.length * gh, wv = R.waveform.peaks.acc;
+  b += `<text x="${labelW - 10}" y="${wy + 10}" text-anchor="end" font-size="13" fill="${C.ink}">raw waveform</text>`;
+  b += `<rect x="${labelW}" y="${wy + 1}" width="${X(wv) - labelW}" height="${bh}" rx="2" fill="${C.ink}"/><text x="${X(wv) + 5}" y="${wy + 10.5}" font-size="11" font-family="IBM Plex Mono" fill="${C.ink}">${wv.toFixed(2)}</text>`;
+  const cx = X(d.chance_exact);
+  b += `<line x1="${cx}" x2="${cx}" y1="${top - 4}" y2="${wy + 16}" stroke="${C.ink}" stroke-dasharray="4 3" opacity=".6"/><text x="${cx + 4}" y="${wy + 30}" font-size="11" fill="${C.muted}">guessing the most common count (${d.chance_exact.toFixed(2)})</text>`;
+  $("#benchTable").innerHTML = `<div class="chart"><p class="chart-title">Counting repeats, rebuilt: three rules, the same models</p>${svg(W, H, b, "Rebuilt counting test")}<p class="chart-sub" style="margin-top:6px">* USAD is barely affected by window position and the spectrogram not at all, so their third bar matches the start without removing anything.</p></div>`;
 }
 
 boot();
