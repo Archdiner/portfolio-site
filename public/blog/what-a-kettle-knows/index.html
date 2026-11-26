@@ -198,7 +198,7 @@
   <p>When we cut the quality in the last section, we were really shaving the top off this picture. The kettle survived because most of what makes it sound like a kettle lives in the bottom half.<sup><a href="#fn1" id="r1">1</a></sup></p>
 
   <h2>Smooth and sharp</h2>
-  <p>Once sound is a picture, simple geometry gets you surprisingly far. Here's a different recording from the same cup of tea: hot water going into a cup, with a spoon knocking against the side.</p>
+  <p>Once sound is a picture, simple geometry gets you surprisingly far. Here's a different recording: hot water going into a cup, with a spoon knocking against the side.</p>
   <p>Steady sounds like running water draw <em>horizontal</em> stripes, because the same pitches carry on over time. Sharp sounds like a spoon hitting china draw <em>vertical</em> lines, because every pitch flares up for an instant. There's a classic trick that splits a spectrogram into its horizontal and vertical parts,<sup><a href="#fn2" id="r2">2</a></sup> and it involves no learning and no training data at all, just "keep what's smooth side to side" and "keep what's smooth top to bottom".</p>
 </section>
 
@@ -275,7 +275,7 @@
 
 <section class="col">
   <p id="guessCallback">A light switch, then running water, then a coffee machine, and then, for most of the boil, a vacuum cleaner.</p>
-  <p>It's easy to laugh (my kettle is admittedly loud), but look at the timing. "Light switch" lands at 2.7 seconds, exactly when the kettle clicks on. "Running water" and "coffee machine" cover the heating, when a kettle really does sound like water being churned around. "Kettle" isn't one of the Ear's fifteen words, so it reached for the nearest ones it had, and given that vocabulary, its answers are about as sensible as they could be.</p>
+  <p>It's easy to laugh, but look at the timing. "Light switch" lands at 2.7 seconds, exactly when the kettle clicks on. "Running water" and "coffee machine" cover the heating, when a kettle really does sound like water being churned around. "Kettle" isn't one of the Ear's fifteen words, so it reached for the nearest ones it had, and given that vocabulary, its answers are about as sensible as they could be.</p>
   <p>The more interesting part is what it <em>didn't</em> say. After about 53 seconds it goes quiet, even though the kettle keeps boiling for another 45. A steady roar that never changes apparently stops looking like news. And nothing in its output connects the click at the start to the quiet at the end, or says that one object was on the whole time.</p>
   <p>This is the gap I mentioned at the start. A model like the Ear answers "what is this sound?" a few seconds at a time, while the questions we actually care about, like how long it boiled or whether it's still on, need something that keeps track <em>between</em> those few seconds.</p>
 
