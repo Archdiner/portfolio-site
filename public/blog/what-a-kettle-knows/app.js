@@ -18,8 +18,8 @@ const FAMILY_COLOR = {
   vit_universal_ssl: "#2f6f5e", vit_mae: "#2f6f5e", vit_ssl: "#2f6f5e", vit_unit_ssl: "#2f6f5e",
 };
 const FAMILY_LABEL = {
-  dsp: "DSP", cnn_distilled: "AudioSet CNN",
-  vit_universal_ssl: "SSL ViT", vit_mae: "SSL ViT", vit_ssl: "SSL ViT", vit_unit_ssl: "SSL ViT",
+  dsp: "DSP baseline", cnn_distilled: "AudioSet",
+  vit_universal_ssl: "self-supervised", vit_mae: "self-supervised", vit_ssl: "self-supervised", vit_unit_ssl: "self-supervised",
 };
 const fcolor = (f) => FAMILY_COLOR[f] || "#2f6f5e";
 const flabel = (f) => FAMILY_LABEL[f] || "SSL ViT";
@@ -27,7 +27,7 @@ const flabel = (f) => FAMILY_LABEL[f] || "SSL ViT";
 const CLIP_NAMES = ["kettle", "cup_spoon", "stir", "pour", "codec_original", "codec_8khz",
   "codec_4khz", "hpss_mix", "hpss_harmonic", "hpss_percussive", "bouncing_ball"];
 const MINI = [
-  ["kettle", "Electric kettle", "1:50"],
+  ["kettle", "The recording", "1:50"],
   ["cup_spoon", "Cup and spoon", "0:14"],
   ["stir", "Spoon stirring", "0:30"],
   ["pour", "Water pour", "0:04"],
@@ -37,6 +37,7 @@ const state = {
   results: null, kettle: null, taps: null, similarity: null, sources: null,
   bounce: null, clips: {}, clip: "kettle",
   simModel: "dsp_rich", codec: "codec_original", selectedEncoder: "mn10_as",
+  revealed: false, heard: false, dockDismissed: false,
 };
 
 /* ---------------------------------------------------------------- loading */
@@ -76,7 +77,6 @@ async function boot() {
   buildCremad();
   buildCost();
   buildFailures();
-  buildNext();
   buildSources();
   buildAllTable();
   wireScroll();
@@ -93,7 +93,7 @@ function buildRail() {
     ["s04", "04 resolution"], ["s05", "05 similarity"], ["s06", "06 separation"],
     ["s07", "07 detection"], ["s08", "08 recurrence"], ["s09", "09 memory"],
     ["s10", "10 prediction"], ["s11", "11 speech"], ["s12", "12 cost"],
-    ["s13", "13 failures"], ["s14", "14 next"], ["s15", "15 reproduce"],
+    ["s13", "13 failures"], ["s14", "14 open"], ["s15", "15 reproduce"],
     ["appendix", "appendix"],
   ];
   rail.innerHTML = items.map(([id, l]) => `<a href="#${id}" data-for="${id}">${l}</a>`).join("");
@@ -110,8 +110,10 @@ function wireScroll() {
   const on = () => {
     const h = document.documentElement.scrollHeight - innerHeight;
     bar.style.width = `${h > 0 ? (scrollY / h) * 100 : 0}%`;
+    scheduleDock();
   };
   addEventListener("scroll", on, { passive: true });
+  addEventListener("resize", scheduleDock);
   on();
 }
 
@@ -152,18 +154,37 @@ function buildHero() {
 }
 
 function revealHero() {
+  if (state.revealed) return;
+  state.revealed = true;
+  $("#heroTitle").innerHTML = "What a<br>Kettle Knows";
+  $("#heroDek").textContent = "From the click on, through the boil, to the click off.";
   const el = $("#heroLabel");
   el.textContent = "an electric kettle, coming to the boil";
   el.classList.remove("blind");
-  $("#heroReveal").textContent = "that is the whole trick";
+  $("#heroReveal").textContent = "named";
   $("#heroReveal").disabled = true;
+  const pill = $("#heroPill");
+  if (pill) pill.textContent = "1 kettle · 4 taps · 8 encoders";
+  $("#s01Title").textContent = "One kettle, four states";
+  $("#s01Lead").textContent = "The recording is ordinary on purpose. A kettle switches on at 0:02.7, heats for ten seconds, boils for 86.3 seconds, and clicks off at 1:39. Four states, two transients, one object. Everything the rest of this essay asks about is already in that cycle: a sustained sound that changes slowly, short events with sharp edges, and a sequence that only means anything if you were there for all of it.";
+  $("#s01Caption").textContent = "Two clicks and a texture. The switch-on is a transient. The boil is a sustained sound whose energy falls as the water settles. The auto-off is a second transient, then silence. Once you can hear the states, every later section is a different question about them.";
+  $("#s01Note").textContent = "The longer recording of making tea is in the sources table. It is not the spine: its opening is room tone. The kettle is the cleanest complete cycle in the set. The cup, the spoon, and the pour are close-ups from the same activity, and they come back when one long sound is not enough.";
+  const chip = document.querySelector(".chip[data-clip='kettle']");
+  if (chip) chip.textContent = "kettle";
+  const mini = document.querySelector(".mini[data-clip='kettle'] b");
+  if (mini) mini.textContent = "Electric kettle";
+  $("#stageStrip").setAttribute("aria-label", "Kettle states");
+  drawDesk();
+  buildRecognition();
+  buildMemory();
+  scheduleDock();
 }
 
 function buildDesk() {
   audio = new Audio("assets/audio/kettle.mp3");
   audio.preload = "metadata";
   audio.addEventListener("timeupdate", syncAll);
-  audio.addEventListener("play", () => setPlaying(true));
+  audio.addEventListener("play", () => { state.heard = true; setPlaying(true); scheduleDock(); });
   audio.addEventListener("pause", () => setPlaying(false));
   audio.addEventListener("ended", () => setPlaying(false));
   audio.addEventListener("loadedmetadata", syncAll);
@@ -187,8 +208,21 @@ function drawDesk() {
   drawSpec($("#spec"), c.spec);
   drawStages(c);
   drawLane(c);
-  $("#clipLabel").textContent = c.label;
+  $("#clipLabel").textContent = publicClipLabel(c);
+  syncDockLabel();
   $("#deskFoot").textContent = `${clock(c.duration)} · 16 kHz · ${c.events.length} predicted episode${c.events.length === 1 ? "" : "s"} · ${c.stages.length} annotated state${c.stages.length === 1 ? "" : "s"}`;
+}
+
+function publicClipLabel(c) {
+  if (!state.revealed && c.name === "kettle") return "the recording";
+  return c.label;
+}
+
+function syncDockLabel() {
+  const el = $("#dockLabel");
+  const c = clip();
+  if (!el || !c) return;
+  el.textContent = (!state.revealed && c.name === "kettle") ? "the recording" : c.label;
 }
 
 function clip(name = state.clip) { return state.clips[name]; }
@@ -201,7 +235,6 @@ function loadClip(name, play = false) {
   $$(".clip-switch .chip").forEach((b) => b.classList.toggle("active", b.dataset.clip === name));
   $$(".mini").forEach((m) => m.classList.toggle("active", m.dataset.clip === name));
   drawDesk();
-  $("#dockLabel").textContent = `${name.replaceAll("_", " ")} · ${clip().label.toLowerCase()}`;
   if (was) audio.play().catch(() => {});
   syncAll();
 }
@@ -245,7 +278,6 @@ function syncAll() {
   const active = clip().events.filter((e) => t >= e.start && t <= e.end);
   const label = active.length ? [...new Set(active.map((e) => e.text || e.label))].join(" · ") : "—";
   $("#nowEvent").textContent = label;
-  $("#dockNow").textContent = label;
   const stage = clip().stages.find((s) => t >= s.start && t <= s.end);
   $("#timelineNow").textContent = stage ? `${stage.label} · ${clock(t)}` : `— · ${clock(t)}`;
   progressWaves(f);
@@ -333,14 +365,20 @@ function specLUT() {
 
 /* stage strip */
 const STAGE_COLOR = { off: "#3b362d", heat: "#a8792f", boil: "#2f6f5e" };
+function stageText(s, clipName = "kettle") {
+  const named = s.label === "heating" || s.label === "boiling" || s.kind === "heat" || s.kind === "boil";
+  if (!state.revealed && clipName === "kettle" && named) return "";
+  return s.label;
+}
 function drawStages(c) {
   const strip = $("#stageStrip");
   if (!c.stages.length) { strip.innerHTML = ""; strip.style.display = "none"; return; }
   strip.style.display = "flex";
   strip.innerHTML = c.stages.map((s) => {
     const w = ((s.end - s.start) / c.duration) * 100;
+    const label = stageText(s, c.name);
     return `<div class="stage" style="width:${w}%;border-color:${STAGE_COLOR[s.kind] || "#3b362d"}">
-      <span class="mono" style="color:${STAGE_COLOR[s.kind] || "#a49b8b"}">${esc(s.label)}</span>
+      <span class="mono" style="color:${STAGE_COLOR[s.kind] || "#a49b8b"}">${esc(label)}</span>
       ${w > 7 ? `<em class="mono">${clock(s.start)}–${clock(s.end)}</em>` : ""}</div>`;
   }).join("");
 }
@@ -379,19 +417,62 @@ function buildMiniClips() {
   }));
 }
 
-/* dock */
+/* dock — small, dismissible, and only after the hero player is gone */
+let dockQueued = false;
+function scheduleDock() {
+  if (dockQueued) return;
+  dockQueued = true;
+  requestAnimationFrame(() => { dockQueued = false; syncDock(); });
+}
+
+function heroPlayerGone() {
+  const el = $("#heroListen");
+  return !!el && el.getBoundingClientRect().bottom <= 8;
+}
+
+function dockRestRect() {
+  const el = $("#dock");
+  const h = el.offsetHeight || 46;
+  const w = el.offsetWidth || Math.min(420, window.innerWidth - 24);
+  const left = (window.innerWidth - w) / 2;
+  const top = window.innerHeight - 10 - h;
+  return { top: top - 28, bottom: top + h + 16, left, right: left + w };
+}
+
+function dockCoversEvidence() {
+  const d = dockRestRect();
+  const nodes = document.querySelectorAll("figcaption, .caption, .chart, .sim-matrix, .physics, .stems, .taps, .gloss, .not-draft, .table-scroll, .questions");
+  for (const n of nodes) {
+    const r = n.getBoundingClientRect();
+    if (r.width < 2 || r.height < 2) continue;
+    if (r.bottom > d.top && r.top < d.bottom && r.right > d.left && r.left < d.right) return true;
+  }
+  return false;
+}
+
+function syncDock() {
+  const dock = $("#dock");
+  if (!dock) return;
+  const show = !state.dockDismissed && (state.heard || state.revealed) && heroPlayerGone() && !dockCoversEvidence();
+  dock.classList.toggle("on", show);
+  dock.setAttribute("aria-hidden", show ? "false" : "true");
+  document.body.classList.toggle("dock-live", show);
+}
+
 function buildDock() {
   drawWave($("#dockWave"), state.kettle.peaks, "#6fbfa8", "#171614");
   $("#dockPlay").addEventListener("click", togglePlay);
+  $("#dockClose").addEventListener("click", () => {
+    state.dockDismissed = true;
+    syncDock();
+  });
   $("#dockWave").addEventListener("click", (e) => {
     const r = $("#dockWave").getBoundingClientRect();
     const f = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
     audio.currentTime = f * (audio.duration || state.kettle.duration); syncAll();
   });
-  const io = new IntersectionObserver(([e]) => {
-    $("#dock").classList.toggle("on", !e.isIntersecting && e.boundingClientRect.top < 0);
-  }, { threshold: 0 });
-  io.observe($("#hero"));
+  syncDockLabel();
+  scheduleDock();
 }
 
 /* ---------------------------------------------------------------- recognition */
@@ -418,7 +499,8 @@ function buildRecognition() {
   c.stages.forEach((s) => {
     const x = X(s.start), ww = X(s.end) - x;
     b += `<rect x="${x}" y="${barY}" width="${ww}" height="${barH}" fill="${STAGE_COLOR[s.kind]}" opacity=".86" rx="1"/>`;
-    if (ww > 40) b += `<text x="${x + 5}" y="${barY + barH + 14}" class="svg-small" fill="#6f675c">${esc(s.label)}</text>`;
+    const name = stageText(s);
+    if (ww > 40 && name) b += `<text x="${x + 5}" y="${barY + barH + 14}" class="svg-small" fill="#6f675c">${esc(name)}</text>`;
   });
   b += `<text x="10" y="82" class="svg-mono" fill="#2f6f5e">Ear v1 labels</text>`;
   labels.forEach((l, i) => {
@@ -436,9 +518,9 @@ function buildRecognition() {
 /* ---------------------------------------------------------------- physics */
 function buildPhysics() {
   const cards = [
-    ["kettle", "Sustained · boiling", "broadband · slow decay", "kettle"],
-    ["pour", "Turbulent · pouring", "broadband · no pitch", "pour"],
-    ["cup_spoon", "Transient · spoon and cup", "short · material resonances", "cup"],
+    ["kettle", "Kettle", "1:50", "the long sound"],
+    ["pour", "Pour", "0:04", "into a mug"],
+    ["cup_spoon", "Spoon and cup", "0:14", "a short hit"],
   ];
   $("#physicsCards").innerHTML = cards.map(([name, title, sub, label]) => `
     <div class="physics card" data-clip="${name}">
@@ -505,7 +587,7 @@ function buildSimilarity() {
   const draw = () => {
     const M = state.similarity.matrices[state.simModel];
     const labels = state.similarity.labels;
-    if (!M) { $("#simMatrix").innerHTML = `<p class="bracket">matrix unavailable</p>`; return; }
+    if (!M) { $("#simMatrix").innerHTML = `<p class="prose">Matrix unavailable.</p>`; return; }
     const flat = M.flat();
     const lo = Math.min(...flat), hi = Math.max(...flat);
     const color = (v) => {
@@ -525,13 +607,13 @@ function buildSimilarity() {
     html += `</div>`;
     $("#simMatrix").innerHTML = html;
     const notes = {
-      dsp_rich: "DSP separates the metal bowl furthest (0.55) and keeps the two mug taps closest (0.96).",
-      beats_iter3: "BEATs keeps the mug pair closest (0.98), but every pair is above 0.87: the matrix is compressed.",
-      eat_pretrain: "EAT is nearly flat (0.96–0.99): clip-mean embeddings of 0.75 s transients lose material identity.",
-      usad2_small: "USAD keeps the mug pair closest (0.97) and spreads the rest more than EAT, less than DSP.",
+      dsp_rich: "The hand-built baseline puts the two mug taps closest, at 0.96, and a soft mug tap against the metal bowl furthest, at 0.56.",
+      beats_iter3: "BEATs also puts the mug taps closest, at 0.98. The lowest other pair is 0.87, so the grid is compressed.",
+      eat_pretrain: "EAT sits between 0.96 and 0.99. The mug pair is the closest, and the material differences are almost gone.",
+      usad2_small: "USAD puts the mug taps closest, at 0.97, and spreads the other pairs more than EAT and less than the baseline.",
     };
     $("#simTitle").textContent = { dsp_rich: "DSP baseline", beats_iter3: "BEATs iter3", eat_pretrain: "EAT pretrain", usad2_small: "USAD2-small" }[state.simModel];
-    $("#simNote").textContent = `[NOTE — ${notes[state.simModel]} Colour is within-matrix rank; numbers are cosine. All four taps loudness-normalised before embedding.]`;
+    $("#simNote").textContent = `${notes[state.simModel]} Colour is the rank inside this grid. The numbers are cosine similarity.`;
     $$("#simTabs .tab").forEach((b) => b.classList.toggle("active", b.dataset.sim === state.simModel));
   };
   $$("#simTabs .tab").forEach((b) => b.addEventListener("click", () => { state.simModel = b.dataset.sim; draw(); }));
@@ -689,7 +771,8 @@ function buildMemory() {
   c.stages.forEach((s) => {
     const x = X(s.start), ww = X(s.end) - x;
     b += `<rect x="${x}" y="20" width="${ww}" height="46" fill="${STAGE_COLOR[s.kind]}" opacity=".9" rx="2"/>`;
-    if (ww > 80) b += `<text x="${x + 8}" y="49" class="svg-small" fill="#f4efe4">${esc(s.label)}</text>`;
+    const name = stageText(s);
+    if (ww > 80 && name) b += `<text x="${x + 8}" y="49" class="svg-small" fill="#f4efe4">${esc(name)}</text>`;
     b += `<text x="${x + 4}" y="82" class="svg-mono" fill="#6f675c">${clock(s.start)}</text>`;
   });
   // ticks
@@ -701,8 +784,9 @@ function buildMemory() {
   $("#kettleTimeline").innerHTML = svgWrap(w, 130, b, "Kettle state timeline");
 
   const t = state.results.t1;
-  const types = Object.entries(t.by_type).map(([k, v]) => ({ label: k, ours: v.ours, af3: v.af3, n: v.n }));
-  const w2 = 1000, rowH = 34, labelW2 = 120, plotW = 700, h2 = 60 + types.length * rowH + 40;
+  const typeName = { ago: "how long ago", at: "when", count: "how many", dur: "how long", since: "since when" };
+  const types = Object.entries(t.by_type).map(([k, v]) => ({ label: typeName[k] || k, ours: v.ours, af3: v.af3, n: v.n }));
+  const w2 = 1000, rowH = 34, labelW2 = 210, plotW = 640, h2 = 60 + types.length * rowH + 40;
   let b2 = "";
   b2 += `<text x="16" y="18" class="svg-mono" fill="#7c2b26">overall · n = ${t.n}</text>`;
   [["ours", t.ours, "#2f6f5e"], ["AF3", t.af3, "#7c2b26"], ["constant", t.const, "#c9bca4"]].forEach(([l, v, col], i) => {
@@ -793,20 +877,7 @@ function buildCost() {
   $("#hours").addEventListener("input", calc);
   sel.addEventListener("change", calc);
   calc();
-
-  const w = 1000, rowH = 28, labelW = 150, plotW = 760, h = 30 + encs.length * rowH + 24;
-  let b = "";
-  const max = Math.max(...encs.map((e) => e.s_per_audio_h_1c));
-  [...encs].sort((a, z) => a.s_per_audio_h_1c - z.s_per_audio_h_1c).forEach((e, i) => {
-    const y = 20 + i * rowH, bw = Math.max(2, Math.sqrt(e.s_per_audio_h_1c / max) * plotW);
-    b += `<text x="${labelW - 8}" y="${y + 15}" text-anchor="end" class="svg-small">${e.id}</text>`;
-    b += `<rect x="${labelW}" y="${y + 5}" width="${bw}" height="16" fill="${fcolor(e.family)}" rx="1"/>`;
-    b += `<text x="${labelW + bw + 6}" y="${y + 17}" class="svg-mono" fill="#6f675c">${e.s_per_audio_h_1c} s</text>`;
-  });
-  $("#costChart").innerHTML = svgWrap(w, h, b, "Wall seconds per audio hour");
-
   buildFrontier();
-  buildProfileTable();
 }
 
 function buildFrontier() {
@@ -854,7 +925,7 @@ function buildEncoderCard() {
       <p class="eyebrow">selected encoder</p>
       <div class="big">${e.id}</div>
       <p style="margin-top:8px;font-size:12.5px;color:#6f675c">${flabel(e.family)} · ${e.params_m}M params · ${e.dim}-dim</p>
-      <p class="bracket" style="margin-top:12px">[NOTE — Swap the selection to feel the frontier. This card is the anchor for the paragraph on the knee of the curve.]</p>
+      <p style="margin-top:12px;font-size:13px;line-height:1.5;color:#6f675c">Click another point to change this row. Real-time factor is one core, fp32. The full table is in the appendix.</p>
     </div>
     <div class="kv">
       <div><span>RTF, 1 core</span><b>${e.rtf_1c}</b></div>
@@ -868,20 +939,7 @@ function buildEncoderCard() {
     </div>`;
 }
 
-function buildProfileTable() {
-  const rows = [...state.results.encoders].sort((a, b) => a.params_m - b.params_m);
-  const best = (k) => Math.max(...rows.map((r) => r[k]));
-  const b1 = best("cremad"), b2 = best("epic_dense"), b3 = best("epic_disc");
-  $("#profileTable").innerHTML = `
-    <thead><tr><th>encoder</th><th>params</th><th>dim</th><th>RTF 1c</th><th>s / audio h</th><th>RSS</th><th>CREMA-D</th><th>EPIC dense</th><th>EPIC vocab</th></tr></thead>
-    <tbody>${rows.map((r) => `<tr><td>${r.id}</td><td class="num">${r.params_m}M</td><td class="num">${r.dim}</td>
-      <td class="num">${r.rtf_1c}</td><td class="num">${r.s_per_audio_h_1c}</td><td class="num">${r.rss_gb}</td>
-      <td class="num ${r.cremad === b1 ? "best" : ""}">${fmt(r.cremad, 3)}</td>
-      <td class="num ${r.epic_dense === b2 ? "best" : ""}">${fmt(r.epic_dense, 3)}</td>
-      <td class="num ${r.epic_disc === b3 ? "best" : ""}">${fmt(r.epic_disc, 3)}</td></tr>`).join("")}</tbody>`;
-}
-
-/* ---------------------------------------------------------------- failures / next */
+/* ---------------------------------------------------------------- failures */
 const FAILURES = [
   ["Synthetic drill RL (Gym v1–v3)", "fail", "drills 0.565 → 0.709, STAR-Bench flat or worse", "proxy gain only; killed 2026-11-18"],
   ["Same-home SSL (ak_ssl1)", "void", "0.746 → 0.783 on the same home", "violates held-out sources; not generalisation"],
@@ -901,36 +959,6 @@ function buildFailures() {
       <td><span class="verdict ${v}">${v}</span></td>
       <td class="num" style="text-align:left;white-space:normal;max-width:260px">${num}</td>
       <td style="text-align:left;white-space:normal;max-width:260px;color:#6f675c">${rep}</td></tr>`).join("")}</tbody>`;
-}
-
-function buildNext() {
-  const w = 1000, h = 280;
-  let b = "";
-  const paths = [
-    { y: 30, t: "mn10_as", s: "AudioSet CNN · 4.9M", note: "identity", fill: "#f0dfda", stroke: "#7c2b26" },
-    { y: 100, t: "dsp_rich", s: "0M · 70-dim", note: "change", fill: "#f2e7cf", stroke: "#a8792f" },
-    { y: 170, t: "SSL clip path", s: "USAD / Dasheng", note: "prosody", fill: "#dcebe4", stroke: "#2f6f5e" },
-  ];
-  paths.forEach((p) => {
-    b += box(20, p.y, 210, 56, p.fill, p.stroke);
-    b += `<text x="34" y="${p.y + 23}" class="svg-label" font-weight="600">${p.t}</text>`;
-    b += `<text x="34" y="${p.y + 41}" class="svg-small">${p.s} · ${p.note}</text>`;
-    b += arrow(232, p.y + 28, 330, 120);
-  });
-  b += box(335, 82, 180, 76, "#fbf7ee", "#1b1916");
-  b += `<text x="350" y="110" class="svg-label" font-weight="600">router</text>`;
-  b += `<text x="350" y="130" class="svg-small">task-aware, cheap</text>`;
-  b += arrow(517, 120, 610, 120);
-  b += box(615, 70, 170, 100, "#dcebe4", "#2f6f5e");
-  b += `<text x="630" y="98" class="svg-label" font-weight="600">shared state</text>`;
-  b += `<text x="630" y="118" class="svg-small">episodes · durations</text>`;
-  b += `<text x="630" y="134" class="svg-small">recency · novelty</text>`;
-  b += arrow(787, 120, 860, 120);
-  b += box(865, 88, 120, 64, "#fbf7ee", "#c9bca4");
-  b += `<text x="878" y="114" class="svg-label" font-weight="600">tools</text>`;
-  b += `<text x="878" y="132" class="svg-small">to the LLM</text>`;
-  b += `<text x="20" y="252" class="svg-mono" fill="#9a9183">cheapest falsifiable test: does [mn10_as + dsp_rich] beat either alone on G1 F1?</text>`;
-  $("#nextDiagram").innerHTML = svgWrap(w, h, b, "Proposed hybrid ear");
 }
 
 /* ---------------------------------------------------------------- sources / tables */

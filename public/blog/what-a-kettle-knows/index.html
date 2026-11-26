@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%237c2b26'/%3E%3Cpath d='M10 13h12v7a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4z' fill='none' stroke='%23f4efe4' stroke-width='2'/%3E%3Cpath d='M22 15l4 2-4 2' fill='none' stroke='%23f4efe4' stroke-width='2'/%3E%3C/svg%3E">
-<title>What a Kettle Knows — wireframe</title>
-<meta name="description" content="Wireframe for a technical essay on machine listening, built around one kettle. Assets and interactions are real; prose is placeheld.">
+<title>What a Kettle Knows — draft</title>
+<meta name="description" content="A draft research note on machine listening. The recording comes before the name.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -18,7 +18,7 @@
 <header class="masthead">
   <a class="wordmark" href="#top">Asad Rizvi <span>/ research</span></a>
   <div class="masthead-right">
-    <span class="mono">wireframe · v0.2 · tea cut</span>
+    <span class="mono">draft</span>
     <a class="mono" href="PLAN.md">plan</a>
     <a class="mono" href="#appendix">appendix</a>
   </div>
@@ -29,18 +29,18 @@
   <!-- ============================== HERO ============================== -->
   <section class="hero" id="hero">
     <div class="hero-copy">
-      <p class="eyebrow">Research note 01 · November 2026 · draft wireframe</p>
-      <h1>What a<br>Kettle Knows</h1>
-      <p class="dek">You recognise this sound in half a second. Everything interesting happens after that.</p>
+      <p class="eyebrow">Research note 01 · November 2026 · draft</p>
+      <h1 id="heroTitle">What is this?</h1>
+      <p class="dek" id="heroDek">Press play. The name stays behind the button until you ask for it.</p>
       <div class="byline">
         <span>Asad Rizvi</span>
         <span class="dot">·</span>
         <span>14 min read</span>
         <span class="dot">·</span>
-        <span class="pill good">1 kettle · 4 taps · 8 encoders</span>
+        <span class="pill good" id="heroPill">1 recording · 4 taps · 8 encoders</span>
       </div>
-      <p class="prose">Press play. You will know what it is before the first second is over: a kettle, coming to the boil, switching itself off.</p>
-      <p class="prose">That recognition is not one act. It is a stack of inferences — about an object, an action, a state, and a likely future — compressed into a feeling of obviousness. This essay takes the stack apart, one layer at a time, using the same recording throughout. What did the microphone actually receive? What would a model call it? And what would a machine have to remember ten minutes later to answer a question about it?</p>
+      <p class="prose">Stay with the sound. It has a short edge, a long texture, another edge, and then quiet.</p>
+      <p class="prose">The rest of the page takes the recording apart. What reached the microphone. What a model would call it. What it would have to remember to answer a question about it afterwards.</p>
     </div>
 
     <div class="hero-listen" id="heroListen">
@@ -71,22 +71,22 @@
   <section class="section" id="s01">
     <div class="section-head">
       <p class="eyebrow">01 · the recording</p>
-      <h2>One kettle, three states</h2>
-      <p class="prose">The recording is ordinary on purpose. A kettle is switched on, heats for ten seconds, boils for a minute and a half, and clicks off. Four states, two transients, one object. Everything the rest of this essay asks about is already present in that cycle: a sustained sound that changes slowly, short events with sharp edges, and a sequence that only means anything if you were there for all of it.</p>
+      <h2 id="s01Title">One recording, four stretches</h2>
+      <p class="prose" id="s01Lead">The recording is ordinary on purpose. Something starts, holds, and stops. Four stretches, two short edges, one long texture in the middle. Later sections ask different questions about that cycle: what the microphone received, what a model would call it, and what you would have to remember to answer.</p>
     </div>
 
     <div class="desk" id="desk">
       <div class="desk-top">
         <div class="desk-title">
           <span class="mono">the recording · CC0 · richwise</span>
-          <b id="clipLabel">Electric kettle · switch on → boil → auto-off</b>
+          <b id="clipLabel">the recording</b>
         </div>
         <div class="desk-controls">
           <button id="playBtn" class="play" aria-label="Play or pause">
             <span class="play-icon"></span><span id="playText">Play</span>
           </button>
-          <div class="clip-switch" role="tablist" aria-label="Tea recordings">
-            <button class="chip active" data-clip="kettle" role="tab">kettle</button>
+          <div class="clip-switch" role="tablist" aria-label="Recordings">
+            <button class="chip active" data-clip="kettle" role="tab">clip</button>
             <button class="chip" data-clip="cup_spoon" role="tab">cup</button>
             <button class="chip" data-clip="stir" role="tab">stir</button>
             <button class="chip" data-clip="pour" role="tab">pour</button>
@@ -94,7 +94,7 @@
         </div>
       </div>
 
-      <div class="stage-strip" id="stageStrip" aria-label="Kettle states"></div>
+      <div class="stage-strip" id="stageStrip" aria-label="Recording stretches"></div>
 
       <div class="wave-wrap">
         <canvas id="wave" height="140" aria-label="Waveform"></canvas>
@@ -121,10 +121,10 @@
       </div>
     </div>
 
-    <div class="caption prose">Two clicks and a texture. The switch-on is a transient; the boil is a sustained sound whose energy decays as the water settles; the auto-off is a second transient followed by silence. Once you can hear the states, every later section is a different way of asking what they were.</div>
+    <div class="caption prose" id="s01Caption">Two short edges and a longer texture between them. The strip above the wave marks the stretches, still unnamed.</div>
 
     <div class="asset-note">
-      <p class="prose">The full three-and-a-half-minute recording of making tea is in the sources table. It is not the spine: its first two minutes are room tone. The kettle is the cleanest complete cycle in the set. The cup, the spoon and the pour are close-ups from the same activity, and they come back later when one long sound is not enough to ask the question.</p>
+      <p class="prose" id="s01Note">A longer recording of the same activity is in the sources table. It is not the one this page follows: the opening is room tone. This clip is the cleanest complete cycle in the set. The shorter clips are close-ups, and they come back when one long sound is not enough.</p>
       <div class="mini-clips" id="miniClips"></div>
     </div>
   </section>
@@ -155,11 +155,7 @@
       <figcaption class="prose">The same minute fifty, labelled twice. Human states on top, ear predictions below. The events line up even where the words do not — which is the point: timing survives, vocabulary does not.</figcaption>
     </figure>
 
-    <div class="callout card">
-      <p class="mono">the physical-grounding detour</p>
-      <p class="bracket">[EPIC-SOUNDS — Audio-first, video-reveal interaction. Play a 3-second kitchen action; the reader guesses the cause; reveal the first-person frame and the action label. Link out to the dataset rather than re-hosting restricted video.]</p>
-      <p class="bracket">[WHY HERE — Recognition is cheaper when you can see the cause. The rest of the essay is about what a machine can do when it cannot.]</p>
-    </div>
+    <p class="not-draft"><span class="tag">Not in this draft</span>An EPIC-SOUNDS clip you would hear before you see, with the video linked out rather than re-hosted.</p>
   </section>
 
   <!-- ============================== 03 · SIGNAL ============================== -->
@@ -167,15 +163,12 @@
     <div class="section-head">
       <p class="eyebrow">03 · signal</p>
       <h2>What actually reached the microphone</h2>
-      <p class="bracket">[SECTION INTENT — Ground the three acoustic regimes in physics. A boil is a sustained, broadband, slowly decaying texture. A pour is turbulence with a broad spectrum and no clear pitch. A spoon tap is a short transient with material-dependent resonances. The spectrograms should make the difference obvious before the prose does.]</p>
+      <p class="prose">Play each one. The top picture is the waveform. The bottom picture is a spectrogram, low frequencies at the bottom.</p>
     </div>
 
     <div class="physics-grid" id="physicsCards"></div>
 
-    <div class="callout card">
-      <p class="mono">the one sentence to land</p>
-      <p class="bracket">[CALLOUT — “A kettle is easy to hear and hard to describe: one long event with no fixed boundary, made of the same broadband noise as a hundred other machines.” This is why the next section is about representation, not detection.]</p>
-    </div>
+    <p class="prose">The long one is a boil. It is broadband, it has no clear pitch, and it slowly gets quieter as the water settles. The pour is turbulence: also broadband, also without a pitch, and over in a few seconds. The spoon is a short hit. What rings afterwards depends on the cup. The boil is easy to hear and hard to separate from other machines that make the same kind of noise. Hearing that difference is not yet a decision about which part of it to keep.</p>
   </section>
 
   <!-- ============================== 04 · COMPRESSION ============================== -->
@@ -183,7 +176,7 @@
     <div class="section-head">
       <p class="eyebrow">04 · resolution</p>
       <h2>What survives when you throw the sound away</h2>
-      <p class="bracket">[SECTION INTENT — Compression is an intuition pump for representation. Keep the same 20 seconds, drop the sample rate and the bitrate, and ask what the ear still needs. The kettle survives at 8 kHz; the material of the spoon does not. This sets up “what should an embedding preserve?”]</p>
+      <p class="prose">The same twenty seconds, three times. Play them in order and listen for what goes first.</p>
     </div>
 
     <div class="codec card">
@@ -197,7 +190,7 @@
           <canvas id="codecWave" height="90"></canvas>
           <div class="codec-foot mono"><span id="codecMeta">128 kbps · 16 kHz</span><button id="codecPlay" class="play small"><span class="play-icon"></span><span>Play A</span></button></div>
         </div>
-        <div class="bracket codec-note" id="codecNote">[NOTE — What changes first: the high-frequency fizz of the boil, then the attack of the switch. The low-frequency rumble and the on/off boundaries survive. Ask the reader which of those the task actually needs.]</div>
+        <p class="prose" id="codecNote">At 8 kHz the high end of the boil thins out first. At 4 kHz the click is softer, and the low rumble is still there, along with the moment it starts and the moment it stops. You can throw that much away and still recognise the kettle. A cut like this does not explain why a learned encoder keeps one distinction and drops another. That is a choice, and it is the next section.</p>
       </div>
     </div>
   </section>
@@ -207,7 +200,7 @@
     <div class="section-head">
       <p class="eyebrow">05 · representation</p>
       <h2>Which of these sounds are the same?</h2>
-      <p class="bracket">[SECTION INTENT — The conceptual centre. Four short recordings: the same mug tapped softly and hard, a glass clink, a metal bowl strike. Ask the reader to order them by similarity before showing any model. Then reveal the real cosine matrices. A good representation puts the two mug taps closest and keeps material identity; a bad one collapses everything.]</p>
+      <p class="prose">Play the four. Two are the same mug, once soft and once hard. Then a glass, then a metal bowl. Decide which pair belongs together before you read the grid.</p>
     </div>
 
     <div class="taps" id="taps"></div>
@@ -227,15 +220,12 @@
       </div>
       <div class="sim-wrap">
         <div id="simMatrix" class="sim-matrix"></div>
-        <div class="sim-side bracket" id="simNote">[NOTE — Model matrices are real, computed from cached checkpoints on the four taps. Colour is within-matrix rank; numbers are cosine. The mug-hard / mug-soft pair is closest in every model, but the whole matrix is compressed: these 0.75 s transients are hard for clip-mean embeddings.]</div>
+        <p class="prose" id="simNote"></p>
       </div>
-      <figcaption class="bracket">[FIGURE 2 — The prompt before the reveal: which pair should be closest? Then flip models. The DSP baseline separates metal best; EAT is nearly flat. This is the invariance/contrastive-learning lesson without a loss function.]</figcaption>
+      <figcaption class="prose">Each cell is cosine similarity between two clip embeddings, shown to two decimals. Colour is the rank inside this grid only, so a compressed grid still shows its lightest and darkest cells. All four taps were loudness-matched, and each is three quarters of a second.</figcaption>
     </figure>
 
-    <div class="callout card">
-      <p class="mono">the question the matrix asks</p>
-      <p class="bracket">[CALLOUT — “Same object, different force” is the invariance we want. “Same force, different material” is the contrast we want. A representation is a choice about which differences matter. Every downstream result in this post is a consequence of that choice.]</p>
-    </div>
+    <p class="prose">The two mug taps are the same object at two forces. The glass and the metal are different materials. A learned representation makes a choice about which of those differences to keep. In every model here the mug pair is the closest. How far the metal sits from that pair is where they disagree. The hand-built baseline leaves the most room. EAT leaves almost none. Four clips are an illustration, not a benchmark. The previous section only showed that the kettle can survive a lossy cut. It did not make this choice.</p>
   </section>
 
   <!-- ============================== 06 · SEPARATION ============================== -->
@@ -243,7 +233,7 @@
     <div class="section-head">
       <p class="eyebrow">06 · separation</p>
       <h2>Can you isolate the spoon from the water?</h2>
-      <p class="bracket">[SECTION INTENT — A cheap, audible decomposition. Harmonic-percussive source separation splits the cup recording into a steady watery layer and a transient spoon layer. It is not a learned separator, but it makes the point: the mixture is a sum of causes, and a model can choose which layer to attend to.]</p>
+      <p class="prose">One recording, split into three players on one clock. Press play, then mute a row.</p>
     </div>
 
     <div class="mixer card" id="mixer">
@@ -255,7 +245,7 @@
         <button id="mixerPlay" class="play"><span class="play-icon"></span><span>Play mix</span></button>
       </div>
       <div class="stems" id="stems"></div>
-      <p class="bracket mixer-note">[INTERACTION — Three synchronised players: mixture, harmonic, percussive. Solo and mute. The reader should hear the water disappear when the harmonic stem is muted, and the spoon disappear when the percussive stem is muted. Link to BASS / MIT for the learned version.]</p>
+      <p class="prose mixer-note">Mute the steady row and the water drops away. Mute the transient row and the spoon drops away. The split is harmonic–percussive source separation, HPSS: time–frequency bins sorted into a steady layer and a short layer, then rebuilt as two signals. It is a filter on this recording, not a model that learned what a spoon is. You can hear that the mixture is more than one cause. Which cause a learned encoder keeps is a separate question, already visible in the four taps.</p>
     </div>
   </section>
 
@@ -264,20 +254,20 @@
     <div class="section-head">
       <p class="eyebrow">07 · detection</p>
       <h2>When did it happen?</h2>
-      <p class="bracket">[SECTION INTENT — Move from clip labels to time. The ear finds the switch click, the boil onset and the off click, but assigns them the wrong names. Show the predicted episodes against the four human states, then the G1 change result: DSP and SSL beat tagging CNNs on scene change.]</p>
+      <p class="prose">The lane on the first player is one recording. The chart is 345 clips. G1 is a test of whether a model notices that the scene changed. Gold is a hand-built DSP baseline, with no learned weights. Red is a compact AudioSet classifier: mn04, mn10, mn20. Green is a self-supervised model, such as BEATs, EAT, Dasheng, or USAD.</p>
     </div>
 
     <figure class="card">
       <div class="chart-head">
         <div>
-          <p class="eyebrow">G1 v2 · n = 345 · 5-way change</p>
+          <p class="eyebrow">345 clips · did the scene change?</p>
           <h3>Who notices a change?</h3>
         </div>
-        <div class="legend mono"><span><i class="sw" style="background:#a8792f"></i>DSP</span><span><i class="sw" style="background:#7c2b26"></i>AudioSet CNN</span><span><i class="sw" style="background:#2f6f5e"></i>SSL ViT</span></div>
+        <div class="legend mono"><span><i class="sw" style="background:#a8792f"></i>DSP baseline</span><span><i class="sw" style="background:#7c2b26"></i>AudioSet</span><span><i class="sw" style="background:#2f6f5e"></i>self-supervised</span></div>
       </div>
       <div id="g1Chart" class="chart"></div>
-      <p class="mono" style="margin-top:10px;color:var(--faint);text-transform:none;letter-spacing:0">shuffled controls · F1 0.192 · F2 0.130 · F4 0.467</p>
-      <figcaption class="bracket">[FIGURE 3 — F1 by encoder. dsp_rich 0.744 and EAT 0.776 beat every compact CNN. The tagging objective, not the parameter count, is the limitation. The kettle’s two clicks are exactly this kind of boundary.]</figcaption>
+      <p class="mono" style="margin-top:10px;color:var(--faint);text-transform:none;letter-spacing:0">shuffled controls · change 0.192 · count 0.130 · properties 0.467</p>
+      <figcaption class="prose">The left column is the change score, F1. Shuffling the labels lands near 0.192. The hand-built baseline scores 0.744 and EAT scores 0.776. The compact AudioSet models land lower, from 0.480 to 0.608. The middle column is a count, F2. Every encoder is near the floor there; the next section stays with that. The right column, F4, is whether the properties of the change came back with it. The chart shows the gap. It does not say what caused it. On the kettle, the two clicks are this kind of boundary, and the lane on the first player still gives them the wrong names.</figcaption>
     </figure>
   </section>
 
@@ -286,7 +276,7 @@
     <div class="section-head">
       <p class="eyebrow">08 · recurrence</p>
       <h2>How many times?</h2>
-      <p class="bracket">[SECTION INTENT — Counting is the failure that surprises people. Every embedding path collapses on F2 (0.00–0.14); waveform cross-correlation gets 0.94. Use the bouncing ball as a controlled, visible example: the impacts are evenly structured, and the count is trivial from the waveform but not from a pooled embedding.]</p>
+      <p class="prose">A bouncing ball, with the impact times known. Hide the marks, play it, and count. Then look at the bars.</p>
     </div>
 
     <div class="two-col">
@@ -300,12 +290,12 @@
           <button id="bouncePlay" class="play small"><span class="play-icon"></span><span>Play</span></button>
           <button id="bounceHide" class="toggle">hide onsets</button>
         </div>
-        <p class="bracket">[INTERACTION — Play with onsets hidden, ask the reader to count, then reveal. The point is not that counting is hard for humans; it is that a pooled embedding loses the very structure that makes it easy.]</p>
+        <p class="prose">There are 11 impacts. The marks are the known times. Counting them off the wave is straightforward. The bars are the same kind of question — how many times — asked of the encoders.</p>
       </div>
       <figure class="card">
-        <div class="chart-head"><div><p class="eyebrow">G1 · F2 · n = 345</p><h3>Counting recurrence</h3></div></div>
+        <div class="chart-head"><div><p class="eyebrow">345 clips · the count column</p><h3>Counting recurrence</h3></div></div>
         <div id="f2Chart" class="chart"></div>
-        <figcaption class="bracket">[FIGURE 4 — Every encoder at or below 0.14; waveform NCC at 0.94. This is the strongest negative result in the ladder, and the reason the next ear keeps a non-embedding path.]</figcaption>
+        <figcaption class="prose">F2 is the count score from the previous chart. Every encoder lands between 0.00 and 0.14. Waveform correlation — a normalised cross-correlation of the raw wave, NCC — lands at 0.94. The embeddings stay near zero. The waveform correlation does not. What is still open is whether that gap is pooling, the time resolution, or the test itself.</figcaption>
       </figure>
     </div>
   </section>
@@ -315,7 +305,7 @@
     <div class="section-head">
       <p class="eyebrow">09 · memory</p>
       <h2>How long did it boil?</h2>
-      <p class="bracket">[SECTION INTENT — The product claim. A state timeline turns the recording into answers: when it switched on, how long it boiled, whether it is on now. Then the paired result: 0.869 vs 0.188 against Audio Flamingo 3 on 298 frozen questions. This is the section a host or a robot actually cares about.]</p>
+      <p class="prose">The strip is the recording as four annotated states. The questions under it are answered from that strip. Open one.</p>
     </div>
 
     <div class="card timeline-card">
@@ -324,7 +314,7 @@
           <span class="mono" id="timelineNow">off · 0:00</span>
         </div>
         <div id="kettleTimeline"></div>
-        <p class="bracket timeline-note">[FIGURE 5 — Four states, two transients. Scrub the docked player and the state readout follows. The timeline is the memory; the waveform is the evidence.]</p>
+        <p class="prose timeline-note">Off, then heating, then boiling, then off. Heating runs from 0:02.7 to 0:12.7, ten seconds. Boiling runs from 0:12.7 to 1:39, which is 86.3 seconds. The readout above follows the playhead. The strip is the memory. The waveform is the evidence it was built from.</p>
     </div>
 
     <div class="card ask-card" style="margin-top:18px">
@@ -334,17 +324,18 @@
           <span class="mono" id="qProgress">0 / 7 revealed</span>
         </div>
         <div id="kettleQuestions" class="questions"></div>
-        <p class="bracket ask-note">[INTERACTION — Reveal the answer computed from the state timeline. No language model. The same schema the listener exposes: count, last_heard_s_ago, total_seconds, is_on.]</p>
+        <p class="prose ask-note">Each answer is arithmetic on the strip: a time, a count, a duration, or whether it was on. Nothing in this list calls a language model. The fields are the ones the listener exposes: how many, how long ago, how long in total, and whether it is on.</p>
     </div>
 
     <figure class="card">
       <div class="chart-head">
-        <div><p class="eyebrow">SINS home · days 4–7 · 298 items</p><h3>Long-horizon questions</h3></div>
+        <div><p class="eyebrow">one home · days 4–7 · 298 items</p><h3>Long-horizon questions</h3></div>
         <div class="legend mono"><span>ours 0.869</span><span>AF3 0.188</span><span>constant 0.262</span></div>
       </div>
       <div id="memoryBars" class="chart"></div>
-      <figcaption class="bracket">[FIGURE 6 — Overall and by question type. The kettle question is the toy version; this is the same question over a real home week. AF3 sees a 10-minute window and covers 0.911 of the timeline.]</figcaption>
+      <figcaption class="prose">The same kinds of questions on SINS, a recorded week in one home: days 4 to 7, 298 items. The state timeline scores 0.869. Audio Flamingo 3, on the same items, scores 0.188. Answering with a constant scores 0.262. Green is the timeline, red is Audio Flamingo 3. By type, the timeline is 1.000 on “when” (96 items) and 0.407 on “how many” (27 items). The kettle questions above are the short version of this test.</figcaption>
     </figure>
+    <p class="not-draft"><span class="tag">Not in this draft</span>The per-question traces behind these home-week bars.</p>
   </section>
 
   <!-- ============================== 10 · PREDICTION ============================== -->
@@ -352,7 +343,7 @@
     <div class="section-head">
       <p class="eyebrow">10 · prediction</p>
       <h2>What happens next?</h2>
-      <p class="bracket">[SECTION INTENT — Prediction is where physics, memory and representation meet. Hide the last twenty seconds of the kettle: will it keep boiling, switch off, or be picked up? The answer is in the state, not just the last frame. Use the bouncing ball as the clean timing example and the kettle as the ambiguous one.]</p>
+      <p class="prose">The last twenty seconds are covered. Pick one before you read on.</p>
     </div>
 
     <div class="predict card" id="prediction">
@@ -371,7 +362,7 @@
         <div class="predict-known" id="predictKnown"></div>
       </div>
       <div class="predict-out mono" id="predictOut">[choose a prediction]</div>
-      <p class="bracket predict-note">[INTERACTION — The hidden region is the auto-off and silence. A model that only sees the last window predicts “keeps boiling”; a model with the state and the 1:39 switch-off prior predicts “switches off”. The visual should make the difference in available context explicit.]</p>
+      <p class="prose predict-note">The covered stretch is 1:30 to 1:50. In the recording the kettle clicks off at 1:39 and the rest is quiet, so “switches off” is the one that matches. Up to 1:30 the state has been the boil since 0:12.7. That stretch is context the last moment by itself does not include. The bouncing ball is the clean version of the same idea: the next impact is in the timing you have already heard.</p>
     </div>
   </section>
 
@@ -380,23 +371,23 @@
     <div class="section-head">
       <p class="eyebrow">11 · speech, once</p>
       <h2>The same ear on a voice</h2>
-      <p class="bracket">[SECTION INTENT — Keep speech to one comparative section. The point is not that speech is unimportant; it is that prosody is another axis, and the compact ear is not automatically good at it. Dasheng and USAD beat the tagging CNNs. Then the inverse lesson: a speech model on an empty room invents 846 words an hour, and VAD-gating removes them.]</p>
+      <p class="prose">One chart for emotion in the voice, then three numbers from the quiet parts of a recording.</p>
     </div>
 
     <div class="two-col">
       <figure class="card">
-        <div class="chart-head"><div><p class="eyebrow">CREMA-D · n = 1,066 · actor-disjoint</p><h3>Vocal prosody</h3></div><span class="mono">chance 0.167</span></div>
+        <div class="chart-head"><div><p class="eyebrow">1,066 clips · actors held out</p><h3>Vocal emotion</h3></div><span class="mono">chance 0.167</span></div>
         <div id="cremadChart" class="chart"></div>
-        <figcaption class="bracket">[FIGURE 7 — Dasheng 0.740, USAD 0.700, BEATs 0.632, compact CNNs 0.56–0.59. Speech-aware SSL wins; the AudioSet-only ear does not.]</figcaption>
+        <figcaption class="prose">CREMA-D is acted emotion in the voice: 1,066 test clips, six classes, and the actors in the test set were not in training. Chance is 0.167. Dasheng scores 0.740, USAD 0.700, BEATs 0.632. The compact AudioSet models sit between 0.559 and 0.587.</figcaption>
       </figure>
       <div class="card speech-note">
-        <p class="eyebrow">the inverse lesson</p>
+        <p class="eyebrow">the quiet parts</p>
         <div class="speech-stats">
-          <div><b>846</b><span>invented words / hour, ungated Whisper</span></div>
-          <div><b>0</b><span>invented words / hour, VAD-gated</span></div>
-          <div><b>0.254 → 0.039</b><span>WER at 10 dB after gating</span></div>
+          <div><b>846</b><span>invented words / hour, no gate</span></div>
+          <div><b>0</b><span>invented words / hour, speech gate on</span></div>
+          <div><b>0.254 → 0.039</b><span>word error at 10 dB, after the gate</span></div>
         </div>
-        <p class="bracket">[NOTE — Silence is not empty. A model asked to transcribe it will hallucinate. The same is true of an event model asked to tag a quiet room. Gating is a product decision, not a model improvement.]</p>
+        <p class="prose">Whisper is a speech recogniser. Asked to transcribe stretches with no speech, and with no gate, it invents 846 words an hour, and the word error is 0.254. A voice-activity gate — VAD, keeping only the frames where someone is speaking — takes the invented words to 0 and the word error to 0.039. The gate decides when the recogniser runs. It does not change the recogniser.</p>
       </div>
     </div>
   </section>
@@ -406,7 +397,7 @@
     <div class="section-head">
       <p class="eyebrow">12 · cost</p>
       <h2>What it costs to leave it on</h2>
-      <p class="bracket">[SECTION INTENT — Turn RTF into a household number: one core, one month, one kettle. Let the reader move the hours slider and pick an encoder. The claim is not “cheap”; it is “cheap enough to leave running”. Keep the 0.64 GB Python floor and the 3.56 GB full-path peak visible.]</p>
+      <p class="prose">One core, the hours you choose, the encoder you pick. The month below is 30.4 days, one clip at a time, fp32.</p>
     </div>
 
     <div class="calc card">
@@ -421,27 +412,15 @@
         <div><b id="shareCore">—</b><span>share of one always-on core</span></div>
         <div><b id="vsBeats">—</b><span>vs BEATs on the same audio</span></div>
       </div>
-      <p class="bracket calc-note">[CALCULATOR — 30.4 days/month, batch 1, fp32, one core. Formula: RTF × hours/day × 30.4. Do not convert to dollars; the price changes by deployment.]</p>
+      <p class="prose calc-note">At 24 hours a day, the share of one core is the real-time factor itself. mn10, the default, is 0.00583, which is 0.6% of a core that never sleeps. BEATs on the same audio is 0.03943, and 141.9 seconds of compute per hour of audio. The smallest AudioSet model, mn04, is 11.3 seconds. The full path is heavier than the encoder alone. It adds a vocabulary and a Viterbi decode — the step that turns per-frame scores into a single sequence of episodes. That path runs at real-time factor 0.0698, about 251 seconds per hour of audio, and peaks at 3.56 GB. The lightest runs use 0.64 GB, including the DSP baseline with no learned weights, so that figure is mostly the runtime. No dollar price: it moves with the machine.</p>
     </div>
 
     <figure class="card">
-      <div class="chart-head"><div><p class="eyebrow">C01 profile · one core</p><h3>Wall seconds per audio hour</h3></div><span class="mono">sqrt-scaled bars · true values labelled</span></div>
-      <div id="costChart" class="chart"></div>
-      <figcaption class="bracket">[FIGURE 8 — BEATs at 141.9 s/h for the encoder alone; mn04 at 11.3. The full listener path (BEATs + vocabulary + Viterbi) is 251.5 s/h and 3.56 GB. Mark both.]</figcaption>
-    </figure>
-
-    <figure class="card">
-      <div class="chart-head"><div><p class="eyebrow">C01 profile · parameters vs RTF</p><h3>The efficiency frontier</h3></div><span class="mono">click a point</span></div>
+      <div class="chart-head"><div><p class="eyebrow">one core · fp32</p><h3>Parameters and speed</h3></div><span class="mono">click a point</span></div>
       <div id="frontier" class="chart"></div>
       <div class="encoder-card" id="encoderCard" style="border:0;padding:18px 0 0;margin:0"></div>
-      <figcaption class="bracket">[FIGURE 9 — The knee of the curve. The compact AudioSet CNNs sit bottom-left; the SSL ViTs top-right. Clicking a point updates the profile below. This is the figure a reader will screenshot.]</figcaption>
+      <figcaption class="prose">Parameters against real-time factor, both on a log scale. Toward the lower left is smaller and faster. The compact AudioSet models sit there. BEATs, EAT, and Dasheng sit higher and to the right. Click a point for that row. Every column, including these, is in the appendix.</figcaption>
     </figure>
-
-    <div class="table-card card">
-      <div class="table-head"><h3>Measured, not estimated</h3><span class="mono">s per audio hour · 1 core</span></div>
-      <div class="table-scroll"><table id="profileTable"></table></div>
-      <p class="bracket table-note">[TABLE 1 — Full ladder. Include RSS because the phone/MCU claim depends on it. Flag fp32, unquantized.]</p>
-    </div>
   </section>
 
   <!-- ============================== 13 · FAILURES ============================== -->
@@ -449,33 +428,21 @@
     <div class="section-head">
       <p class="eyebrow">13 · the ledger</p>
       <h2>What didn’t work</h2>
-      <p class="bracket">[SECTION INTENT — Keep the failures in the main body. Each row names the idea, the verdict, the number that killed it, and what replaced it. The reader should trust the passing numbers more after this table, not less.]</p>
+      <p class="prose">Each row is an idea that was measured. Read the verdict before the number. Fail, void, and inconclusive are not the same word.</p>
     </div>
 
     <div class="table-card card">
       <div class="table-scroll"><table id="failureTable"></table></div>
-      <p class="bracket table-note">[TABLE 2 — Verdicts and numbers from CLAIMS.md. Preserve fail / void / inconclusive exactly. The same-home SSL result is void for generalisation, not a failure of the method.]</p>
+      <p class="caption prose">Void means the test did not measure what it was for. The same-home run went from 0.746 to 0.783, and it is void because that home was not held out. Inconclusive means the comparison did not finish: on the fine-tune, the fold-2 validation loss was still falling at epoch 4, with 0.466 against a frozen 0.438. The count row is the observation from earlier: embedding scores between 0.00 and 0.14, waveform correlation at 0.940.</p>
     </div>
   </section>
 
   <!-- ============================== 14 · NEXT ============================== -->
   <section class="section" id="s14">
     <div class="section-head">
-      <p class="eyebrow">14 · next</p>
-      <h2>Compose, don’t sweep</h2>
-      <p class="bracket">[SECTION INTENT — The decision. One tagging CNN cannot cover identity, prosody, change and recurrence. The next experiment is a hybrid: mn10_as for identity, dsp_rich for change, an optional SSL clip path for prosody. Distillation is the fallback. State the kill rule.]</p>
-    </div>
-
-    <figure class="card">
-      <div id="nextDiagram"></div>
-      <figcaption class="bracket">[FIGURE 10 — The proposed hybrid ear and the cheapest falsifiable test: does [mn10_as + dsp_rich] beat either alone on G1 F1? Kill if the gain is under the pre-registered margin.]</figcaption>
-    </figure>
-
-    <div class="roadmap card">
-      <div class="roadmap-row"><span class="mono">now</span><b>C01 measurement complete</b><span>8-encoder ladder · G1 · CREMA-D · EPIC</span></div>
-      <div class="roadmap-row"><span class="mono">next</span><b>Phase 3A · hybrid</b><span>[mn10_as + dsp_rich], optional SSL clip path</span></div>
-      <div class="roadmap-row"><span class="mono">fallback</span><b>Phase 3B · distill</b><span>Dasheng / USAD → ≤5M student</span></div>
-      <div class="roadmap-row"><span class="mono">skip</span><b>more mn-scale tagging sweeps</b><span>no remaining information</span></div>
+      <p class="eyebrow">14 · open</p>
+      <h2>What this does not settle</h2>
+      <p class="prose">The kettle is one object in one room. The questions above — what it is, how many times, how long, what happens next — are answered for this recording and for the sets named on each chart. They do not pick an ear to leave running, and they do not say what a second home would look like.</p>
     </div>
   </section>
 
@@ -484,13 +451,13 @@
     <div class="section-head">
       <p class="eyebrow">15 · reproduce</p>
       <h2>Recordings, data, seeds, sealed set</h2>
-      <p class="bracket">[SECTION INTENT — Give a reader everything needed to disbelieve the post. Every tea recording with author, licence and URL. Every dataset with its split. The three-seed rule, the sealed-test protocol, the exact runner commands.]</p>
+      <p class="prose">The recordings, the sets, and the rule for a number you do not trust.</p>
     </div>
 
     <div class="table-card card">
       <div class="table-head"><h3>Tea recordings</h3><span class="mono">Freesound · CC0 / CC BY</span></div>
       <div class="table-scroll"><table id="sourcesTable"></table></div>
-      <p class="bracket table-note">[TABLE 3 — Live sources. The glass clink is CC BY 4.0 and needs attribution; everything else is CC0. The full ritual is linked but not the spine.]</p>
+      <p class="caption prose">The glass clink is CC BY 4.0 and needs the attribution in this table. Every other recording here is CC0. The longer “making tea” take is linked in the table. This page uses the kettle cycle, not that full take, because its opening is room tone.</p>
     </div>
 
     <div class="repro-grid" style="margin-top:18px">
@@ -498,10 +465,9 @@
         <p class="eyebrow">datasets</p>
         <div id="dataTable"></div>
       </div>
-      <div class="card bracket">
+      <div class="card">
         <p class="eyebrow">method</p>
-        <p>[METHOD — Three seeds or a stated CI. Held-out sources only. One pipeline path for thresholds, calibration and test. Sealed test sets opened once, inside the runner. Name the runner and the commit.]</p>
-        <p>[COMMANDS — ./rx new → ./rx check → ./rx run → ./rx verdict. Spec ids: c01_profile, c01_g1, c01_cremad, c01_epic, glb_t1, glb_t5, words2, novel1.]</p>
+        <p class="prose">Three seeds, or a confidence interval that is stated with the number. Sources in the test are held out. Thresholds, calibration, and the test pass go through one path. A sealed set is opened once, inside the runner, not while exploring. The commands are rx new, rx check, rx run, and rx verdict. The spec ids behind this page are c01_profile, c01_g1, c01_cremad, c01_epic, glb_t1, glb_t5, words2, and novel1.</p>
       </div>
     </div>
   </section>
@@ -511,7 +477,7 @@
     <div class="section-head">
       <p class="eyebrow">appendix</p>
       <h2>All numbers, one table</h2>
-      <p class="bracket">[APPENDIX — Every encoder × every metric, with units and the source result file. This is the table a reviewer will screenshot.]</p>
+      <p class="prose">Every encoder on the metrics in this page. Real-time factor and seconds per audio hour are one core, fp32, not quantised. Green marks the highest score in a column. The count column is left unmarked, because every encoder is near the floor.</p>
     </div>
 
     <div class="table-card card">
@@ -519,13 +485,26 @@
     </div>
 
     <div class="two-col appendix-notes">
-      <div class="card bracket">
+      <div class="card gloss">
         <p class="eyebrow">glossary</p>
-        <p>[GLOSSARY — RTF, episode, onset, dense F1, disc512, actor-disjoint, NCC, sealed set, G1 F1/F2/F4, HPSS, NMF.]</p>
+        <p><b>RTF.</b> Real-time factor: compute time divided by audio time. Below 1 is faster than playback.</p>
+        <p><b>Episode.</b> A stretch the ear marks as one event, with a start and an end.</p>
+        <p><b>Onset.</b> The start time of an event.</p>
+        <p><b>G1.</b> A test of whether a model notices that the scene changed. F1 is that change score. F2 is the count. F4 is the properties of the change.</p>
+        <p><b>DSP baseline.</b> Hand-built signal features, no learned weights. On the charts it is <span class="mono" style="text-transform:none;letter-spacing:0">dsp_rich</span>.</p>
+        <p><b>AudioSet classifiers.</b> Compact models trained on AudioSet: mn04, mn10, mn20.</p>
+        <p><b>Self-supervised models.</b> BEATs, EAT, Dasheng, USAD.</p>
+        <p><b>Viterbi.</b> The step that turns per-frame scores into a single sequence of episodes.</p>
+        <p><b>NCC.</b> Normalised cross-correlation of the waveform. The counting chart calls this waveform correlation.</p>
+        <p><b>HPSS.</b> Harmonic–percussive source separation. A filter that splits a mixture into a steady layer and a transient layer.</p>
+        <p><b>CREMA-D.</b> Acted emotional speech. Actor-disjoint means the test speakers were not in training.</p>
+        <p><b>EPIC dense.</b> A frame-level score on the EPIC kitchen clips, 21 classes.</p>
+        <p><b>EPIC vocab.</b> A second score on those clips, over a fixed vocabulary.</p>
+        <p><b>Sealed set.</b> A test set opened once, inside the runner.</p>
       </div>
-      <div class="card bracket">
+      <div class="card">
         <p class="eyebrow">what this post does not claim</p>
-        <p>[LIMITS — One home for the memory result. Fixed sentences for CREMA-D. EPIC kitchens only. fp32, unquantized. No phone/MCU measurement yet. The 5M frontier is task-dependent, not universal. The similarity matrices are four taps, not a benchmark.]</p>
+        <p class="prose">The memory numbers are one home. CREMA-D is fixed sentences, with actors held out. EPIC is kitchens. The cost numbers are fp32, not quantised, and not a phone. The four-tap grids are four clips, not a benchmark. Where the encoders disagree, the page reports the scores and leaves the cause open when the measurement does not decide it.</p>
       </div>
     </div>
   </section>
@@ -533,29 +512,18 @@
 </main>
 
 <footer class="footer">
-  <div>
-    <p class="mono">cite this</p>
-    <p class="bracket">[CITATION BLOCK — author, title, date, URL, commit hash. BibTeX toggle.]</p>
-  </div>
-  <div>
-    <p class="mono">thread</p>
-    <p class="bracket">[TWITTER PLAN — 7 posts: the blind kettle clip → “you know what it is” → the ear’s wrong labels → the four taps matrix → the 0.869 vs 0.188 chart → the failure ledger → link. One asset per post.]</p>
-  </div>
-  <div>
-    <p class="mono">next note</p>
-    <p class="bracket">[NEXT POST — Phase 3A hybrid result, or “how the G1 battery was thrown away and rebuilt”.]</p>
-  </div>
+  <p class="not-draft"><span class="tag">Not in this draft</span>A citation block, with BibTeX.</p>
 </footer>
 
 <!-- docked reference clip -->
 <div class="dock" id="dock" aria-hidden="true">
   <button class="dock-play" id="dockPlay" aria-label="Play or pause"><span class="play-icon"></span></button>
   <div class="dock-mid">
-    <div class="dock-meta mono"><span id="dockLabel">kettle · switch on → boil → off</span><span id="dockTime">0:00 / 1:50</span></div>
-    <canvas id="dockWave" height="32"></canvas>
+    <div class="dock-meta mono"><span id="dockLabel">the recording</span><span id="dockTime">0:00 / 1:50</span></div>
+    <canvas id="dockWave" height="22"></canvas>
     <div class="dock-progress"><i id="dockProgress"></i></div>
   </div>
-  <div class="dock-now mono" id="dockNow">—</div>
+  <button class="dock-close" id="dockClose" type="button">close</button>
 </div>
 
 <script src="app.js"></script>
