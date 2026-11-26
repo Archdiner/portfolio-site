@@ -8,24 +8,25 @@ footnotes and the appendix.
 The idea it builds towards: hearing is mostly solved, and remembering is not. A useful
 listener keeps a diary of what turned on and off, and when, instead of captioning clips.
 
-## v0.8: two posts (current)
+## v0.9: kettle first, deep dive second (current)
 
-**Part 1 (index.html): How machines learn to hear.** Message: a model hears what its training
-objective taught it to care about. Shown first in a controlled lab, then checked against real models.
+**Post 1 (index.html): What a Kettle Knows.** Hearing a sound is not keeping track of it.
+Models are introduced at a high level only.
 
 | Section | Figure |
 |---|---|
-| Cold open, how did you know, the two skills | Blind guess, moments |
-| The path every model follows | Five-step pipeline |
-| 1.76 million numbers, a picture of sound, patches | Zoom, spectrogram, patches (whole / cut / hide) |
-| Five ways to teach a model to hear | Family tree (learns? labels? what does it predict?) |
-| The lab: one tiny transformer, five objectives, one changed line each | Five benches: patch view + code with the changed line + live training map (build/lab.py) |
-| Do the real models agree? | Real EAT / Dasheng / USAD maps, taps grid, report card |
-| What none of them can tell you | Hand-off to part 2 |
+| Cold open, how did you know, the two skills, framing | Blind guess, moments, pipeline |
+| 1.76 million numbers, a picture of sound, patches | Zoom, spectrogram, patches |
+| Meet the listeners (one line per model, link to post 2) | Family tree, real-model maps of five sounds |
+| Teaching it fifteen words | The Ear's training curve, the Ear's labels on the kettle |
+| Finding repeats | Bouncing ball matching, skills chart, repeat re-creation (dips), every-moment map (window position) |
+| What about a bigger model? | Audio-language model diagram, Audio Flamingo |
+| Knowing when to listen | Whisper's sentence |
+| Keeping a diary | Kettle diary questions, SINS memory chart |
+| Back to the kettle | Final log; bitter lesson; points to post 2 |
 
-**Part 2 (part-2/index.html, draft): What a kettle knows.** Hearing is not keeping time: the Ear's
-fine-tune and vacuum cleaner, finding repeats (dips not peaks), window position, Audio Flamingo,
-Whisper, the diary. Not yet restructured.
+**Post 2 (learning-to-hear/, draft): How Machines Learn to Hear.** The five-objective lab
+(build/lab.py), the taps grid and the report card.
 
 ## Voice rules
 

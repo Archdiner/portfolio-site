@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%237c2b26'/%3E%3Cpath d='M10 13h12v7a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4z' fill='none' stroke='%23f4efe4' stroke-width='2'/%3E%3Cpath d='M22 15l4 2-4 2' fill='none' stroke='%23f4efe4' stroke-width='2'/%3E%3C/svg%3E">
-<title>What a Kettle Knows, part 1</title>
-<meta name="description" content="One kettle, five ways to train a model to listen, and why each one ends up hearing something different.">
+<title>What a Kettle Knows</title>
+<meta name="description" content="I tried to teach a computer to listen to a kitchen. Hearing turned out to be the easy part. The hard part was remembering.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -22,9 +22,9 @@
 <main>
 
 <header class="title">
-  <p class="eyebrow">Part 1 of 2 · How machines learn to hear · November 2026 · about 20 minutes · best with sound on</p>
+  <p class="eyebrow">November 2026 · about 20 minutes · best with sound on</p>
   <h1>What a Kettle Knows</h1>
-  <p class="dek">One kettle, five ways to train a model to listen, and why each one ends up hearing something different.</p>
+  <p class="dek">I tried to teach a computer to listen to a kitchen. Hearing turned out to be the easy part. The hard part was remembering.</p>
 </header>
 
 <!-- ======================================================= COLD OPEN -->
@@ -62,7 +62,7 @@
 <section class="col">
   <h2>How did you know?</h2>
   <p>Someone flicks the kettle on about three seconds in. It rumbles, builds to a roar, boils for a minute and a half and clicks itself off at 1:39. Most people get it, or get close, within a few seconds, which is a little strange when you think about it. Nobody said the word "kettle" and there was no picture. All that reached you was air pushing on your eardrums for a couple of minutes.</p>
-  <p>You also picked up a lot more than a name. Without really trying, you probably noticed that it started with a click, that the noise grew for a while before settling into a steady roar, and that it stopped by itself with another click. If I asked you how long it boiled, you could give me a rough answer.</p>
+  <p>You also picked up a lot more than a name. Without really trying, you probably noticed that it started with a click, that the noise grew for a while before settling into a steady roar, and that it stopped by itself with another click. If I asked you how long it boiled, you could give me a rough answer, and if I asked whether anyone poured the water afterwards you'd say no.</p>
   <p>Play it again and watch those moments go by:</p>
 </section>
 
@@ -83,7 +83,7 @@
 
 <section class="col">
   <p>Those are two different skills: hearing what a sound is, and keeping track of what happened and for how long. People do both without noticing they're separate. A computer gets neither for free.</p>
-  <p>This is my first real dive into audio research, and it turned into two posts. This one is about the first skill. How does a model learn to hear at all? And why do models trained in different ways end up hearing the same kettle differently? Part two is about the second skill, keeping time, which turns out to be much harder. Every model here follows roughly the same path:</p>
+  <p>This is my first real dive into audio research. This post follows the kettle: how a model hears it, and why knowing what a sound is turns out to be very different from keeping track of it over time. A second post goes deeper into how these models learn to hear in the first place. Every model here follows roughly the same path:</p>
 </section>
 
 <figure class="wide">
@@ -173,14 +173,14 @@
     <canvas id="patchCanvas" height="210" aria-label="The kettle's spectrogram, cut into patches"></canvas>
     <p class="patch-note" id="patchNote"></p>
   </div>
-  <figcaption>The first 24 seconds of the kettle. The patches are drawn much bigger than real ones so you can see them.<sup><a href="#fn2" id="r2">2</a></sup></figcaption>
+  <figcaption>The patches are drawn much bigger than real ones so you can see them.<sup><a href="#fn2" id="r2">2</a></sup></figcaption>
 </figure>
 
 <section class="col">
   <p>That last step, hiding most of the patches, is how most modern audio models teach themselves with no labels at all. You can't fill in a missing chunk of boil without learning what a boil sounds like. But "fill it in" can mean several different things, and that's where models start to differ.</p>
 
-  <h2>Five ways to teach a model to hear</h2>
-  <p>The listeners I spent the most time with can be sorted by two questions about how they were trained:</p>
+  <h2>Meet the listeners</h2>
+  <p>Before asking anything about time, it's worth meeting the models. Most of the ones in this post taught themselves: nobody ever told them what any sound was. They learned by hiding most of the patches and guessing what was missing. What exactly they guess differs, and that turns out to matter. Sorted by how they were trained:</p>
 </section>
 
 <figure class="wide">
@@ -188,152 +188,21 @@
     <div class="tq">Does it learn at all?</div>
     <div class="tb"><span class="tn">no</span><div class="tl gold">The recipe<small>70 hand-picked measurements</small></div></div>
     <div class="tq">Does it get labels?</div>
-    <div class="tb"><span class="tn">yes</span><div class="tl blood">AudioSet taggers<small>lab step 1: learn from labels</small></div></div>
+    <div class="tb"><span class="tn">yes</span><div class="tl blood">AudioSet taggers<small>two million labelled YouTube clips</small></div></div>
     <div class="tq">No labels. So what does it predict about the patches it can't see?</div>
     <div class="tb four">
-      <div class="tl teal">the pixels<small>Dasheng · step 2</small></div>
-      <div class="tl teal">a code word<small>BEATs · step 3</small></div>
-      <div class="tl teal">a teacher's view<small>EAT · step 4</small></div>
-      <div class="tl teal">an expert's view<small>USAD · step 5</small></div>
+      <div class="tl teal">the pixels<small>Dasheng</small></div>
+      <div class="tl teal">a code word<small>BEATs</small></div>
+      <div class="tl teal">a teacher's view<small>EAT</small></div>
+      <div class="tl teal">an expert's view<small>USAD</small></div>
     </div>
   </div>
-  <figcaption>Every listener in this post, sorted by two questions about how it was trained. The steps refer to the lab below.</figcaption>
+  <figcaption>Every listener in this post, sorted by two questions about how it was trained. The next post goes inside each one.</figcaption>
 </figure>
 
 <section class="col">
-  <p>The trouble with comparing the real models directly is that they differ in everything at once: training data, size, architecture and training goal. So I set up a small lab where only the goal changes. There's one tiny transformer of about 20,000 parameters, and five kinds of kitchen sound cut into half-second windows: the kettle heating, the kettle boiling, pouring, stirring, and a spoon tapping a cup. It gets trained five times, and between runs exactly one line of the training loop changes.<sup><a href="#fn3" id="r3">3</a></sup></p>
-  <p>To make the result visible, every version has to squeeze each window down to just two numbers, so we can plot it directly. Each dot below is one window, coloured by what it really is. The model never sees those colours, except in step 1. All of this is real training, run on a laptop processor.</p>
-  <div class="lab-legend" id="labLegend"></div>
-
-  <h3 class="lab-step">Step 1: learn from labels</h3>
-  <p>The most direct way is to tell the model what each window is and let it learn to guess the label. This is how the AudioSet taggers were trained, on two million YouTube clips labelled by people.</p>
-</section>
-
-<figure class="wide">
-  <div class="card bench" data-bench="labels">
-    <div class="bench-left">
-      <p class="bench-k mono">what it sees, and what it has to guess</p>
-      <canvas class="bench-patch" height="130"></canvas>
-      <p class="bench-k mono" style="margin-top:14px">the training loop</p>
-      <pre class="bench-code"></pre>
-    </div>
-    <div class="bench-right">
-      <p class="bench-k mono">its map of the five sounds, while it trains</p>
-      <canvas class="bench-map" height="270"></canvas>
-      <div class="bench-ctl"><button class="play small" aria-label="Play training"><span class="play-icon"></span></button><input type="range" min="0" max="60" value="0" aria-label="Training step"><span class="mono dim bench-step">step 0</span></div>
-      <p class="bench-score"></p>
-    </div>
-  </div>
-  <figcaption>With labels, the five sounds pull into tidy groups, because that's exactly what the model was asked to do.</figcaption>
-</figure>
-
-<section class="col">
-  <p>It works almost perfectly: 98% of new windows land closest to their own kind. But look at what it learned. It has five islands and no opinion about how they relate. Nothing tells it that heating and boiling are the same kettle, or that stirring and tapping are both a spoon on china. And it needed labels, which are slow and expensive to collect.</p>
-
-  <h3 class="lab-step">Step 2: redraw what's hidden</h3>
-  <p>So drop the labels. Hide three quarters of each window's patches and ask the model to redraw them from the rest. This is the idea behind masked autoencoders, and behind Dasheng.</p>
-</section>
-
-<figure class="wide">
-  <div class="card bench" data-bench="redraw">
-    <div class="bench-left">
-      <p class="bench-k mono">what it sees, and what it has to guess</p>
-      <canvas class="bench-patch" height="130"></canvas>
-      <p class="bench-k mono" style="margin-top:14px">the training loop</p>
-      <pre class="bench-code"></pre>
-    </div>
-    <div class="bench-right">
-      <p class="bench-k mono">its map of the five sounds, while it trains</p>
-      <canvas class="bench-map" height="270"></canvas>
-      <div class="bench-ctl"><button class="play small" aria-label="Play training"><span class="play-icon"></span></button><input type="range" min="0" max="60" value="0" aria-label="Training step"><span class="mono dim bench-step">step 0</span></div>
-      <p class="bench-score"></p>
-    </div>
-  </div>
-  <figcaption>Nobody gives it labels now. It only has to redraw the hidden patches, and the sounds arrange themselves by how they sound.</figcaption>
-</figure>
-
-<section class="col">
-  <p>It sorts 80% of new windows correctly, without ever seeing a label. More interesting is the map itself. Pouring sits on its own, because nothing else sounds like it. Heating runs into the boil, which is right, because it's the same kettle getting louder. Stirring and the spoon tapping the cup overlap, which is also right, because both are a spoon hitting china.</p>
-  <p>The catch is that redrawing every pixel means spending effort on things that don't matter, like the exact grain of the hiss in a boil.</p>
-
-  <h3 class="lab-step">Step 3: name the code</h3>
-  <p>BEATs' answer is to make the target coarser. First sort all the patches into a small codebook of typical shapes (16 here, a few thousand in BEATs). Then, instead of redrawing a hidden patch, the model only has to say which codebook entry it is, a bit like guessing a missing word instead of a missing photo.</p>
-</section>
-
-<figure class="wide">
-  <div class="card bench" data-bench="code">
-    <div class="bench-left">
-      <p class="bench-k mono">what it sees, and what it has to guess</p>
-      <canvas class="bench-patch" height="130"></canvas>
-      <p class="bench-k mono" style="margin-top:14px">the training loop</p>
-      <pre class="bench-code"></pre>
-    </div>
-    <div class="bench-right">
-      <p class="bench-k mono">its map of the five sounds, while it trains</p>
-      <canvas class="bench-map" height="270"></canvas>
-      <div class="bench-ctl"><button class="play small" aria-label="Play training"><span class="play-icon"></span></button><input type="range" min="0" max="60" value="0" aria-label="Training step"><span class="mono dim bench-step">step 0</span></div>
-      <p class="bench-score"></p>
-    </div>
-  </div>
-  <figcaption>The model now guesses each hidden patch's code word. The codes come from grouping similar-looking patches.</figcaption>
-</figure>
-
-<section class="col">
-  <p>This one sorts 71% of new windows. The heating and the boil merge into a single continuous path, and the spoon sounds spread out along the top. With only 16 codes, many different patches share a word, so the model can't tell them apart. In BEATs, the codebook is itself learned and improved over several rounds, which is how it gets past that.</p>
-
-  <h3 class="lab-step">Step 4: match a teacher</h3>
-  <p>EAT goes a step further and drops fixed targets altogether. It keeps a second copy of the model, the <em>teacher</em>, which sees the whole window and updates slowly towards the student. The student sees only a quarter of the patches and has to predict what the teacher thinks about the rest. As the student improves, so does the teacher, and so do the targets.</p>
-</section>
-
-<figure class="wide">
-  <div class="card bench" data-bench="teacher">
-    <div class="bench-left">
-      <p class="bench-k mono">what it sees, and what it has to guess</p>
-      <canvas class="bench-patch" height="130"></canvas>
-      <p class="bench-k mono" style="margin-top:14px">the training loop</p>
-      <pre class="bench-code"></pre>
-    </div>
-    <div class="bench-right">
-      <p class="bench-k mono">its map of the five sounds, while it trains</p>
-      <canvas class="bench-map" height="270"></canvas>
-      <div class="bench-ctl"><button class="play small" aria-label="Play training"><span class="play-icon"></span></button><input type="range" min="0" max="60" value="0" aria-label="Training step"><span class="mono dim bench-step">step 0</span></div>
-      <p class="bench-score"></p>
-    </div>
-  </div>
-  <figcaption>The student guesses the teacher's view of each hidden patch, and the teacher slowly follows the student.</figcaption>
-</figure>
-
-<section class="col">
-  <p>This is the messiest map, sorting 69% of new windows, and it does something none of the others do. Every half-second of boil gets squeezed onto almost the same point, and so does every half-second of pouring, while the spoon sounds stay spread out. That's what this goal rewards: two views of the same steady sound should get the same answer. It's a tidy way to learn what doesn't change. It's also a risk, because a model can satisfy this goal by giving <em>everything</em> the same answer, which is called collapse. Real methods add safeguards against it (here, normalising the teacher's answers), and the boil and pour are a mild version of it.</p>
-
-  <h3 class="lab-step">Step 5: copy an expert</h3>
-  <p>The last way skips the guessing game and copies a model that already exists. The target is simply what a big trained model says about each window. Here the expert is the real Dasheng, run on the same windows. USAD learns this way from two experts at once, one for speech and one for general sound, and the small AudioSet taggers also learn partly by copying a bigger model.</p>
-</section>
-
-<figure class="wide">
-  <div class="card bench" data-bench="expert">
-    <div class="bench-left">
-      <p class="bench-k mono">what it sees, and what it has to guess</p>
-      <canvas class="bench-patch" height="130"></canvas>
-      <p class="bench-k mono" style="margin-top:14px">the training loop</p>
-      <pre class="bench-code"></pre>
-    </div>
-    <div class="bench-right">
-      <p class="bench-k mono">its map of the five sounds, while it trains</p>
-      <canvas class="bench-map" height="270"></canvas>
-      <div class="bench-ctl"><button class="play small" aria-label="Play training"><span class="play-icon"></span></button><input type="range" min="0" max="60" value="0" aria-label="Training step"><span class="mono dim bench-step">step 0</span></div>
-      <p class="bench-score"></p>
-    </div>
-  </div>
-  <figcaption>The target is the real Dasheng's output for each window. The tiny model's map comes to look like a squashed copy of Dasheng's.</figcaption>
-</figure>
-
-<section class="col">
-  <p>Copying an expert sorts 91% of new windows, the best of the label-free runs, which is the point of it: a tiny model inherits much of what a model thousands of times its size learned. It also inherits that model's way of seeing. Heating flows into the boil, pouring sits apart and the spoon sounds stay close, because that's how Dasheng hears them.</p>
-  <p>So that's the lab: the same tiny network, the same sounds, and one changed line in each run, giving five different ears. Labels carve the world into the categories you gave them. Redrawing keeps detail, naming codes keeps the gist, matching a teacher learns what stays the same, and copying an expert inherits someone else's ear.</p>
-
-  <h2>Do the real models agree?</h2>
-  <p>A toy lab is only interesting if it says something about the real thing. Here are three real self-taught models, EAT, Dasheng and USAD, run on exactly the same five sounds. For comparison there's also the raw spectrogram, with no model at all:</p>
+  <p>Here's the short version. The recipe isn't trained at all. It measures a few dozen things a sound engineer would pick, like brightness and how quickly a sound dies away. The AudioSet taggers learned from people's labels on two million YouTube clips. Dasheng learned by redrawing hidden patches, BEATs by naming them from a codebook, EAT by matching a slowly updated copy of itself, and USAD by copying two expert models. (The <a href="learning-to-hear/">next post</a> goes inside each of these, with a small lab where you can watch them train.)</p>
+  <p>Those different goals give them different ears. Here are three of the real models listening to five kitchen sounds, next to the raw spectrogram with no model at all:</p>
 </section>
 
 <figure class="wide">
@@ -352,50 +221,198 @@
 </figure>
 
 <section class="col">
-  <p>Even the raw spectrogram sorts the windows somewhat, because pouring and boiling really do look different. Every real model does better, and Dasheng best of all, at 96%. Dasheng's map also looks a lot like the lab's redraw and copy-an-expert maps. EAT's biggest directions are the messiest, as its tiny counterpart's were.</p>
-  <p>The clearest real-world sign of the "match a teacher" habit is small differences going missing. Play these four taps:</p>
+  <p>None of them was told what these sounds are, yet each one sorts them, and each draws a different picture. Dasheng sorts them best, at 96%. Hold on to that, because we're about to ask them a question that has nothing to do with what a sound is.</p>
+<h2>Teaching it fifteen words</h2>
+  <p>None of these models outputs a name out of the box, though, and a name is the first thing a home listener needs. To get names, you fine-tune: add a small layer on top that maps the model's view of each moment onto a list of labels, then keep training on labelled examples. I did this with EAT, the self-taught model that matches a teacher, on RealDESED, a set of real home recordings labelled with fifteen everyday sounds: footsteps, dishes, doors, a light switch, a vacuum, a coffee machine and the rest. I tried three learning rates, ten passes over the data (epochs) each, on one rented A100 GPU. Each epoch took about two minutes, so the whole thing ran in under an hour. Here's the run:</p>
 </section>
 
 <figure class="wide">
-  <div class="taps" id="taps"></div>
-</figure>
-
-<section class="col">
-  <p>To my ear, A and B are the same mug, C is a glass and D is metal. Here's how alike four listeners think each pair is, on a scale where 1 means identical:<sup><a href="#fn4" id="r4">4</a></sup></p>
-</section>
-
-<figure class="wide">
-  <div class="sim card">
-    <div class="tabs" id="simTabs" role="tablist">
-      <button class="tab on" data-sim="dsp_rich">hand-written recipe</button>
-      <button class="tab" data-sim="beats_iter3">BEATs</button>
-      <button class="tab" data-sim="eat_pretrain">EAT</button>
-      <button class="tab" data-sim="usad2_small">USAD</button>
+  <div class="card" id="curve">
+    <div class="player-top">
+      <button class="play" id="curvePlay" aria-label="Play the training run"><span class="play-icon"></span></button>
+      <span class="mono dim" id="curveEpoch">epoch 0 of 9</span>
     </div>
-    <div class="sim-body">
-      <div id="simMatrix"></div>
-      <p id="simNote" class="sim-note"></p>
-    </div>
+    <div id="curveSvg"></div>
   </div>
-  <figcaption>Each cell compares two taps, and darker means more alike. The shading is relative to each grid, so you can see the order even when the numbers are bunched together.</figcaption>
+  <figcaption>The Ear's real training log, one line per learning rate. Left: training loss, where lower is better. Right: F1, where higher is better, measured on the same validation clips used to set its thresholds, so it's on the optimistic side. The dashed band is the honest number, on clips it didn't tune on: 0.897 (95% interval 0.888 to 0.906).</figcaption>
 </figure>
 
 <section class="col">
-  <p>The recipe, which measures brightness and decay directly, hears the soft mug and the metal bowl as quite different. EAT puts all four taps almost on top of each other, just as the lab's teacher-matching model squeezed every half-second of boil onto one point. Four clips don't prove anything on their own, but it's the pattern the lab predicts.</p>
-  <p>Finally, here's how each way of training does on tasks that go well beyond five kitchen sounds:</p>
+  <p>The highest learning rate learns fastest and ends best. All three runs show the classic shape: loss drops steeply, flattens out, and then ticks back up on the last epoch, a hint that more training wouldn't have helped. I'll call the result the Ear. Here's everything it reported while listening to our kettle:</p>
 </section>
 
 <figure class="wide">
-  <div class="card" id="report"></div>
-  <figcaption>One row per way of training, using the real model that represents it. Shading ranks each column, and darker is better. These real models also differ in their training data and size, so this table is consistent with the lab, but it can't prove the training goal caused each difference. Only the lab does that, because there the goal is the only thing that changes.<sup><a href="#fn5" id="r5">5</a></sup></figcaption>
+  <div class="player card" data-view="ear">
+    <div class="player-top">
+      <button class="play" data-kettle="ear" aria-label="Play the kettle"><span class="play-icon"></span></button>
+      <span class="mono dim" data-time></span>
+      <span class="now-label" id="earNow"></span>
+    </div>
+    <div class="rows" id="earRows"></div>
+  </div>
+  <figcaption>Top row: what actually happened, picked out from the kettle's loudness. Below: every label the Ear produced, and when. Click a row to jump there.</figcaption>
 </figure>
 
 <section class="col">
-  <p>No single way of training wins. The recipe is best at telling materials apart and does well at noticing a change, but knows nothing about voices. The label-trained tagger is cheap and good at kitchen events, the kind of thing it was labelled with, and weak at emotion in a voice, which no label described. Dasheng, trained to redraw, is best at that emotion. EAT is best at noticing when a scene changes, and worst at telling china from metal.</p>
-  <p>That's what I mean by models hearing differently. They share the same pipeline, and often the same kind of network. What sets them apart is mostly what they were asked to do while they learned.</p>
+  <p id="guessCallback">A light switch, then running water, then a coffee machine, and then, for most of the boil, a vacuum cleaner.</p>
+  <p>It's easy to laugh, but look at the timing. "Light switch" lands at 2.7 seconds, exactly when the kettle clicks on. "Running water" and "coffee machine" cover the heating, when a kettle really does sound like water being churned around. "Kettle" isn't one of the Ear's fifteen words, so it reached for the nearest ones it had. That's fine-tuning's trade: you get names, but only the ones you taught.</p>
+  <p>The more interesting part is what it <em>didn't</em> say. After about 53 seconds it goes quiet, even though the kettle keeps boiling for another 45. And nothing in its output connects the click at the start to the quiet at the end, or says that one object was on the whole time.</p>
 
-  <h2>What none of them can tell you</h2>
-  <p>Every model in this post can tell the boil from the pour. Ask one how long the kettle boiled, though, or whether it's still on, and none of them has an answer. A model that hears well, it turns out, isn't the same as one that keeps track of time. That's part two, where I fine-tune one of these models into a listener for a home, it calls the kettle a vacuum cleaner, and I find out why counting is so much harder than hearing.</p>
+  <h2>Finding repeats</h2>
+  <p>Before going further, I wanted to know which basic timing skills the models already had. I put together 345 short clips where something changes partway through (a sound starts, stops, or gives way to another) and asked two things. Did the model notice the change? And could it find how many times a sound repeated?</p>
+  <p>The repeat test works like this. Take a two-second example of the sound, average the model's view of it into a single vector, then slide that vector along the recording, frame by frame, and count the peaks where the two match. You can try the same idea on the raw waveform of a bouncing ball:</p>
+</section>
+
+<figure class="wide">
+  <div class="bounce card" id="bounce">
+    <div class="player-top">
+      <button class="play" id="bouncePlay" aria-label="Play the bouncing ball"><span class="play-icon"></span></button>
+      <span class="mono dim">a bouncing ball · 2.5 s</span>
+      <button class="ghost" id="bounceShow">show the answer</button>
+    </div>
+    <canvas id="bounceWave" height="110" aria-label="Waveform of a bouncing ball"></canvas>
+    <p class="bounce-answer mono" id="bounceAnswer" hidden>11 bounces, each marked where it lands</p>
+    <p class="chart-title" style="margin-top:16px">Sliding the first bounce along the recording</p>
+    <canvas id="probeCurve" height="100" aria-label="How well the first bounce matches each moment of the recording"></canvas>
+    <div class="zoom-controls">
+      <span class="mono dim">less picky</span>
+      <input type="range" id="probeThr" min="20" max="95" value="55" aria-label="Peak threshold">
+      <span class="mono dim">more picky</span>
+    </div>
+    <p class="zoom-read mono" id="probeRead">decoding…</p>
+  </div>
+  <figcaption>The bottom curve is computed live in your browser, from the raw waveform: how closely the first bounce matches each moment of the recording. Every peak above the line counts as a repeat. Drag the slider to change how picky it is.</figcaption>
+</figure>
+
+<section class="col">
+  <p>On the raw waveform, matching works almost perfectly. Each bounce lines up with the first one and makes a sharp peak. Here are the scores across all 345 clips:</p>
+</section>
+
+<figure class="wide">
+  <div class="card" id="skillsChart"></div>
+  <figcaption>Each listener's score on the 345 clips, where 1 is perfect. The dashed lines mark what you'd score by luck. Gold is the recipe, red the AudioSet taggers, green the self-taught models, and black is plain waveform matching.</figcaption>
+</figure>
+
+<section class="col">
+  <p>Noticing a change is fine: EAT scores 0.78, and the hand-written recipe 0.74. Finding repeats is a wipeout. Waveform matching gets 0.94, and no model gets above 0.14, which is barely better than luck.</p>
+  <p>The recording still had its time steps, so time wasn't thrown away.<sup><a href="#fn3" id="r3">3</a></sup> Bigger didn't help either: the 90-million-parameter models did no better than the one with a million. So why did they fail?</p>
+  <p>With the real models running, I could finally look. I made a small re-creation of the test: a mug tapped six times over twenty seconds of our kettle boiling. A two-second example around the first tap gets averaged into a single vector, as in the test, and then slid along each model's frames:</p>
+</section>
+
+<figure class="wide">
+  <div class="card" id="repeats">
+    <div class="player-top">
+      <button class="play" id="repPlay" aria-label="Play the re-created test"><span class="play-icon"></span></button>
+      <span class="mono dim">a mug tapped six times over a boiling kettle · 22 s</span>
+    </div>
+    <div class="tabs" id="repMode" role="tablist">
+      <button class="tab on" data-mode="peaks">count the peaks (what the test did)</button>
+      <button class="tab" data-mode="dips">count the dips</button>
+    </div>
+    <div id="repRows"></div>
+  </div>
+  <figcaption>Each row is one listener's match between the two-second example (shaded) and every moment of the recording. The marks along the top are where the taps really are. Counts use the same rule as the full test: marks at least 1.5 seconds apart that stand well clear of the rest of the curve.<sup><a href="#fn4" id="r4">4</a></sup></figcaption>
+</figure>
+
+<section class="col">
+  <p>Look at where the taps are. In every model's curve they're <em>dips</em>, not peaks. The two-second example is mostly boil with a fraction of a second of tap in it, so its average looks like boil, and the moments that match it least are the taps. Counting peaks, every model finds nothing. Switch to counting dips, and USAD finds all six taps and nothing else, and Dasheng finds all six plus two false alarms. EAT finds three dips and none of them is a tap. They sit at the start of each of its ten-second windows, for a reason the next figure shows.</p>
+  <p>In this re-creation, at least, the models heard the taps perfectly well, and the peak-counting was looking the wrong way. I haven't rerun the full 345-clip test with dips yet, so I can't say this explains all of the failure, but it's the first thing I'd check.</p>
+  <p>The waveform shows the opposite problem. It nails the clean bouncing ball, but with a kettle boiling underneath, the later taps barely match the first one, because the noise on top of each is different. It finds seven peaks, and only two of them are taps, one being the tap it was copied from.</p>
+  <p>EAT's poor showing has a second cause, which you can see if you compare every moment of the kettle with every other moment:</p>
+</section>
+
+<figure class="wide">
+  <div class="card" id="selfSim">
+    <div class="tabs" id="simModelTabs" role="tablist">
+      <button class="tab on" data-m="spectrogram">raw spectrogram</button>
+      <button class="tab" data-m="EAT">EAT</button>
+      <button class="tab" data-m="Dasheng">Dasheng</button>
+      <button class="tab" data-m="USAD">USAD</button>
+    </div>
+    <div class="selfsim-wrap"><canvas id="selfCanvas" height="340" aria-label="Every moment of the kettle compared with every other moment"></canvas></div>
+    <p class="patch-note" id="selfNote"></p>
+  </div>
+  <figcaption>The whole 1:50 of the kettle, compared with itself. Both axes are time, from the start at the top left. Each point compares two moments, and brighter means the model thinks they sound more alike.</figcaption>
+</figure>
+
+<section class="col">
+  <p>The spectrogram's map follows the sound itself: after the click, one big block while the boil is loudest, then a second block once the roar dulls and the kettle switches off. EAT and Dasheng show a grid instead. I fed them the recording ten seconds at a time, and their frames turn out to remember where they sit inside each ten-second window. During the steady boil, two EAT frames from the same spot in different windows are 0.98 alike, against 0.89 for frames half a window apart. For Dasheng it's 0.77 against 0.54.</p>
+  <p>That's a side effect of how transformers work. Each patch is told its position so the model can keep track of order, and some of that position survives all the way to the output. For classifying a clip it barely matters, but for matching a sample against a long recording it's noise. EAT also produces only about six frames a second, which is coarse for a tap. USAD, fed thirty seconds at a time, shows a much weaker version (0.91 against 0.88). Its big blocks are the thirty-second windows themselves.</p>
+
+  <h2>What about a bigger model?</h2>
+  <p>At this point you might reasonably ask why I'm fiddling with listeners like these at all. There are now large audio-language models that you can hand a recording and question in plain English. They're built like this:</p>
+</section>
+
+<figure class="wide">
+  <div class="card alm" aria-label="An audio-language model: audio goes into an encoder, the encoder's output goes into a language model, which writes an answer">
+    <div class="alm-box"><b>ten minutes of audio</b><span>plus a question</span></div><div class="alm-arrow">→</div>
+    <div class="alm-box"><b>audio encoder</b><span>turns sound into tokens, like the models above</span></div><div class="alm-arrow">→</div>
+    <div class="alm-box"><b>language model</b><span>reads them alongside the question, like words</span></div><div class="alm-arrow">→</div>
+    <div class="alm-box out"><b>"none"</b><span>its most common answer</span></div>
+  </div>
+  <figcaption>How an audio-language model like Audio Flamingo 3 is put together. The encoder does the hearing, and the language model does the talking.</figcaption>
+</figure>
+
+<section class="col">
+  <p>So I tried one, Audio Flamingo 3, on a much harder version of the kettle question: a week of audio recorded continuously in one person's home,<sup><a href="#fn5" id="r5">5</a></sup> with 298 questions like whether the vacuum was on at a given moment, since when, for how long, and how many times. Each question came with ten minutes of audio.</p>
+  <p>It mostly answered "none". Overall it scored 0.19, below the 0.26 you get from a baseline that ignores the audio and always gives the most common answer. Some of that was my prompt and my scoring, so I wouldn't read much into the exact number. But it shows something about the design: the language model only sees what the encoder hands it, and nothing in either half was trained to keep time across ten minutes.</p>
+
+  <h2>Knowing when to listen</h2>
+  <p>Training data leaves fingerprints in other ways, too. Whisper, a popular speech-to-text model, learned from hundreds of thousands of hours of internet audio paired with whatever text came with it, much of it subtitles. I ran the small version over an hour of that same home with nobody in it, and in 49 of those 60 minutes it produced text. It kept writing the same sentence:</p>
+  <blockquote>Thank you very much for watching this video and I will see you in much for watching.</blockquote>
+  <p>A common explanation is that the end of an online video is often quiet, and the subtitles over that quiet often say exactly this, so to Whisper an empty room sounds like the end of a video. Putting a small voice-activity detector in front of it, so that Whisper only hears the parts where someone is actually talking, made the invented words disappear. With speech mixed into the home's background noise, the word error rate fell from 25% to 4%. Whisper itself didn't change at all.</p>
+
+  <h2>Keeping a diary</h2>
+  <p>Which brings us back to the questions about time. The approach I ended up with doesn't ask a model to remember audio at all. A listener writes a diary instead: every time something changes, it notes what turned on or off, and when, and it smooths over the flicker so that one long boil becomes one entry rather than thirty.<sup><a href="#fn6" id="r6">6</a></sup></p>
+  <p>This isn't a new idea, and I didn't come up with it. In video, Socratic Models (2022) turned first-person footage into a running text log and answered questions by reading it, and a 2026 paper does the same with long audio recordings. (Links are in the further reading.) Once the diary exists, questions about time become arithmetic on a list. Ask the kettle's diary something:</p>
+</section>
+
+<figure class="wide">
+  <div class="card diary" data-view="diary">
+    <div class="player-top">
+      <button class="play" data-kettle="diary" aria-label="Play the kettle"><span class="play-icon"></span></button>
+      <span class="mono dim" data-time></span>
+    </div>
+    <div class="diary-strip" id="diaryStrip"></div>
+    <div class="questions" id="questions"></div>
+  </div>
+  <figcaption>Click a question to see the answer and the bit of the diary it came from. This diary comes from a simple loudness-tracking system, not the Ear.</figcaption>
+</figure>
+
+<section class="col">
+  <p>Back in the week-long home recording, a listener built on BEATs, frozen, with a small layer on top for household activities, wrote the diary itself. The same 298 questions were then answered from that diary:</p>
+</section>
+
+<figure class="wide">
+  <div class="card" id="memoryChart"></div>
+  <figcaption>Share of the 298 questions answered correctly, by kind of question. "Same answer each time" ignores the audio and always gives the most common answer. The diary's perfect score on "is it happening?" is too easy, because some of the "no" cases are silence.</figcaption>
+</figure>
+
+<section class="col">
+  <p>The diary gets 0.87 overall, and it's weakest on "how many times?", which is the repeat problem again. The surprising part was which half did the work. Handing the same diary to a general language model (Qwen) and asking in plain English only moved its score from 0.25 to 0.34. What got 0.87 was answering with small exact queries that look things up and subtract. Writing things down turned out to be only half of it. The other half was doing the arithmetic properly.</p>
+  <p>Treat this as a demonstration rather than a benchmark. It's one home, and the diary's vocabulary was set up for that home's activities, which Audio Flamingo didn't get. The whole system runs on an ordinary laptop processor. Plenty didn't work along the way, including a test where I'd swapped "added" and "removed", and a result that turned out to be a home memorising itself. The full list is in the appendix.</p>
+
+  <h2>Back to the kettle</h2>
+  <p>Let's play it one last time, and this time watch the diary:</p>
+</section>
+
+<figure class="wide">
+  <div class="player card dark" data-view="final">
+    <div class="player-top">
+      <button class="play" data-kettle="final" aria-label="Play the kettle"><span class="play-icon"></span></button>
+      <span class="mono dim" data-time></span>
+    </div>
+    <div class="wave-box">
+      <canvas class="kwave" height="60"></canvas>
+      <div class="ph"></div>
+    </div>
+    <ol class="log" id="log"></ol>
+  </div>
+</figure>
+
+<section class="col">
+  <p>So what does a kettle know? It depends who's listening. To the list of numbers it's 1.76 million values. The self-taught models know what a boil sounds like, but not when this one started. The Ear, taught fifteen words, calls it a vacuum cleaner for fifty seconds. And the diary knows it switched on at 0:02.7, boiled for 86 seconds and switched itself off, which is all anyone was going to ask it.</p>
+  <p>The diary is a choice I made by hand, about what to write down and how. Rich Sutton's bitter lesson says hand-made choices like that tend to lose, eventually, to models that learn for themselves what's worth keeping. Which raises the question the <a href="learning-to-hear/">next post</a> is about: how do these models learn to hear in the first place, and why do different ways of teaching them produce such different ears? In it, I build a small lab where you can watch five of those ways train side by side. After that, I want to go the other way, to diffusion models that generate sound instead of describing it.</p>
   <p>Thanks for reading!</p>
   <p class="sign">Asad</p>
 </section>
@@ -406,9 +423,10 @@
   <ol>
     <li id="fn1">Your inner ear does something similar. The cochlea is a coiled tube that vibrates at different places for different pitches, so your brain receives sound already split up roughly the way a spectrogram is. The spectrograms here use 64 bands spaced the way hearing is, closer together at low pitches. <a href="#r1">↩</a></li>
     <li id="fn2">Real audio transformers typically use 16 × 16 patches on spectrograms with 128 pitch bands and 10 ms time steps, so each patch covers about a sixth of a second. <a href="#r2">↩</a></li>
-    <li id="fn3">The lab model is a two-layer transformer with 32-number tokens, about 20,000 parameters, ending in two numbers per window. Each window is half a second of spectrogram (8 time steps × 64 bands) cut into 8 patches. Each run is 1,500 steps of 128 windows with Adam. "Hiding" masks 75% of the patches. The codebook has 16 entries from k-means over all patches. The teacher is a moving average of the student (0.99 per step), with its outputs normalised across each batch. The expert targets are the real Dasheng's outputs averaged over each window. Scores are on 180 windows held out from training, and count how often a window's two numbers sit closest to the average of its own kind. The script is build/lab.py. <a href="#r3">↩</a></li>
-    <li id="fn4">These are the cosine similarities between clip embeddings, each averaged over its patches. Each tap was loudness-matched and trimmed to three quarters of a second first. <a href="#r4">↩</a></li>
-    <li id="fn5">Materials is the similarity between the soft mug tap and the metal bowl, where lower means it hears more difference (only measured for four listeners). Kitchen events is the frame-level score on EPIC-SOUNDS (21 classes). Voice emotion is CREMA-D accuracy with the actors held out (chance 0.17). Noticing a change is the change-detection score on 345 clips (luck 0.19). Every number is in the appendix. <a href="#r5">↩</a></li>
+    <li id="fn3">Inside BEATs and EAT, the patches at each moment are averaged across pitch, but the sequence over time is kept. The two-second example is the only part that gets averaged into a single vector. Peaks had to be at least 1.5 seconds apart, and the threshold was chosen on the first 50 items and scored on the last 50. <a href="#r3">↩</a></li>
+    <li id="fn4">The re-creation uses 22 seconds of the kettle's boil with a hard mug tap added six times, about twice as loud as the boil's peaks. The example is the two seconds from 1.0 to 3.0, around the first tap. "Stands well clear" means more than 2.5 robust standard deviations from the curve's median. The models are EAT, Dasheng and USAD2-Small run on CPU, and the script is in the post's folder. <a href="#r4">↩</a></li>
+    <li id="fn5">SINS, a public dataset recorded continuously in one home for a week, with daily activities like cooking, washing up and vacuuming labelled. The questions cover days four to seven. <a href="#r5">↩</a></li>
+    <li id="fn6">The smoothing is a Viterbi pass. Given second-by-second guesses about whether something is on, it finds the most likely sequence of on and off stretches, so a single noisy second can't split one boil into two. <a href="#r6">↩</a></li>
   </ol>
 </section>
 
@@ -416,20 +434,33 @@
   <h3>Further reading</h3>
   <p>Here are the papers and datasets behind this post if you want to go deeper. It's not a survey of the field, just the things I actually used or leaned on.</p>
   <ul>
-    <li><b>Volhejn, 2025.</b> <a href="https://kyutai.org/codec-explainer/">Neural audio codecs: how to get audio into LLMs</a>. The other half of this story: how to turn audio into tokens a language model can continue. This post is about how models learn to hear; that one is about how they learn to speak.</li>
+    <li><b>Volhejn, 2025.</b> <a href="https://kyutai.org/codec-explainer/">Neural audio codecs: how to get audio into LLMs</a>. The other half of this story: how to turn audio into tokens a language model can continue. This post is about hearing and remembering; that one is about speaking.</li>
     <li><b>Dosovitskiy et al., 2020.</b> An image is worth 16x16 words: transformers for image recognition at scale. Where cutting pictures into patches comes from.</li>
     <li><b>Gong, Chung &amp; Glass, 2021.</b> AST: Audio Spectrogram Transformer. The same patch trick applied to spectrograms.</li>
-    <li><b>Huang et al., 2022.</b> Masked autoencoders that listen. Hide most of the patches and redraw them: the idea behind Dasheng and lab step 2.</li>
+    <li><b>Huang et al., 2022.</b> Masked autoencoders that listen. Hide most of the patches and redraw them: the idea behind Dasheng.</li>
     <li><b>Baevski et al., 2022.</b> Efficient self-supervised learning with contextualized target representations for vision, speech and language (data2vec 2.0). The "match the teacher" recipe that EAT builds on.</li>
     <li><b>Koutini et al., 2021.</b> Efficient training of audio transformers with patchout (PaSST). The big transformer the small AudioSet taggers learn to copy.</li>
-    <li><b>Hinton, Vinyals &amp; Dean, 2015.</b> Distilling the knowledge in a neural network. The original "copy an expert" paper.</li>
     <li><b>Gemmeke et al., 2017.</b> Audio Set: an ontology and human-labeled dataset for audio events. Two million YouTube clips with sound labels, which is what the small taggers learned from.</li>
     <li><b>Schmid, Koutini &amp; Widmer, 2023.</b> Efficient large-scale audio tagging via transformer-to-CNN knowledge distillation. The compact taggers (mn04, mn10, mn20) in the charts.</li>
-    <li><b>Chen et al., 2022.</b> BEATs: audio pre-training with acoustic tokenizers. The "name the code" model.</li>
+    <li><b>Chen et al., 2022.</b> BEATs: audio pre-training with acoustic tokenizers. One of the large self-taught listeners, and the one the diary system builds on.</li>
     <li><b>Chen et al., 2024.</b> EAT: self-supervised pre-training with efficient audio transformer. The model that hears every tap as nearly the same, and the one the Ear is fine-tuned from.</li>
     <li><b>Dinkel et al., 2024.</b> Scaling up masked audio encoder learning for general audio classification. Dasheng, the best of the bunch at hearing emotion in a voice.</li>
-    <li><b>Huh et al., 2023.</b> EPIC-SOUNDS: a large-scale dataset of actions that sound. The kitchen events column of the report card.</li>
-    <li><b>Cao et al., 2014.</b> CREMA-D: crowd-sourced emotional multimodal actors dataset. The emotion-in-a-voice column of the report card.</li>
+    <li><b>Goel et al., 2025.</b> Audio Flamingo 3: advancing audio intelligence with fully open large audio language models. The big model we asked about the week.</li>
+    <li><b>Dekkers et al., 2017.</b> The SINS database for detection of daily activities in a home environment using an acoustic sensor network. The week in one home.</li>
+    <li><b>Radford et al., 2022.</b> Robust speech recognition via large-scale weak supervision. Whisper.</li>
+    <li><b>Fitzgerald, 2010.</b> Harmonic/percussive separation using median filtering. The smooth-and-sharp trick.</li>
+    <li><b>Rabiner, 1989.</b> A tutorial on hidden Markov models and selected applications in speech recognition. Still the friendliest introduction to the Viterbi smoothing behind the diary.</li>
+    <li><b>Huh et al., 2023.</b> EPIC-SOUNDS: a large-scale dataset of actions that sound. The kitchen recordings behind the short-events results.</li>
+    <li><b>Cao et al., 2014.</b> CREMA-D: crowd-sourced emotional multimodal actors dataset. The acted voices behind the emotion scores in the appendix.</li>
+  </ul>
+  <p>On writing things down instead of remembering:</p>
+  <ul>
+    <li><b>Zeng et al., 2022.</b> <a href="https://arxiv.org/abs/2204.00598">Socratic Models: composing zero-shot multimodal reasoning with language</a>. Turns first-person video into a text log and answers questions by reading it. The earliest clear version of the diary idea I know of.</li>
+    <li><b>2024.</b> <a href="https://arxiv.org/abs/2408.03160">User-in-the-loop evaluation of multimodal LLMs for activity assistance</a>. Finds that the text-log approach beats models looking at frames directly when a task needs a long history, including in a live cooking study.</li>
+    <li><b>2024.</b> <a href="https://www.ecva.net/papers/eccv_2024/papers_ECCV/papers/03241.pdf">VideoAgent: a memory-augmented multimodal agent for video understanding</a> (ECCV). A structured memory of events and objects that a language model queries with tools.</li>
+    <li><b>2026.</b> <a href="https://arxiv.org/abs/2602.14612">Event-grounded question answering over long audio via structured retrieval</a>. The audio version: long recordings become timestamped events in a database, with smart-home monitoring as a target use. The closest thing to this post's diary.</li>
+    <li><b>2026.</b> <a href="https://arxiv.org/abs/2609.01542">TAG-Bench: benchmarking temporal audio grounding in large audio language models</a>. Twenty-one systems asked when sounds happen, with the best model counting repeated sounds correctly under 14% of the time. Independent evidence for the counting problem.</li>
+    <li><b>Sutton, 2019.</b> <a href="http://www.incompleteideas.net/IncIdeas/BitterLesson.html">The bitter lesson</a>. Why a diary format designed by a person is probably a stepping stone, not the destination.</li>
   </ul>
 </section>
 
@@ -442,13 +473,18 @@
     <p class="small">Speed is the share of real time one CPU core needs (fp32, not quantised). "Notice", "count" and "describe the change" are F1, F2 and F4 on the 345-clip change test; shuffled controls score 0.192, 0.130 and 0.467. "Voice emotion" is CREMA-D accuracy on 1,066 test clips with the actors held out (chance 0.167). "Kitchen" is the frame-level score on EPIC-SOUNDS, 21 classes.</p>
   </details>
   <details>
+    <summary>What failed, in full</summary>
+    <div class="table-scroll"><table id="failTable"></table></div>
+    <p class="small">"Void" means the test didn't measure what it was meant to (the same-home run used a home that wasn't held out). "Inconclusive" means the comparison didn't finish.</p>
+  </details>
+  <details>
     <summary>Recordings and licences</summary>
     <div class="table-scroll"><table id="srcTable"></table></div>
     <p class="small">All recordings are from Freesound, transcoded to 16 kHz mono. The glass clink is CC BY 4.0 (KVV_Audio); everything else is CC0. The kettle's four states were picked out automatically from the recording's loudness envelope and checked against its description. The bouncing ball is synthesised.</p>
   </details>
   <details>
     <summary>Method</summary>
-    <p class="small">The lab (build/lab.py) trains one tiny transformer five times on the post\'s recordings, on a laptop CPU. The real-model figures use the public checkpoints worstchan/EAT-base_epoch30_pretrain, mispeech/dasheng-base and MIT-SLS/USAD2-Small (build/real_models.py). The report card\'s scores come from my earlier evaluations: three seeds or a stated confidence interval, held-out sources, and sealed test sets opened once.</p>
+    <p class="small">Three seeds, or a confidence interval reported with the number. Sources in the test set are held out from training. Thresholds, calibration and the test pass go through one code path, and sealed test sets are opened once, inside the runner, not while exploring. The SINS memory result is one home; the cost numbers are one core in fp32, not a phone. Audio Flamingo 3 was run on an A100 on the same 298 items. The real-model figures (the five sound types, the repeat re-creation and the self-comparison maps) use the public checkpoints worstchan/EAT-base_epoch30_pretrain, mispeech/dasheng-base and MIT-SLS/USAD2-Small, run on a CPU with build/real_models.py. The tiny-model animation is build/tiny.py.</p>
   </details>
 </section>
 

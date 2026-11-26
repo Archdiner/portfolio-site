@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%237c2b26'/%3E%3Cpath d='M10 13h12v7a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4z' fill='none' stroke='%23f4efe4' stroke-width='2'/%3E%3Cpath d='M22 15l4 2-4 2' fill='none' stroke='%23f4efe4' stroke-width='2'/%3E%3C/svg%3E">
+<title>How Machines Learn to Hear (draft)</title>
+<meta name="description" content="One kettle, five ways to train a model to listen, and why each one ends up hearing something different.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="progress" id="progress" aria-hidden="true"></div>
+
+<header class="masthead">
+  <a class="wordmark" href="/">Asad Rizvi</a>
+  <span class="mono faint">research · draft</span>
+</header>
+
+<main>
+
+<header class="title">
+  <p class="eyebrow">Part 2 of the kettle series · draft · about 20 minutes</p>
+  <h1>How Machines Learn to Hear</h1>
+  <p class="dek">One kettle, five ways to train a model to listen, and why each one ends up hearing something different.</p>
+</header>
+
+<!-- ======================================================= COLD OPEN -->
+<section class="col">
+  <p>Before you read anything else, put on headphones if you have them and press play. Don't look for clues, just listen and make a guess. (Fair warning: it gets fairly loud around the ten-second mark.)</p>
+</section>
+
+<figure class="wide">
+  <div class="blind" id="blind">
+    <div class="blind-top">
+      <button class="play big" data-kettle="blind" aria-label="Play the mystery recording"><span class="play-icon"></span></button>
+      <div>
+        <div class="mono dim">mystery recording</div>
+        <div class="blind-time mono" id="blindTime">0:00 / 1:50</div>
+      </div>
+    </div>
+    <canvas id="blindWave" height="120" aria-label="Waveform, drawn as the recording plays"></canvas>
+    <div class="guess" id="guess">
+      <p class="guess-q">What do you think it is?</p>
+      <div class="guess-opts">
+        <button data-guess="vacuum">A vacuum cleaner</button>
+        <button data-guess="tea">Someone making tea</button>
+        <button data-guess="rain">Rain on a window</button>
+        <button data-guess="coffee">A coffee machine</button>
+      </div>
+    </div>
+    <div class="reveal" id="reveal" hidden>
+      <p class="reveal-tag mono" id="revealTag"></p>
+      <p class="reveal-big">It's an electric kettle.</p>
+      <p class="reveal-sub" id="revealSub"></p>
+    </div>
+  </div>
+</figure>
+
+<section class="col">
+  <h2>How did you know?</h2>
+  <p>Someone flicks the kettle on about three seconds in. It rumbles, builds to a roar, boils for a minute and a half and clicks itself off at 1:39. Most people get it, or get close, within a few seconds, which is a little strange when you think about it. Nobody said the word "kettle" and there was no picture. All that reached you was air pushing on your eardrums for a couple of minutes.</p>
+  <p>You also picked up a lot more than a name. Without really trying, you probably noticed that it started with a click, that the noise grew for a while before settling into a steady roar, and that it stopped by itself with another click. If I asked you how long it boiled, you could give me a rough answer.</p>
+  <p>Play it again and watch those moments go by:</p>
+</section>
+
+<figure class="wide">
+  <div class="player card" data-view="moments">
+    <div class="player-top">
+      <button class="play" data-kettle="moments" aria-label="Play the kettle"><span class="play-icon"></span></button>
+      <span class="mono dim" data-time></span>
+    </div>
+    <div class="wave-box">
+      <canvas class="kwave" height="120"></canvas>
+      <div class="pins" id="momentPins"></div>
+      <div class="ph"></div>
+    </div>
+  </div>
+  <figcaption>The whole recording. Click anywhere to jump there. The labels pop up as the playhead reaches each moment.</figcaption>
+</figure>
+
+<section class="col">
+  <p>Those are two different skills: hearing what a sound is, and keeping track of what happened and for how long. People do both without noticing they're separate. A computer gets neither for free.</p>
+  <p>This is the second post in a series. The first, <a href="../">What a Kettle Knows</a>, was about the gap between hearing a sound and keeping track of it over time. This one goes inside the hearing. How does a model learn to hear at all? And why do models trained in different ways end up hearing the same kettle differently? Every model here follows roughly the same path:</p>
+</section>
+
+<figure class="wide">
+  <div class="card plan" id="plan" aria-label="The path every listener follows: numbers, a picture, patches, a trained model, an output">
+    <div class="plan-step"><p class="plan-k mono">1 · numbers</p>
+      <svg viewBox="0 0 120 40" class="plan-wave" preserveAspectRatio="xMinYMid meet" aria-hidden="true"><path d="M0 20 L6 20 L8 4 L10 36 L12 20 L22 20 L24 14 L26 26 L28 12 L30 28 L32 10 L34 30 L36 11 L38 29 L40 12 L42 28 L44 13 L46 27 L48 14 L50 26 L52 15 L54 25 L56 15 L58 25 L60 16 L62 24 L64 16 L66 24 L68 17 L70 23 L72 17 L74 23 L76 18 L78 22 L80 18 L82 22 L84 18 L86 22 L88 6 L90 34 L92 20 L120 20"/></svg>
+      <p class="plan-d">16,000 a second</p></div>
+    <div class="plan-arrow">→</div>
+    <div class="plan-step"><p class="plan-k mono">2 · a picture</p>
+      <div class="plan-spec" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <p class="plan-d">Which pitches, when</p></div>
+    <div class="plan-arrow">→</div>
+    <div class="plan-step"><p class="plan-k mono">3 · patches</p>
+      <div class="plan-grid" aria-hidden="true"><i></i><i class="m"></i><i></i><i class="m"></i><i class="m"></i><i></i><i class="m"></i><i></i></div>
+      <p class="plan-d">Cut into tokens</p></div>
+    <div class="plan-arrow">→</div>
+    <div class="plan-step"><p class="plan-k mono">4 · a model</p>
+      <div class="plan-model">trained how?</div>
+      <p class="plan-d">The part that differs most</p></div>
+    <div class="plan-arrow">→</div>
+    <div class="plan-step"><p class="plan-k mono">5 · an answer</p>
+      <div class="plan-tags"><span>a point</span><span>labels</span><span>a diary</span></div>
+      <p class="plan-d">What it hands back</p></div>
+  </div>
+  <figcaption>The path every listener in this post follows. The first three steps are much the same for all of them. Step four, how the model was trained, is where they part ways.</figcaption>
+</figure>
+
+<section class="col">
+  <h2>1.76 million numbers</h2>
+  <p>A microphone measures how hard the air is pushing on it, over and over again. This recording took that measurement 16,000 times every second, and each measurement is just a single number, so the whole 1:50 clip is a list of about 1.76 million of them. Drag the slider to zoom in:</p>
+</section>
+
+<figure class="wide">
+  <div class="zoom card" id="zoom">
+    <canvas id="zoomOverview" height="46" aria-label="Whole recording, with the zoom window marked"></canvas>
+    <canvas id="zoomCanvas" height="200" aria-label="Zoomed view of the samples"></canvas>
+    <div class="zoom-controls">
+      <span class="mono dim">whole clip</span>
+      <input type="range" id="zoomSlider" min="0" max="1000" value="0" aria-label="Zoom level">
+      <span class="mono dim">single numbers</span>
+    </div>
+    <div class="zoom-read mono" id="zoomRead">loading…</div>
+  </div>
+  <figcaption>The top strip is the whole clip, and the shaded box is the stretch you're looking at. Click the strip to move it. At full zoom, each dot is one number.</figcaption>
+</figure>
+
+<section class="col">
+  <p>From far away you can see the shape of the event. Zoom into the boil and it turns to fuzz, and if you keep going you reach the individual numbers, each one a dot swinging up and down around zero. Nothing in this list says "kettle". There isn't even a number that means "loud". Loudness is how far the dots swing across hundreds of them.</p>
+
+  <h2>A picture of sound</h2>
+  <p>Almost every model in this post reads sound as a picture instead. Any sound can be treated as a mix of pitches playing at once, from low rumble to high hiss. A <em>spectrogram</em> splits the sound into those pitches and shows how strong each one is over time. Time runs left to right, pitch runs from low at the bottom to high at the top, and brighter means louder. Here's the kettle drawn both ways:</p>
+</section>
+
+<figure class="wide">
+  <div class="player card dark" data-view="spec">
+    <div class="player-top">
+      <button class="play" data-kettle="spec" aria-label="Play the kettle"><span class="play-icon"></span></button>
+      <span class="mono dim" data-time></span>
+    </div>
+    <div class="wave-box">
+      <canvas class="kwave" height="70"></canvas>
+      <div class="ph"></div>
+    </div>
+    <div class="wave-box">
+      <canvas class="kspec" height="170"></canvas>
+      <div class="spec-notes" id="specNotes"></div>
+      <div class="ph"></div>
+    </div>
+  </div>
+  <figcaption>Top: the waveform, which only tells you how loud things are. Bottom: the spectrogram of the same recording, which tells you what kind of loud.</figcaption>
+</figure>
+
+<section class="col">
+  <p>The switch shows up as a thin vertical line. A click is so short that it contains a bit of every pitch at once, so it lights up a whole column. The boil is a broad smear, because thousands of bursting bubbles make noise at every pitch all the time. Over the boil the top of the picture slowly dims as the roar gets duller.<sup><a href="#fn1" id="r1">1</a></sup></p>
+
+  <h2>Cutting the picture into patches</h2>
+  <p>Most modern audio models are transformers, the same kind of network behind chatbots like ChatGPT. A transformer reads a sequence of tokens, so the picture has to become one. The standard trick, borrowed from image models, is to cut the spectrogram into small squares called <em>patches</em>, flatten each one into a list of numbers, and treat each list as one token:</p>
+</section>
+
+<figure class="wide">
+  <div class="card patches" id="patches">
+    <div class="tabs" id="patchSteps" role="tablist">
+      <button class="tab on" data-step="whole">the picture</button>
+      <button class="tab" data-step="cut">cut into patches</button>
+      <button class="tab" data-step="hide">hide 75% of them</button>
+    </div>
+    <canvas id="patchCanvas" height="210" aria-label="The kettle's spectrogram, cut into patches"></canvas>
+    <p class="patch-note" id="patchNote"></p>
+  </div>
+  <figcaption>The patches are drawn much bigger than real ones so you can see them.<sup><a href="#fn2" id="r2">2</a></sup></figcaption>
+</figure>
+
+<section class="col">
+  <p>That last step, hiding most of the patches, is how most modern audio models teach themselves with no labels at all. You can't fill in a missing chunk of boil without learning what a boil sounds like. But "fill it in" can mean several different things, and that's where models start to differ.</p>
+
+  <h2>Five ways to teach a model to hear</h2>
+  <p>The listeners I spent the most time with can be sorted by two questions about how they were trained:</p>
+</section>
+
+<figure class="wide">
+  <div class="card tree" aria-label="A family tree of training objectives">
+    <div class="tq">Does it learn at all?</div>
+    <div class="tb"><span class="tn">no</span><div class="tl gold">The recipe<small>70 hand-picked measurements</small></div></div>
+    <div class="tq">Does it get labels?</div>
+    <div class="tb"><span class="tn">yes</span><div class="tl blood">AudioSet taggers<small>lab step 1: learn from labels</small></div></div>
+    <div class="tq">No labels. So what does it predict about the patches it can't see?</div>
+    <div class="tb four">
+      <div class="tl teal">the pixels<small>Dasheng · step 2</small></div>
+      <div class="tl teal">a code word<small>BEATs · step 3</small></div>
+      <div class="tl teal">a teacher's view<small>EAT · step 4</small></div>
+      <div class="tl teal">an expert's view<small>USAD · step 5</small></div>
+    </div>
+  </div>
+  <figcaption>Every listener in this post, sorted by two questions about how it was trained. The steps refer to the lab below.</figcaption>
+</figure>
+
+<section class="col">
+  <p>The trouble with comparing the real models directly is that they differ in everything at once: training data, size, architecture and training goal. So I set up a small lab where only the goal changes. There's one tiny transformer of about 20,000 parameters, and five kinds of kitchen sound cut into half-second windows: the kettle heating, the kettle boiling, pouring, stirring, and a spoon tapping a cup. It gets trained five times, and between runs exactly one line of the training loop changes.<sup><a href="#fn3" id="r3">3</a></sup></p>
+  <p>To make the result visible, every version has to squeeze each window down to just two numbers, so we can plot it directly. Each dot below is one window, coloured by what it really is. The model never sees those colours, except in step 1. All of this is real training, run on a laptop processor.</p>
+  <div class="lab-legend" id="labLegend"></div>
+
+  <h3 class="lab-step">Step 1: learn from labels</h3>
+  <p>The most direct way is to tell the model what each window is and let it learn to guess the label. This is how the AudioSet taggers were trained, on two million YouTube clips labelled by people.</p>
+</section>
+
+<figure class="wide">
+  <div class="card bench" data-bench="labels">
+    <div class="bench-left">
+      <p class="bench-k mono">what it sees, and what it has to guess</p>
+      <canvas class="bench-patch" height="130"></canvas>
+      <p class="bench-k mono" style="margin-top:14px">the training loop</p>
+      <pre class="bench-code"></pre>
+    </div>
+    <div class="bench-right">
+      <p class="bench-k mono">its map of the five sounds, while it trains</p>
+      <canvas class="bench-map" height="270"></canvas>
+      <div class="bench-ctl"><button class="play small" aria-label="Play training"><span class="play-icon"></span></button><input type="range" min="0" max="60" value="0" aria-label="Training step"><span class="mono dim bench-step">step 0</span></div>
+      <p class="bench-score"></p>
+    </div>
+  </div>
+  <figcaption>With labels, the five sounds pull into tidy groups, because that's exactly what the model was asked to do.</figcaption>
+</figure>
+
+<section class="col">
+  <p>It works almost perfectly: 98% of new windows land closest to their own kind. But look at what it learned. It has five islands and no opinion about how they relate. Nothing tells it that heating and boiling are the same kettle, or that stirring and tapping are both a spoon on china. And it needed labels, which are slow and expensive to collect.</p>
+
+  <h3 class="lab-step">Step 2: redraw what's hidden</h3>
+  <p>So drop the labels. Hide three quarters of each window's patches and ask the model to redraw them from the rest. This is the idea behind masked autoencoders, and behind Dasheng.</p>
+</section>
+
+<figure class="wide">
+  <div class="card bench" data-bench="redraw">
+    <div class="bench-left">
+      <p class="bench-k mono">what it sees, and what it has to guess</p>
+      <canvas class="bench-patch" height="130"></canvas>
+      <p class="bench-k mono" style="margin-top:14px">the training loop</p>
+      <pre class="bench-code"></pre>
+    </div>
+    <div class="bench-right">
+      <p class="bench-k mono">its map of the five sounds, while it trains</p>
+      <canvas class="bench-map" height="270"></canvas>
+      <div class="bench-ctl"><button class="play small" aria-label="Play training"><span class="play-icon"></span></button><input type="range" min="0" max="60" value="0" aria-label="Training step"><span class="mono dim bench-step">step 0</span></div>
+      <p class="bench-score"></p>
+    </div>
+  </div>
+  <figcaption>Nobody gives it labels now. It only has to redraw the hidden patches, and the sounds arrange themselves by how they sound.</figcaption>
+</figure>
+
+<section class="col">
+  <p>It sorts 80% of new windows correctly, without ever seeing a label. More interesting is the map itself. Pouring sits on its own, because nothing else sounds like it. Heating runs into the boil, which is right, because it's the same kettle getting louder. Stirring and the spoon tapping the cup overlap, which is also right, because both are a spoon hitting china.</p>
+  <p>The catch is that redrawing every pixel means spending effort on things that don't matter, like the exact grain of the hiss in a boil.</p>
+
+  <h3 class="lab-step">Step 3: name the code</h3>
+  <p>BEATs' answer is to make the target coarser. First sort all the patches into a small codebook of typical shapes (16 here, a few thousand in BEATs). Then, instead of redrawing a hidden patch, the model only has to say which codebook entry it is, a bit like guessing a missing word instead of a missing photo.</p>
+</section>
+
+<figure class="wide">
+  <div class="card bench" data-bench="code">
+    <div class="bench-left">
+      <p class="bench-k mono">what it sees, and what it has to guess</p>
+      <canvas class="bench-patch" height="130"></canvas>
+      <p class="bench-k mono" style="margin-top:14px">the training loop</p>
+      <pre class="bench-code"></pre>
+    </div>
+    <div class="bench-right">
+      <p class="bench-k mono">its map of the five sounds, while it trains</p>
+      <canvas class="bench-map" height="270"></canvas>
+      <div class="bench-ctl"><button class="play small" aria-label="Play training"><span class="play-icon"></span></button><input type="range" min="0" max="60" value="0" aria-label="Training step"><span class="mono dim bench-step">step 0</span></div>
+      <p class="bench-score"></p>
+    </div>
+  </div>
+  <figcaption>The model now guesses each hidden patch's code word. The codes come from grouping similar-looking patches.</figcaption>
+</figure>
+
+<section class="col">
+  <p>This one sorts 71% of new windows. The heating and the boil merge into a single continuous path, and the spoon sounds spread out along the top. With only 16 codes, many different patches share a word, so the model can't tell them apart. In BEATs, the codebook is itself learned and improved over several rounds, which is how it gets past that.</p>
+
+  <h3 class="lab-step">Step 4: match a teacher</h3>
+  <p>EAT goes a step further and drops fixed targets altogether. It keeps a second copy of the model, the <em>teacher</em>, which sees the whole window and updates slowly towards the student. The student sees only a quarter of the patches and has to predict what the teacher thinks about the rest. As the student improves, so does the teacher, and so do the targets.</p>
+</section>
+
+<figure class="wide">
+  <div class="card bench" data-bench="teacher">
+    <div class="bench-left">
+      <p class="bench-k mono">what it sees, and what it has to guess</p>
+      <canvas class="bench-patch" height="130"></canvas>
+      <p class="bench-k mono" style="margin-top:14px">the training loop</p>
+      <pre class="bench-code"></pre>
+    </div>
+    <div class="bench-right">
+      <p class="bench-k mono">its map of the five sounds, while it trains</p>
+      <canvas class="bench-map" height="270"></canvas>
+      <div class="bench-ctl"><button class="play small" aria-label="Play training"><span class="play-icon"></span></button><input type="range" min="0" max="60" value="0" aria-label="Training step"><span class="mono dim bench-step">step 0</span></div>
+      <p class="bench-score"></p>
+    </div>
+  </div>
+  <figcaption>The student guesses the teacher's view of each hidden patch, and the teacher slowly follows the student.</figcaption>
+</figure>
+
+<section class="col">
+  <p>This is the messiest map, sorting 69% of new windows, and it does something none of the others do. Every half-second of boil gets squeezed onto almost the same point, and so does every half-second of pouring, while the spoon sounds stay spread out. That's what this goal rewards: two views of the same steady sound should get the same answer. It's a tidy way to learn what doesn't change. It's also a risk, because a model can satisfy this goal by giving <em>everything</em> the same answer, which is called collapse. Real methods add safeguards against it (here, normalising the teacher's answers), and the boil and pour are a mild version of it.</p>
+
+  <h3 class="lab-step">Step 5: copy an expert</h3>
+  <p>The last way skips the guessing game and copies a model that already exists. The target is simply what a big trained model says about each window. Here the expert is the real Dasheng, run on the same windows. USAD learns this way from two experts at once, one for speech and one for general sound, and the small AudioSet taggers also learn partly by copying a bigger model.</p>
+</section>
+
+<figure class="wide">
+  <div class="card bench" data-bench="expert">
+    <div class="bench-left">
+      <p class="bench-k mono">what it sees, and what it has to guess</p>
+      <canvas class="bench-patch" height="130"></canvas>
+      <p class="bench-k mono" style="margin-top:14px">the training loop</p>
+      <pre class="bench-code"></pre>
+    </div>
+    <div class="bench-right">
+      <p class="bench-k mono">its map of the five sounds, while it trains</p>
+      <canvas class="bench-map" height="270"></canvas>
+      <div class="bench-ctl"><button class="play small" aria-label="Play training"><span class="play-icon"></span></button><input type="range" min="0" max="60" value="0" aria-label="Training step"><span class="mono dim bench-step">step 0</span></div>
+      <p class="bench-score"></p>
+    </div>
+  </div>
+  <figcaption>The target is the real Dasheng's output for each window. The tiny model's map comes to look like a squashed copy of Dasheng's.</figcaption>
+</figure>
+
+<section class="col">
+  <p>Copying an expert sorts 91% of new windows, the best of the label-free runs, which is the point of it: a tiny model inherits much of what a model thousands of times its size learned. It also inherits that model's way of seeing. Heating flows into the boil, pouring sits apart and the spoon sounds stay close, because that's how Dasheng hears them.</p>
+  <p>So that's the lab: the same tiny network, the same sounds, and one changed line in each run, giving five different ears. Labels carve the world into the categories you gave them. Redrawing keeps detail, naming codes keeps the gist, matching a teacher learns what stays the same, and copying an expert inherits someone else's ear.</p>
+
+  <h2>Do the real models agree?</h2>
+  <p>A toy lab is only interesting if it says something about the real thing. Here are three real self-taught models, EAT, Dasheng and USAD, run on exactly the same five sounds. For comparison there's also the raw spectrogram, with no model at all:</p>
+</section>
+
+<figure class="wide">
+  <div class="card" id="realMaps">
+    <div class="tabs" id="realTabs" role="tablist">
+      <button class="tab on" data-m="spectrogram">raw spectrogram</button>
+      <button class="tab" data-m="EAT">EAT</button>
+      <button class="tab" data-m="Dasheng">Dasheng</button>
+      <button class="tab" data-m="USAD">USAD</button>
+    </div>
+    <canvas id="realCanvas" height="280" aria-label="Sound windows arranged by a real model"></canvas>
+    <p class="patch-note" id="realNote"></p>
+    <div class="tiny-legend" id="realLegend"></div>
+  </div>
+  <figcaption>Real pretrained models, run on this post's recordings. Each dot is half a second of sound, coloured by what it really is. None of these models was ever told the labels. The plot shows the two directions along which the dots differ most, so some separation is hidden. The percentage is measured in the model's full space: how often a window is closest to the average of its own kind.</figcaption>
+</figure>
+
+<section class="col">
+  <p>Even the raw spectrogram sorts the windows somewhat, because pouring and boiling really do look different. Every real model does better, and Dasheng best of all, at 96%. Dasheng's map also looks a lot like the lab's redraw and copy-an-expert maps. EAT's biggest directions are the messiest, as its tiny counterpart's were.</p>
+  <p>The clearest real-world sign of the "match a teacher" habit is small differences going missing. Play these four taps:</p>
+</section>
+
+<figure class="wide">
+  <div class="taps" id="taps"></div>
+</figure>
+
+<section class="col">
+  <p>To my ear, A and B are the same mug, C is a glass and D is metal. Here's how alike four listeners think each pair is, on a scale where 1 means identical:<sup><a href="#fn4" id="r4">4</a></sup></p>
+</section>
+
+<figure class="wide">
+  <div class="sim card">
+    <div class="tabs" id="simTabs" role="tablist">
+      <button class="tab on" data-sim="dsp_rich">hand-written recipe</button>
+      <button class="tab" data-sim="beats_iter3">BEATs</button>
+      <button class="tab" data-sim="eat_pretrain">EAT</button>
+      <button class="tab" data-sim="usad2_small">USAD</button>
+    </div>
+    <div class="sim-body">
+      <div id="simMatrix"></div>
+      <p id="simNote" class="sim-note"></p>
+    </div>
+  </div>
+  <figcaption>Each cell compares two taps, and darker means more alike. The shading is relative to each grid, so you can see the order even when the numbers are bunched together.</figcaption>
+</figure>
+
+<section class="col">
+  <p>The recipe, which measures brightness and decay directly, hears the soft mug and the metal bowl as quite different. EAT puts all four taps almost on top of each other, just as the lab's teacher-matching model squeezed every half-second of boil onto one point. Four clips don't prove anything on their own, but it's the pattern the lab predicts.</p>
+  <p>Finally, here's how each way of training does on tasks that go well beyond five kitchen sounds:</p>
+</section>
+
+<figure class="wide">
+  <div class="card" id="report"></div>
+  <figcaption>One row per way of training, using the real model that represents it. Shading ranks each column, and darker is better. These real models also differ in their training data and size, so this table is consistent with the lab, but it can't prove the training goal caused each difference. Only the lab does that, because there the goal is the only thing that changes.<sup><a href="#fn5" id="r5">5</a></sup></figcaption>
+</figure>
+
+<section class="col">
+  <p>No single way of training wins. The recipe is best at telling materials apart and does well at noticing a change, but knows nothing about voices. The label-trained tagger is cheap and good at kitchen events, the kind of thing it was labelled with, and weak at emotion in a voice, which no label described. Dasheng, trained to redraw, is best at that emotion. EAT is best at noticing when a scene changes, and worst at telling china from metal.</p>
+  <p>That's what I mean by models hearing differently. They share the same pipeline, and often the same kind of network. What sets them apart is mostly what they were asked to do while they learned.</p>
+
+  <h2>What none of them can tell you</h2>
+  <p>Every model in this post can tell the boil from the pour. Ask one how long the kettle boiled, though, and none of them has an answer. That gap between hearing and keeping time is what <a href="../">the first post</a> was about.</p>
+  <p>Thanks for reading!</p>
+  <p class="sign">Asad</p>
+</section>
+
+<!-- ======================================================= NOTES -->
+<section class="col notes">
+  <h3>Notes</h3>
+  <ol>
+    <li id="fn1">Your inner ear does something similar. The cochlea is a coiled tube that vibrates at different places for different pitches, so your brain receives sound already split up roughly the way a spectrogram is. The spectrograms here use 64 bands spaced the way hearing is, closer together at low pitches. <a href="#r1">↩</a></li>
+    <li id="fn2">Real audio transformers typically use 16 × 16 patches on spectrograms with 128 pitch bands and 10 ms time steps, so each patch covers about a sixth of a second. <a href="#r2">↩</a></li>
+    <li id="fn3">The lab model is a two-layer transformer with 32-number tokens, about 20,000 parameters, ending in two numbers per window. Each window is half a second of spectrogram (8 time steps × 64 bands) cut into 8 patches. Each run is 1,500 steps of 128 windows with Adam. "Hiding" masks 75% of the patches. The codebook has 16 entries from k-means over all patches. The teacher is a moving average of the student (0.99 per step), with its outputs normalised across each batch. The expert targets are the real Dasheng's outputs averaged over each window. Scores are on 180 windows held out from training, and count how often a window's two numbers sit closest to the average of its own kind. The script is build/lab.py. <a href="#r3">↩</a></li>
+    <li id="fn4">These are the cosine similarities between clip embeddings, each averaged over its patches. Each tap was loudness-matched and trimmed to three quarters of a second first. <a href="#r4">↩</a></li>
+    <li id="fn5">Materials is the similarity between the soft mug tap and the metal bowl, where lower means it hears more difference (only measured for four listeners). Kitchen events is the frame-level score on EPIC-SOUNDS (21 classes). Voice emotion is CREMA-D accuracy with the actors held out (chance 0.17). Noticing a change is the change-detection score on 345 clips (luck 0.19). Every number is in the appendix. <a href="#r5">↩</a></li>
+  </ol>
+</section>
+
+<section class="col reading">
+  <h3>Further reading</h3>
+  <p>Here are the papers and datasets behind this post if you want to go deeper. It's not a survey of the field, just the things I actually used or leaned on.</p>
+  <ul>
+    <li><b>Volhejn, 2025.</b> <a href="https://kyutai.org/codec-explainer/">Neural audio codecs: how to get audio into LLMs</a>. The other half of this story: how to turn audio into tokens a language model can continue. This post is about how models learn to hear; that one is about how they learn to speak.</li>
+    <li><b>Dosovitskiy et al., 2020.</b> An image is worth 16x16 words: transformers for image recognition at scale. Where cutting pictures into patches comes from.</li>
+    <li><b>Gong, Chung &amp; Glass, 2021.</b> AST: Audio Spectrogram Transformer. The same patch trick applied to spectrograms.</li>
+    <li><b>Huang et al., 2022.</b> Masked autoencoders that listen. Hide most of the patches and redraw them: the idea behind Dasheng and lab step 2.</li>
+    <li><b>Baevski et al., 2022.</b> Efficient self-supervised learning with contextualized target representations for vision, speech and language (data2vec 2.0). The "match the teacher" recipe that EAT builds on.</li>
+    <li><b>Koutini et al., 2021.</b> Efficient training of audio transformers with patchout (PaSST). The big transformer the small AudioSet taggers learn to copy.</li>
+    <li><b>Hinton, Vinyals &amp; Dean, 2015.</b> Distilling the knowledge in a neural network. The original "copy an expert" paper.</li>
+    <li><b>Gemmeke et al., 2017.</b> Audio Set: an ontology and human-labeled dataset for audio events. Two million YouTube clips with sound labels, which is what the small taggers learned from.</li>
+    <li><b>Schmid, Koutini &amp; Widmer, 2023.</b> Efficient large-scale audio tagging via transformer-to-CNN knowledge distillation. The compact taggers (mn04, mn10, mn20) in the charts.</li>
+    <li><b>Chen et al., 2022.</b> BEATs: audio pre-training with acoustic tokenizers. The "name the code" model.</li>
+    <li><b>Chen et al., 2024.</b> EAT: self-supervised pre-training with efficient audio transformer. The model that hears every tap as nearly the same, and the one the Ear is fine-tuned from.</li>
+    <li><b>Dinkel et al., 2024.</b> Scaling up masked audio encoder learning for general audio classification. Dasheng, the best of the bunch at hearing emotion in a voice.</li>
+    <li><b>Huh et al., 2023.</b> EPIC-SOUNDS: a large-scale dataset of actions that sound. The kitchen events column of the report card.</li>
+    <li><b>Cao et al., 2014.</b> CREMA-D: crowd-sourced emotional multimodal actors dataset. The emotion-in-a-voice column of the report card.</li>
+  </ul>
+</section>
+
+<!-- ======================================================= APPENDIX -->
+<section class="col appendix" id="appendix">
+  <h3>Appendix</h3>
+  <details>
+    <summary>Every listener, every number</summary>
+    <div class="table-scroll"><table id="allTable"></table></div>
+    <p class="small">Speed is the share of real time one CPU core needs (fp32, not quantised). "Notice", "count" and "describe the change" are F1, F2 and F4 on the 345-clip change test; shuffled controls score 0.192, 0.130 and 0.467. "Voice emotion" is CREMA-D accuracy on 1,066 test clips with the actors held out (chance 0.167). "Kitchen" is the frame-level score on EPIC-SOUNDS, 21 classes.</p>
+  </details>
+  <details>
+    <summary>Recordings and licences</summary>
+    <div class="table-scroll"><table id="srcTable"></table></div>
+    <p class="small">All recordings are from Freesound, transcoded to 16 kHz mono. The glass clink is CC BY 4.0 (KVV_Audio); everything else is CC0. The kettle's four states were picked out automatically from the recording's loudness envelope and checked against its description. The bouncing ball is synthesised.</p>
+  </details>
+  <details>
+    <summary>Method</summary>
+    <p class="small">The lab (build/lab.py) trains one tiny transformer five times on the post\'s recordings, on a laptop CPU. The real-model figures use the public checkpoints worstchan/EAT-base_epoch30_pretrain, mispeech/dasheng-base and MIT-SLS/USAD2-Small (build/real_models.py). The report card\'s scores come from my earlier evaluations: three seeds or a stated confidence interval, held-out sources, and sealed test sets opened once.</p>
+  </details>
+</section>
+
+</main>
+
+<footer class="foot">
+  <span>Asad Rizvi · 2026</span>
+  <a href="../STORYBOARD.md">storyboard</a>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

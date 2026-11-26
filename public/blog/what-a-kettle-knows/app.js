@@ -157,10 +157,10 @@ function svg(w, h, body, label) { return `<svg viewBox="0 0 ${w} ${h}" role="img
 
 /* ------------------------------------------------------------------ cold open */
 const GUESS = {
-  vacuum: ["You said: a vacuum cleaner", "Hold that thought. In part two, one of my own models hears a vacuum cleaner in this recording too."],
+  vacuum: ["You said: a vacuum cleaner", "Hold that thought. You're not the only listener who heard a vacuum cleaner in this recording, and we'll meet the other one later."],
   tea: ["You said: someone making tea", "Very close. This is the first half of making tea: the kettle, from the moment it's switched on to the moment it switches itself off."],
   rain: ["You said: rain on a window", "Fair enough. A rolling boil and rain both hiss, because both are thousands of tiny impacts at once. The clicks at the start and the end give the kettle away."],
-  coffee: ["You said: a coffee machine", "Good instinct: a kitchen machine heating water. In part two, one of my own models makes the same guess."],
+  coffee: ["You said: a coffee machine", "Good instinct: a kitchen machine heating water. You'll meet another listener later that made exactly the same guess."],
 };
 let heardMax = 0;
 function buildBlind() {
