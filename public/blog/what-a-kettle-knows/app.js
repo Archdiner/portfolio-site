@@ -43,6 +43,11 @@ async function boot() {
   buildEar();
   if ($("#skillsChart")) buildSkills();
   buildBounce();
+  buildProbe();
+  buildPatches();
+  buildTiny();
+  buildFlip();
+  buildCurve();
   buildDiary();
   if ($("#memoryChart")) buildMemory();
   if ($("#costChart")) buildCost();
@@ -447,10 +452,10 @@ function buildSkills() {
   const E = S.results.encoders;
   const rows = (k) => E.map((e) => ({ label: ENC[e.id][0], v: e[k], color: FAM[ENC[e.id][1]] }));
   const count = rows("g1_f2");
-  count.push({ label: "Waveform trick", v: S.results.g1.f2_ncc, color: C.ink, strong: true });
+  count.push({ label: "Waveform match", v: S.results.g1.f2_ncc, color: C.ink, strong: true });
   $("#skillsChart").innerHTML = `<div class="skills">${
     barPanel({ title: "Did it notice the change?", sub: "345 clips · 1 is perfect", rows: rows("g1_f1"), floor: 0.192, floorLabel: "luck" })}${
-    barPanel({ title: "Could it count the repeats?", sub: "same clips · 1 is perfect", rows: count, floor: 0.13, floorLabel: "luck" })}</div>`;
+    barPanel({ title: "Could it find the repeats?", sub: "same clips · 1 is perfect", rows: count, floor: 0.13, floorLabel: "luck" })}</div>`;
 }
 
 /* ------------------------------------------------------------------ bounce */
@@ -512,8 +517,8 @@ function buildDiary() {
 
 /* ------------------------------------------------------------------ memory */
 function buildMemory() {
-  memoryChart("#memoryChartA", ["af3", "const"], "A week in one home: just ask a big model");
-  memoryChart("#memoryChart", ["ours", "af3", "const"], "The same questions, answered from the diary");
+  if ($("#memoryChartA")) memoryChart("#memoryChartA", ["af3", "const"], "A week in one home: just ask a big model");
+  memoryChart("#memoryChart", ["ours", "af3", "const"], "A week in one home: 298 questions");
 }
 function memoryChart(target, keys, title) {
   const T = S.results.t1;
@@ -599,7 +604,226 @@ function wireProgress() {
   addEventListener("scroll", on, { passive: true }); on();
 }
 function redrawAll() {
-  drawBlind(); drawKettleViews(); drawZoom(); syncSwitchers(); drawTaps(); drawBounce();
+  drawBlind(); drawKettleViews(); drawZoom(); syncSwitchers(); drawTaps(); drawBounce(); drawProbe(); drawPatches(); drawTiny();
+}
+
+
+/* ------------------------------------------------------------------ patches */
+const PT = { step: "whole", goal: null, data: null, img: null, hidden: null };
+async function buildPatches() {
+  PT.data = await json("patches");
+  const d = PT.data;
+  PT.img = specImage({ b64: d.b64, frames: d.frames, n_mels: d.n_mels });
+  let seed = 11; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  PT.hidden = Array.from({ length: d.nF }, () => Array.from({ length: d.nT }, () => rnd() < 0.75));
+  $$("#patchSteps .tab").forEach((b) => b.addEventListener("click", () => {
+    PT.step = b.dataset.step; if (PT.step !== "hide") PT.goal = null;
+    $$("#patchSteps .tab").forEach((x) => x.classList.toggle("on", x === b));
+    $("#patchGoals").hidden = PT.step !== "hide";
+    $$("#patchGoals .tab").forEach((x) => x.classList.remove("on"));
+    drawPatches();
+  }));
+  $$("#patchGoals .tab").forEach((b) => b.addEventListener("click", () => {
+    PT.goal = b.dataset.goal;
+    $$("#patchGoals .tab").forEach((x) => x.classList.toggle("on", x === b));
+    drawPatches();
+  }));
+  $$("#patchGoals .tab").forEach((x) => x.classList.remove("on"));
+  drawPatches();
+}
+const CODE_COLORS = ["#7c2b26", "#2f6f5e", "#a8792f", "#3b6ea5", "#7a5aa6", "#b5523b", "#4f8a5b", "#c49a3c", "#5f7f9e", "#8c4f6f", "#6b6b3a", "#38707a"];
+const PATCH_NOTES = {
+  whole: "The kettle's first 24 seconds as a spectrogram: the click, the heating rumble, and the start of the boil.",
+  cut: "Cut into a grid. Each square gets flattened into a list of numbers and becomes one token, like a word in a sentence.",
+  hide: "Now hide three quarters of them. Training is a guessing game about the hidden squares. Pick what the model has to guess:",
+  redraw: "Dasheng redraws each hidden patch from the ones it can see. Here they're filled with a blurred copy of the real patch, which is roughly what an early, half-trained model manages.",
+  code: "BEATs only has to name each hidden patch: which entry in a codebook it is. Patches that look alike share a code, shown by colour and number.",
+  teacher: "EAT has to match a teacher: a slowly updated copy of itself that sees every patch. Its target is the teacher's summary of each patch (shown as a single colour) and of the whole clip (the bar underneath).",
+};
+function drawPatches() {
+  const d = PT.data, cv = $("#patchCanvas");
+  if (!d || !cv) return;
+  const { g, w, h } = sizeCanvas(cv);
+  g.fillStyle = C.card; g.fillRect(0, 0, w, h);
+  const gap = PT.step === "whole" ? 0 : 3, teacherBar = PT.goal === "teacher" ? 22 : 0;
+  const pw = (w - gap * (d.nT - 1)) / d.nT, ph = (h - teacherBar - gap * (d.nF - 1)) / d.nF;
+  const tmp = document.createElement("canvas"); tmp.width = 3; tmp.height = 3; const tg = tmp.getContext("2d");
+  let sum = [0, 0, 0], n = 0;
+  for (let f = 0; f < d.nF; f++) for (let t = 0; t < d.nT; t++) {
+    const x = t * (pw + gap), y = f * (ph + gap), sx = t * d.pt, sy = f * d.pf;
+    const hid = PT.step === "hide" && PT.hidden[f][t];
+    tg.clearRect(0, 0, 3, 3); tg.imageSmoothingEnabled = true; tg.drawImage(PT.img, sx, sy, d.pt, d.pf, 0, 0, 1, 1);
+    const px = tg.getImageData(0, 0, 1, 1).data; sum[0] += px[0]; sum[1] += px[1]; sum[2] += px[2]; n++;
+    if (!hid) { g.imageSmoothingEnabled = true; g.drawImage(PT.img, sx, sy, d.pt, d.pf, x, y, pw, ph); continue; }
+    if (!PT.goal) {
+      g.fillStyle = "#2a2723"; g.fillRect(x, y, pw, ph);
+      g.fillStyle = "#8c8275"; g.font = `500 ${Math.min(16, pw * 0.5)}px Inter`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("?", x + pw / 2, y + ph / 2);
+    } else if (PT.goal === "redraw") {
+      tg.drawImage(PT.img, sx, sy, d.pt, d.pf, 0, 0, 3, 3);
+      g.imageSmoothingEnabled = true; g.drawImage(tmp, 0, 0, 3, 3, x, y, pw, ph);
+      g.strokeStyle = C.peach; g.setLineDash([3, 2]); g.strokeRect(x + 0.5, y + 0.5, pw - 1, ph - 1); g.setLineDash([]);
+    } else if (PT.goal === "code") {
+      const c = d.codes[f][t]; g.fillStyle = CODE_COLORS[c % CODE_COLORS.length]; g.fillRect(x, y, pw, ph);
+      g.fillStyle = "#fff"; g.font = `600 ${Math.min(13, pw * 0.45)}px "IBM Plex Mono"`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(c, x + pw / 2, y + ph / 2);
+    } else {
+      g.fillStyle = `rgb(${px[0]},${px[1]},${px[2]})`; g.fillRect(x, y, pw, ph);
+      g.strokeStyle = C.ink; g.lineWidth = 1.5; g.strokeRect(x + 1, y + 1, pw - 2, ph - 2); g.lineWidth = 1;
+    }
+  }
+  if (teacherBar) {
+    const y = h - teacherBar + 6;
+    g.fillStyle = `rgb(${Math.round(sum[0] / n)},${Math.round(sum[1] / n)},${Math.round(sum[2] / n)})`; g.fillRect(0, y, w, teacherBar - 6);
+    g.fillStyle = "#fff"; g.font = "500 11px Inter"; g.textAlign = "left"; g.textBaseline = "middle"; g.fillText("teacher's summary of the whole clip", 8, y + (teacherBar - 6) / 2);
+  }
+  $("#patchNote").textContent = PATCH_NOTES[PT.goal || PT.step];
+}
+
+/* ------------------------------------------------------------------ tiny model training */
+const TINY_COLORS = [C.gold, C.teal, "#3b6ea5", C.blood, "#7a5aa6"];
+const TN = { d: null, i: 0, timer: null, view: { sup: null, ssl: null } };
+async function buildTiny() {
+  TN.d = await json("tiny_training");
+  const last = TN.d.sup.snaps.length - 1;
+  $("#tinySlider").max = last;
+  $("#tinyLegend").innerHTML = TN.d.classes.map((c, i) => `<span><i style="background:${TINY_COLORS[i]}"></i>${esc(c)}</span>`).join("");
+  $("#tinySlider").addEventListener("input", (e) => { stopTiny(); TN.i = Number(e.target.value); drawTiny(); });
+  $("#tinyPlay").addEventListener("click", () => {
+    if (TN.timer) { stopTiny(); return; }
+    if (TN.i >= last) TN.i = 0;
+    $("#tinyPlay").classList.add("on");
+    TN.timer = setInterval(() => { TN.i++; drawTiny(); if (TN.i >= last) stopTiny(); }, 110);
+  });
+  new IntersectionObserver((es, io) => { if (es[0].isIntersecting && TN.i === 0) { io.disconnect(); $("#tinyPlay").click(); } }, { threshold: 0.5 }).observe($("#tiny"));
+  drawTiny();
+}
+function stopTiny() { clearInterval(TN.timer); TN.timer = null; $("#tinyPlay")?.classList.remove("on"); }
+function drawTiny() {
+  if (!TN.d) return;
+  const steps = 900, nSnap = TN.d.sup.snaps.length;
+  const stepNo = TN.i === 0 ? 1 : Math.round((TN.i / (nSnap - 1)) * steps);
+  $("#tinySlider").value = TN.i; $("#tinyStep").textContent = `step ${stepNo} of ${steps}`;
+  [["sup", "#tinySup", "#tinyLossSup", "guessing the label"], ["ssl", "#tinySsl", "#tinyLossSsl", "redrawing hidden patches"]].forEach(([k, sel, lossSel, what]) => {
+    const pts = TN.d[k].snaps[TN.i], cv = $(sel), { g, w, h } = sizeCanvas(cv);
+    let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+    pts.forEach(([x, y]) => { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); });
+    const tgt = { x0, x1, y0, y1 }, v = TN.view[k] && TN.i > 0 ? TN.view[k] : tgt;
+    for (const q of ["x0", "x1", "y0", "y1"]) v[q] = v[q] + (tgt[q] - v[q]) * 0.5;
+    TN.view[k] = v;
+    const pad = 16, sx = (x) => pad + ((x - v.x0) / (v.x1 - v.x0 || 1)) * (w - 2 * pad), sy = (y) => pad + ((y - v.y0) / (v.y1 - v.y0 || 1)) * (h - 2 * pad);
+    g.fillStyle = "#faf6ee"; g.fillRect(0, 0, w, h);
+    pts.forEach(([x, y], i) => {
+      g.fillStyle = TINY_COLORS[TN.d.labels[i]]; g.globalAlpha = 0.85;
+      g.beginPath(); g.arc(sx(x), sy(y), 3.6, 0, 7); g.fill();
+    });
+    g.globalAlpha = 1;
+    $(lossSel).textContent = `${what} · error ${TN.d[k].loss[TN.i].toFixed(3)}`;
+  });
+}
+
+/* ------------------------------------------------------------------ rank flip */
+function buildFlip() {
+  const E = S.results.encoders;
+  const rank = (k) => [...E].sort((a, b) => b[k] - a[k]).map((e) => e.id);
+  const L = rank("epic_dense"), R = rank("cremad");
+  const W = 640, top = 46, rowH = 30, H = top + E.length * rowH, xl = 230, xr = 410;
+  let b = `<text x="${xl}" y="20" text-anchor="end" font-size="13" font-weight="600" fill="${C.ink}">kitchen events</text>
+    <text x="${xr}" y="20" font-size="13" font-weight="600" fill="${C.ink}">emotion in a voice</text>
+    <text x="${xl}" y="36" text-anchor="end" font-size="11" fill="${C.faint}">rank 1 at the top</text>
+    <text x="${xr}" y="36" font-size="11" fill="${C.faint}">rank 1 at the top</text>`;
+  E.forEach((e) => {
+    const yl = top + L.indexOf(e.id) * rowH + 10, yr = top + R.indexOf(e.id) * rowH + 10, col = FAM[ENC[e.id][1]];
+    b += `<line x1="${xl + 8}" y1="${yl}" x2="${xr - 8}" y2="${yr}" stroke="${col}" stroke-width="2.2" opacity=".75"/>`;
+    b += `<circle cx="${xl + 8}" cy="${yl}" r="4" fill="${col}"/><circle cx="${xr - 8}" cy="${yr}" r="4" fill="${col}"/>`;
+    b += `<text x="${xl - 4}" y="${yl + 4}" text-anchor="end" font-size="12" fill="${C.ink}">${ENC[e.id][0]} <tspan font-family="IBM Plex Mono" fill="${C.muted}">${e.epic_dense.toFixed(2)}</tspan></text>`;
+    b += `<text x="${xr + 4}" y="${yr + 4}" font-size="12" fill="${C.ink}"><tspan font-family="IBM Plex Mono" fill="${C.muted}">${e.cremad.toFixed(2)}</tspan> ${ENC[e.id][0]}</text>`;
+  });
+  $("#flipChart").innerHTML = `<div class="chart"><p class="chart-title">The same eight listeners, ranked on two tasks</p>${svg(W, H, b, "Rank flip between kitchen events and voice emotion")}</div>`;
+}
+
+/* ------------------------------------------------------------------ training curve */
+const CURVE = {
+  "1e-5": { loss: [0.2467, 0.1501, 0.1338, 0.1382, 0.1256, 0.1242, 0.1210, 0.1193, 0.1188, 0.1235], f1: [0.794, 0.825, 0.849, 0.857, 0.864, 0.869, 0.870, 0.875, 0.875, 0.875], c: "#c9a36a" },
+  "3e-5": { loss: [0.2078, 0.1377, 0.1219, 0.1261, 0.1128, 0.1099, 0.1067, 0.1041, 0.1027, 0.1069], f1: [0.831, 0.867, 0.878, 0.884, 0.886, 0.889, 0.891, 0.893, 0.893, 0.894], c: C.teal },
+  "1e-4": { loss: [0.1865, 0.1349, 0.1179, 0.1207, 0.1060, 0.1012, 0.0967, 0.0929, 0.0902, 0.0939], f1: [0.860, 0.879, 0.889, 0.895, 0.899, 0.902, 0.904, 0.906, 0.906, 0.906], c: C.blood },
+};
+let curveE = 9, curveTimer = null;
+function buildCurve() {
+  $("#curvePlay").addEventListener("click", () => {
+    if (curveTimer) { clearInterval(curveTimer); curveTimer = null; $("#curvePlay").classList.remove("on"); return; }
+    curveE = 0; drawCurve(); $("#curvePlay").classList.add("on");
+    curveTimer = setInterval(() => { curveE++; drawCurve(); if (curveE >= 9) { clearInterval(curveTimer); curveTimer = null; $("#curvePlay").classList.remove("on"); } }, 450);
+  });
+  new IntersectionObserver((es, io) => { if (es[0].isIntersecting) { io.disconnect(); $("#curvePlay").click(); } }, { threshold: 0.5 }).observe($("#curve"));
+  drawCurve();
+}
+function drawCurve() {
+  const W = 640, H = 230, pw = 280, ph = 160, top = 34, gapX = 60;
+  const panel = (ox, title, key, lo, hi, fmt) => {
+    const X = (e) => ox + 34 + (e / 9) * (pw - 44), Y = (v) => top + ph - ((v - lo) / (hi - lo)) * ph;
+    let b = `<text x="${ox}" y="16" font-size="13" font-weight="600" fill="${C.ink}">${title}</text>`;
+    for (let i = 0; i <= 4; i++) { const v = lo + ((hi - lo) * i) / 4, y = Y(v);
+      b += `<line x1="${ox + 34}" x2="${ox + pw - 10}" y1="${y}" y2="${y}" stroke="${C.line}"/><text x="${ox + 28}" y="${y + 4}" text-anchor="end" font-size="10" font-family="IBM Plex Mono" fill="${C.faint}">${fmt(v)}</text>`; }
+    for (let e = 0; e <= 9; e += 3) b += `<text x="${X(e)}" y="${top + ph + 16}" text-anchor="middle" font-size="10" font-family="IBM Plex Mono" fill="${C.faint}">${e}</text>`;
+    if (key === "f1") {
+      b += `<rect x="${ox + 34}" y="${Y(0.906)}" width="${pw - 44}" height="${Y(0.888) - Y(0.906)}" fill="${C.ink}" opacity=".07"/>`;
+      b += `<line x1="${ox + 34}" x2="${ox + pw - 10}" y1="${Y(0.897)}" y2="${Y(0.897)}" stroke="${C.ink}" stroke-dasharray="4 3"/>`;
+      b += `<text x="${ox + pw - 10}" y="${Y(0.897) + 14}" text-anchor="end" font-size="10" fill="${C.ink}">held out: 0.897</text>`;
+    }
+    Object.entries(CURVE).forEach(([lr, d]) => {
+      const pts = d[key].slice(0, curveE + 1).map((v, e) => `${X(e)},${Y(v)}`).join(" ");
+      b += `<polyline points="${pts}" fill="none" stroke="${d.c}" stroke-width="2.2"/>`;
+      const v = d[key][curveE]; b += `<circle cx="${X(curveE)}" cy="${Y(v)}" r="3.5" fill="${d.c}"/>`;
+    });
+    return b;
+  };
+  let b = panel(0, "Training loss", "loss", 0.08, 0.26, (v) => v.toFixed(2)) + panel(pw + gapX, "F1 on validation clips", "f1", 0.78, 0.92, (v) => v.toFixed(2));
+  b += Object.entries(CURVE).map(([lr, d], i) => `<rect x="${34 + i * 110}" y="${H - 12}" width="10" height="10" rx="2" fill="${d.c}"/><text x="${50 + i * 110}" y="${H - 3}" font-size="11" fill="${C.muted}">rate ${lr}</text>`).join("");
+  $("#curveSvg").innerHTML = svg(W, H, b, "Training curves of the Ear");
+  $("#curveEpoch").textContent = `epoch ${curveE} of 9`;
+}
+
+/* ------------------------------------------------------------------ probe matching (live) */
+const PR = { sim: null, hop: 16 };
+async function buildProbe() {
+  $("#probeThr").addEventListener("input", drawProbe);
+  try {
+    const buf = await fetch("assets/audio/bouncing_ball.mp3").then((r) => r.arrayBuffer());
+    const ab = await new OfflineAudioContext(1, 16000, 16000).decodeAudioData(buf);
+    const x = ab.getChannelData(0), sr = 16000;
+    let s0 = 0; const thr0 = 0.2 * Math.max(...x.slice(0, sr).map(Math.abs));
+    while (s0 < x.length && Math.abs(x[s0]) < thr0) s0++;
+    s0 = Math.max(0, s0 - 16);
+    const L = Math.round(0.03 * sr), p = x.slice(s0, s0 + L);
+    let pn = 0; for (const v of p) pn += v * v; pn = Math.sqrt(pn) || 1;
+    const out = [];
+    for (let i = 0; i + L < x.length; i += PR.hop) {
+      let dot = 0, xn = 0;
+      for (let j = 0; j < L; j++) { const v = x[i + j]; dot += v * p[j]; xn += v * v; }
+      out.push(Math.max(0, dot / (pn * (Math.sqrt(xn) || 1))));
+    }
+    PR.sim = out; PR.sr = sr; PR.dur = x.length / sr;
+  } catch { $("#probeRead").textContent = "This browser couldn't decode the audio."; }
+  drawProbe();
+}
+function drawProbe() {
+  const cv = $("#probeCurve"); if (!cv) return;
+  const { g, w, h } = sizeCanvas(cv);
+  g.fillStyle = C.card; g.fillRect(0, 0, w, h);
+  if (!PR.sim) return;
+  const thr = Number($("#probeThr").value) / 100, n = PR.sim.length, c = S.clips.bouncing_ball;
+  const X = (i) => ((i * PR.hop) / PR.sr / c.duration) * w, Y = (v) => h - 6 - v * (h - 12);
+  g.strokeStyle = C.teal; g.lineWidth = 1.2; g.beginPath();
+  PR.sim.forEach((v, i) => (i ? g.lineTo(X(i), Y(v)) : g.moveTo(X(i), Y(v)))); g.stroke();
+  g.strokeStyle = C.ink; g.setLineDash([4, 3]); g.beginPath(); g.moveTo(0, Y(thr)); g.lineTo(w, Y(thr)); g.stroke(); g.setLineDash([]);
+  const minGap = Math.round((0.03 * PR.sr) / PR.hop), peaks = [];
+  for (let i = 1; i < n - 1; i++) {
+    const v = PR.sim[i];
+    if (v < thr || v < PR.sim[i - 1] || v < PR.sim[i + 1]) continue;
+    if (peaks.length && i - peaks[peaks.length - 1] < minGap) { if (v > PR.sim[peaks[peaks.length - 1]]) peaks[peaks.length - 1] = i; continue; }
+    peaks.push(i);
+  }
+  g.fillStyle = C.blood; peaks.forEach((i) => { g.beginPath(); g.arc(X(i), Y(PR.sim[i]), 3.5, 0, 7); g.fill(); });
+  $("#probeRead").textContent = `${peaks.length} peak${peaks.length === 1 ? "" : "s"} above the line · the ball really bounced ${S.bounce.onsets.length} times`;
 }
 
 boot();

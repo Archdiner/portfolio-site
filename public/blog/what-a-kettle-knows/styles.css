@@ -243,3 +243,38 @@ td.best{color:var(--teal);font-weight:600}
   .plan-arrow{padding:0;transform:rotate(90deg);justify-self:start;margin-left:8px}
 }
 blockquote{margin:0 0 1.05em;padding:4px 0 4px 18px;border-left:3px solid var(--blood);font-style:italic;color:var(--ink)}
+
+/* v0.7 widgets */
+.plan-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;height:40px}
+.plan-grid i{background:linear-gradient(135deg,var(--teal),var(--gold));border-radius:2px}
+.plan-grid i.m{background:#2a2723}
+.plan-model{height:40px;border:1.5px dashed var(--blood);border-radius:6px;display:grid;place-items:center;font:500 13px var(--sans);color:var(--blood)}
+.goal-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:14px}
+.goal-row .tabs{margin:0}
+.patch-note{font:400 15px/1.5 var(--sans);color:var(--muted);margin:12px 0 0;min-height:2.6em}
+#patchCanvas{border-radius:4px}
+.ways{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.way{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px}
+.way h4{font:500 22px/1.1 var(--serif);color:var(--ink);margin:4px 0 10px}
+.way-k{margin:0}
+.way p:not(.way-k){font:400 14px/1.5 var(--sans);color:var(--body);margin:0 0 8px}
+.way b{font-weight:600;color:var(--ink)}
+.tiny .player-top input{flex:1;accent-color:var(--blood)}
+.tiny-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.tiny-grid canvas{border-radius:6px;border:1px solid var(--line)}
+.tiny-legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:12px;font:400 13px var(--sans);color:var(--muted)}
+.tiny-legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+.alm{display:grid;grid-template-columns:1fr auto 1fr auto 1fr auto 1fr;gap:8px;align-items:stretch}
+.alm-box{border:1px solid var(--line);border-radius:8px;padding:12px;background:#faf6ee}
+.alm-box b{display:block;font:600 14px var(--sans);color:var(--ink);margin-bottom:4px}
+.alm-box span{font:400 12.5px/1.4 var(--sans);color:var(--muted)}
+.alm-box.out{border-color:var(--blood)}
+.alm-box.out b{font-family:var(--mono);color:var(--blood)}
+.alm-arrow{align-self:center;color:var(--faint);font:400 20px var(--sans)}
+#probeCurve{border-radius:4px}
+@media (max-width:640px){
+  .ways{grid-template-columns:1fr}
+  .tiny-grid{grid-template-columns:1fr}
+  .alm{grid-template-columns:1fr}
+  .alm-arrow{transform:rotate(90deg);justify-self:start;margin-left:8px}
+}

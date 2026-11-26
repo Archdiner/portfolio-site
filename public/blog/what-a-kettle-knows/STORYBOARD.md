@@ -8,24 +8,22 @@ footnotes and the appendix.
 The idea it builds towards: hearing is mostly solved, and remembering is not. A useful
 listener keeps a diary of what turned on and off, and when, instead of captioning clips.
 
-## v0.6: the five-way tour (current)
+## v0.7: how models learn to hear (current)
 
-The post is an explainer about how a model can hold the same sound in different ways, not a
-results paper. Each stop says what that way of listening keeps and what it throws away.
-Exact numbers live in the appendix.
+**Audience:** technical readers who have never looked inside an audio model (CS/ML students,
+engineers), plus researchers and recruiters skimming for understanding.
+**Message:** a model hears what its training taught it to care about. The results are evidence
+for that, not the point.
 
-| # | Section | What it keeps / throws away | Widget |
-|---|---|---|---|
-| 0 | Cold open, then "How did you know?" | Naming vs keeping track: two skills | Blind guess, moments player |
-| | Framing + the tour | First dive into audio research; five ways to listen | Five-step plan figure |
-| 1 | A list of numbers | Keeps everything, means nothing yet | Zoom to samples, then the codec ladder |
-| 2 | A picture | Which pitches, when | Spectrogram player, smooth/sharp split |
-| 3 | A point in space | What it sounds like, not when or how many | Four taps + similarity grids, bouncing ball |
-| 4 | A list of labels | Names a few seconds at a time, no story | The Ear's vacuum cleaner |
-| | What about a bigger model? | Audio Flamingo mostly says "none" (qualitative) | none |
-| 5 | A diary | What changed, and when; the arithmetic is the other half | Kettle diary questions |
-| | Knowing when to listen | Whisper's repeated sentence, the gate | Quote |
-| | Back to the kettle | What each listener "knows"; bitter lesson; SSL and diffusion next | Final log |
+| Part | Sections | Widgets |
+|---|---|---|
+| Opening | Cold open, how did you know, the thesis, the pipeline | Blind guess, moments, five-step pipeline |
+| Sound to tokens | 1.76 million numbers, how much can we throw away, a picture of sound, smooth and sharp, cutting into patches | Zoom, codec ladder, spectrogram, HPSS, patches (cut, hide, redraw/code/teacher) |
+| Six ways to train | Recipe, AudioSet taggers, Dasheng, BEATs, EAT, USAD | Six cards |
+| Training shapes hearing | Watching training happen (tiny model, labels vs masked redraw), taps, rank flip | Live-trained tiny model, similarity grids, kitchen vs emotion slope chart |
+| From hearing to doing | Fine-tuning the Ear, finding repeats, audio-language models, Whisper | Real training curve, Ear rows, live waveform matching, skills chart, ALM diagram |
+| Remembering | Keeping a diary | Kettle diary, SINS memory chart |
+| Close | What each listener knows, bitter lesson, SSL and diffusion next | Final log |
 
 ## Voice rules
 
