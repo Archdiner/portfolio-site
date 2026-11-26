@@ -17,6 +17,7 @@ const careerTimeline = [
 ];
 
 const writing = [
+  { tag: 'Interactive · 2026 · wireframe', title: 'What a Kettle Knows — a machine-listening wireframe', href: '/blog/what-a-kettle-knows/' },
   { tag: 'Research · 2025', title: "Arteta-Ball: Modeling Arsenal's Possession with Markov Chains", href: '/research/arteta_wharton-2.pdf' },
   { tag: 'Research · 2025', title: 'Gradient Integrity: Verifying Honest Computation on GPU Networks', href: '/research/gradient-integrity.pdf' },
   { tag: 'Write-up', title: "Why You Can't Trust the Volume Numbers You See Online", href: 'https://github.com/Archdiner/blockchain_trading_volume_generator' },
