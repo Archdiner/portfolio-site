@@ -5,6 +5,10 @@ placeheld in bracketed notes; every chart, player, spectrogram and interaction i
 
 **Live path:** `/blog/what-a-kettle-knows/`
 
+**Public build:** <https://what-a-kettle-knows.vercel.app>
+
+**Plan and debrief:** [PLAN.md](PLAN.md)
+
 ## What is real
 
 - **Audio.** CC0/CC-BY Freesound recordings, transcoded to 16 kHz mono. Every player
