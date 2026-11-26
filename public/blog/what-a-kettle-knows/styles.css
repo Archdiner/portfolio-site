@@ -236,3 +236,4 @@ td.best{color:var(--teal);font-weight:600}
   .plan{grid-template-columns:1fr}
   .plan-arrow{padding:0;transform:rotate(90deg);justify-self:start;margin-left:8px}
 }
+blockquote{margin:0 0 1.05em;padding:4px 0 4px 18px;border-left:3px solid var(--blood);font-style:italic;color:var(--ink)}

@@ -518,7 +518,7 @@ function buildMemory() {
 function memoryChart(target, keys, title) {
   const T = S.results.t1;
   const groups = [
-    ["When did it happen?", T.by_type.at], ["How long did it last?", T.by_type.dur], ["How long since it last happened?", T.by_type.since],
+    ["Is it happening?", T.by_type.at], ["How long did it last?", T.by_type.dur], ["Since when?", T.by_type.since],
     ["How long ago was it?", T.by_type.ago], ["How many times?", T.by_type.count], ["All 298 questions", { ours: T.ours, af3: T.af3, const: T.const, n: T.n }, true],
   ];
   const series = [["ours", "The diary", C.teal], ["af3", "Audio Flamingo 3", C.blood], ["const", "Same answer each time", "#c9bca4"]].filter(([k]) => keys.includes(k));
@@ -547,9 +547,9 @@ function memoryChart(target, keys, title) {
 function buildCost() {
   const E = Object.fromEntries(S.results.encoders.map((e) => [e.id, e]));
   const rows = [
-    ["Smallest tagger", E.mn04_as.rtf_1c, C.blood],
-    ["Compact tagger (the Ear's size)", E.mn10_as.rtf_1c, C.blood],
-    ["Large model (BEATs)", E.beats_iter3.rtf_1c, C.teal],
+    ["Small AudioSet tagger", E.mn10_as.rtf_1c, C.blood],
+    ["EAT (what the Ear is built on)", E.eat_pretrain.rtf_1c, C.teal],
+    ["BEATs on its own", E.beats_iter3.rtf_1c, C.teal],
     ["Full diary system", S.results.t4.rtf_1c, C.ink],
   ];
   const fmtT = (h) => { const m = Math.round(h * 60); return m < 60 ? `${m} min` : `${Math.floor(m / 60)} h ${m % 60} min`; };

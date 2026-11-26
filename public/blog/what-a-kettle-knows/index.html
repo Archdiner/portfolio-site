@@ -85,7 +85,7 @@
 <section class="col">
   <p>Those are two different skills: putting a name on a sound, and keeping track of what happened and for how long. People do both without noticing they're separate. Machines, it turns out, are much better at the first.</p>
   <p>As of late 2026, audio models are good at naming sounds and bad at almost anything involving time. Play one a dog barking and it'll tell you it's a dog. Ask it how long the kettle boiled this morning and you'll usually get a wrong answer (later on we'll see exactly how wrong).</p>
-  <p>This post is my first real dive into audio research, and I've written it the way it happened. The idea I started with seemed almost too obvious to test: if models can name sounds but can't remember them, write the names down with times and answer questions from that. So I built it and pitted it against much bigger models. This post is how that went.</p>
+  <p>This post is my first real dive into audio research, and I've written it the way it happened. My project notes describe the goal as a small ear that stays on, pulls the useful sound out of a room, and hands it to some other model to reason about. The idea I started with seemed almost too obvious to test: if models can name sounds but can't remember them, write the names down with times and answer questions from that. So I built it and pitted it against much bigger models. This post is how that went.</p>
 
   <h2>Why would a computer need to hear a kettle?</h2>
   <p>The questions people actually ask about a home are mostly about time. Did I leave the stove on? How long has the washing machine been beeping? Was that the smoke alarm, or just the kettle finishing? A small device that listens could answer these without putting a camera in anyone's kitchen, but only if it keeps something like a diary. Here's the plan:</p>
@@ -257,7 +257,8 @@
   <p>Four clips don't prove much, but it's a hint that the big models aren't keeping the details a kitchen cares about.</p>
 
   <h2>Asking a trained ear</h2>
-  <p>Let's see what a real model makes of the kettle. A while ago I trained a small listener, which I'll call the Ear, to pick out fifteen everyday home sounds: running water, a light switch, dishes clinking, a vacuum cleaner and so on. Here's everything it reported while listening to our kettle:</p>
+  <p>Let's see what a trained model makes of the kettle. I took EAT, one of the self-taught models from the tap test, and fine-tuned it to label fifteen home sounds frame by frame, using RealDESED, a set of real recordings from homes: footsteps, dishes, doors, a light switch, a vacuum, a coffee machine and the rest. (Yes, the same EAT that thought all four taps sounded alike. Here it's trained end to end, so its insides get adjusted for these fifteen labels.)</p>
+  <p>I tried three learning rates for ten epochs each on a rented A100, at about two minutes an epoch, so just under an hour in all. The best run, at a learning rate of 0.0001, peaked at epoch 8 with a validation F1 of 0.897 (out of 1), and every run started getting worse at epoch 9. I'll call the result the Ear. Here's everything it reported while listening to our kettle:</p>
 </section>
 
 <figure class="wide">
@@ -309,8 +310,8 @@
   <p>You can probably count those, and so can a very old trick: slide the waveform along a copy of itself and note every place where it lines up.<sup><a href="#fn4" id="r4">4</a></sup> That trick scores 0.94 on the same counting test where the best model managed 0.14. Size didn't help either: the 90-million-parameter models counted no better than the one with a million.</p>
 
   <h2>Just ask a bigger model?</h2>
-  <p>At this point you might reasonably ask why I'm fiddling with small listeners at all. There are now large audio-language models that you can hand a recording and question in plain English, so why not give one the audio and ask it how long the kettle boiled?</p>
-  <p>That was the obvious first thing to try, so I tried it at a more realistic scale than one kettle. SINS is a public dataset recorded continuously in one person's home for a week.<sup><a href="#fn5" id="r5">5</a></sup> I asked 298 questions about days four to seven, things like "when did the washing-up start?", "how long was the vacuum on?" and "how long since anyone last cooked?", and gave them to Audio Flamingo 3, one of the strongest open audio-language models. For a baseline, I also scored a "model" that ignores the audio completely and always gives the most common answer.</p>
+  <p>At this point you might reasonably ask why I'm fiddling with listeners like the Ear at all. There are now large audio-language models that you can hand a recording and question in plain English, so why not give one the audio and ask it how long the kettle boiled?</p>
+  <p>That was the obvious first thing to try, so I tried it at a more realistic scale than one kettle. SINS is a public dataset recorded continuously in one person's home for a week.<sup><a href="#fn5" id="r5">5</a></sup> I asked 298 questions about days four to seven, about activities like cooking, washing up, vacuuming and watching TV. They come in five kinds: is it happening at a given moment, since when, for how long, how long ago, and how many times. I gave them to Audio Flamingo 3, one of the strongest open audio-language models. For a baseline, I also scored a "model" that ignores the audio completely and always gives the most common answer.</p>
 </section>
 
 <figure class="wide">
@@ -319,8 +320,9 @@
 </figure>
 
 <section class="col">
-  <p>Audio Flamingo 3 gets 0.19 overall, which is <em>worse</em> than the 0.26 you get by not listening at all. On "how long ago did that happen?" it scores exactly zero.</p>
-  <p>For a sense of scale: the Ear looks at a few seconds at a time, our kettle lasts 110 seconds, and a week is about 600,000 seconds. My best guess is that models like it are trained on short clips with one-line captions, so nothing has ever rewarded them for keeping time, for noticing when something started and subtracting.</p>
+  <p>Audio Flamingo 3 gets 0.19 overall, which is <em>worse</em> than the 0.26 you get by not listening at all. On all 53 "how long ago?" questions it scores exactly zero, and on "is it happening?" it's no better than always guessing the common answer (0.46 against 0.45).</p>
+  <p>It didn't give wild answers, though. Mostly it gave none at all. I also asked it about 461 moments where an activity was just starting, and 87.4% of its answers were the single word "none". It caught 2 of 8 vacuum starts, 1 of 6 TV starts, 0 of 9 cooking starts and 1 of 9 dishwashing starts. Some of that is my fault: when it did say something other than "none", it tended to list everything it could hear ("vacuum cleaning, the TV playing"), and my scorer counted that list as "it started". So its false alarms are partly a prompt problem.</p>
+  <p>For a sense of scale: the Ear looks at a few seconds at a time, our kettle lasts 110 seconds, each question came with ten minutes of audio (which Audio Flamingo got through in about 2.6 seconds on an A100), and the whole week is about 600,000 seconds. My best guess is that models like it are trained on short clips with one-line captions, so nothing has ever rewarded them for keeping time, for noticing when something started and subtracting.</p>
 
   <h2>Keep a diary</h2>
   <p>The fix I tried is the obvious one: instead of asking a model to remember audio, have the listener keep a diary. Every time something changes, it writes down what turned on or off, and when. It also smooths over the flicker, so that one long boil becomes one entry rather than thirty.<sup><a href="#fn6" id="r6">6</a></sup></p>
@@ -351,8 +353,9 @@
 </figure>
 
 <section class="col">
-  <p>The diary gets 0.87 overall against Audio Flamingo's 0.19, and a perfect 1.00 on "when did it happen?". Its weak spot is "how many times?" (0.41), which is our old counting problem showing up again, and probably the clearest thing to fix next.</p>
-  <p>It's also not an even fight. The diary's vocabulary was built around the kinds of household activities this dataset labels, while Audio Flamingo had to handle open-ended questions about a home it had never heard. Some of that gap is home advantage. And since a diary can only answer questions about what it chose to write down, anything outside its vocabulary is invisible to it, which is the Ear's vacuum cleaner problem all over again.</p>
+  <p>The diary gets 0.87 overall against Audio Flamingo's 0.19. It scores a perfect 1.00 on "is it happening?", though that one's too easy, because some of the "no" cases are just silence. Its weak spot is "how many times?" (0.41), our old counting problem again. On activity starts it caught 8 of 8 vacuum starts and 6 of 6 TV starts with no false alarms, 8 of 9 cooking starts (with about 3 false starts a day) and 7 of 9 dishwashing starts (about 5 a day).</p>
+  <p>So is it the writing down that does the work? Only partly. I also handed the same timestamped diary to Qwen, a general-purpose language model, and let it answer in plain English. That only moved its score from 0.25 to 0.34. What gets 0.87 is answering from the diary with exact queries: little bits of code that look things up and subtract. That's a bit awkward, given that "hand it to some other model" was the plan in my project notes. The notes help, but most of the win comes from doing the arithmetic exactly.</p>
+  <p>It's also not an even fight. BEATs, the model underneath the diary, never heard this home, but the vocabulary on top was set up for exactly the activities this dataset labels, while Audio Flamingo had to handle open-ended questions about a home it had never heard. Some of that gap is home advantage. And since a diary can only answer questions about what it chose to write down, anything outside its vocabulary is invisible to it, which is the Ear's vacuum cleaner problem all over again.</p>
   <p>And it's one home. I haven't tried a second one yet, especially one with more than one person in it.</p>
 
   <h2>Can you leave it on?</h2>
@@ -365,19 +368,23 @@
 </figure>
 
 <section class="col">
-  <p>A compact tagger of the kind the Ear uses gets through a whole day in about eight minutes of processor time. The full diary system, with its bigger model, vocabulary and smoothing, takes about an hour and forty minutes, which works out to roughly 7% of one core humming along in the background. It does want up to 3.6 GB of memory at its peak, and that's the next thing to bring down, but it's already in "small box in the corner of the kitchen" territory.</p>
+  <p>The diary system (frozen BEATs, the vocabulary head and the smoothing) runs on a laptop CPU. On one core it needs 252 seconds of compute per hour of audio, which is about an hour and forty minutes a day, or 7% of a core humming along in the background. Spread over ten cores, an hour of audio takes 172 seconds. It does want up to 3.6 GB of memory at its peak, and that's the next thing to bring down. Audio Flamingo, for comparison, needed an A100 graphics card.</p>
 
   <h2>Voices, briefly</h2>
-  <p>The same lesson showed up when the sound was speech. Whisper, a popular speech-to-text model, has a well-known habit of making words up when you give it stretches where nobody is talking. In my tests it invented 846 words for every hour of non-speech audio, which is a lot of words from a quiet room.</p>
-  <p>Putting a tiny speech detector in front of it, so that Whisper only ever hears the parts where someone is actually talking, took that number to zero, and on noisy recordings the error rate fell from 25% of words to 4%. Whisper itself didn't change at all.<sup><a href="#fn7" id="r7">7</a></sup></p>
+  <p>Speech had its own version of this. Whisper, a popular speech-to-text model, is known for making words up when nobody is talking, so I ran the small version on a CPU over sixty minutes of the SINS home with nobody in it. It produced text in 49 of those minutes, 846 words in all, and it kept writing the same sentence:</p>
+  <blockquote>Thank you very much for watching this video and I will see you in much for watching.</blockquote>
+  <p>(Once, for variety, it said "I'll".) Putting a small voice-activity detector (Silero) in front of it, so that Whisper only hears the parts where someone is actually talking, took the invented words to zero. With speech mixed into the home's noise at 10 dB, the word error rate fell from 25% to 4%. Whisper itself didn't change at all.<sup><a href="#fn7" id="r7">7</a></sup></p>
 
-  <h2>What didn't work</h2>
+  <h2>What didn't work, and what I got wrong</h2>
   <p>Plenty:</p>
   <ul class="tidy">
     <li><b>Counting.</b> Every learned listener failed the repetition test. For now the diary leans on the waveform trick, and it's still weakest on "how many" questions.</li>
     <li><b>Flagging anything unusual.</b> A detector for "a sound I've never heard before" raised about 41 false alarms a day and caught only half of the real novelties.</li>
     <li><b>Listening again when unsure.</b> Letting the system take a second, closer listen to clips it wasn't confident about didn't help.</li>
     <li><b>Practice drills.</b> Training on synthetic listening exercises improved scores on the exercises and left the real tests flat or worse.</li>
+    <li><b>My first change-detection test.</b> I'd swapped "added" and "removed" in the answers, and another item cancelled out its own cue. Those numbers are void and aren't in this post.</li>
+    <li><b>Testing on the home I trained on.</b> Training on the SINS home and testing on its later days went from 0.746 to 0.783, which looked like progress but was really the home memorising itself. Voided.</li>
+    <li><b>More passes.</b> A later experiment (I called it LoopEar) added extra recurrent passes on top of a frozen USAD model. It didn't help, and at the second stage four passes did worse than one.</li>
     <li><b>Short kitchen sounds.</b> With recordings from only five kitchens, fancier models for brief events like a drawer closing did worse than the simplest baseline. There just wasn't enough data.</li>
   </ul>
   <p>The full list, with numbers, is in the appendix.</p>
@@ -418,7 +425,7 @@
     <li id="fn4">Normalised cross-correlation. If a sound repeats, the waveform lines up with a shifted copy of itself once per repeat. <a href="#r4">↩</a></li>
     <li id="fn5">SINS is a week of continuous recording in one home, with daily activities like cooking, washing up and vacuuming labelled. The questions cover days four to seven, and the same 298 questions went to every system. <a href="#r5">↩</a></li>
     <li id="fn6">The smoothing is a Viterbi pass. Given second-by-second guesses about whether something is on, it finds the most likely sequence of on and off stretches, so a single noisy second can't split one boil into two. <a href="#r6">↩</a></li>
-    <li id="fn7">I also checked how well the same listeners hear emotion in a voice, using acted speech from actors the models never heard in training. The large self-taught models did best (Dasheng 0.74, where chance is 0.17). It's in the appendix, since this post is about everything except speech. <a href="#r7">↩</a></li>
+    <li id="fn7">I also checked how well the same listeners hear emotion in a voice, using acted speech from actors the models never heard in training. The large self-taught models did best (Dasheng 0.74, where chance is 0.17). The ranking flipped between tasks: on kitchen clips the small AudioSet taggers matched BEATs, and on acted emotion they lost. It's in the appendix, since this post is about everything except speech. <a href="#r7">↩</a></li>
   </ol>
 </section>
 
@@ -430,7 +437,7 @@
     <li><b>Gemmeke et al., 2017.</b> Audio Set: an ontology and human-labeled dataset for audio events. Two million YouTube clips with sound labels, which is what the small taggers learned from.</li>
     <li><b>Schmid, Koutini &amp; Widmer, 2023.</b> Efficient large-scale audio tagging via transformer-to-CNN knowledge distillation. The compact taggers (mn04, mn10, mn20) in the charts.</li>
     <li><b>Chen et al., 2022.</b> BEATs: audio pre-training with acoustic tokenizers. One of the large self-taught listeners, and the one the diary system builds on.</li>
-    <li><b>Chen et al., 2024.</b> EAT: self-supervised pre-training with efficient audio transformer. The model that hears every tap as nearly the same.</li>
+    <li><b>Chen et al., 2024.</b> EAT: self-supervised pre-training with efficient audio transformer. The model that hears every tap as nearly the same, and the one the Ear is fine-tuned from.</li>
     <li><b>Dinkel et al., 2024.</b> Scaling up masked audio encoder learning for general audio classification. Dasheng, the best of the bunch at hearing emotion in a voice.</li>
     <li><b>Goel et al., 2025.</b> Audio Flamingo 3: advancing audio intelligence with fully open large audio language models. The big model we asked about the week.</li>
     <li><b>Dekkers et al., 2017.</b> The SINS database for detection of daily activities in a home environment using an acoustic sensor network. The week in one home.</li>
