@@ -59,7 +59,8 @@ async function boot() {
   wireProgress();
   const plan = $("#plan");
   if (plan) new IntersectionObserver((es, io) => { if (es[0].isIntersecting) { plan.classList.add("go"); io.disconnect(); } }, { threshold: 0.4 }).observe(plan);
-  addEventListener("resize", debounce(redrawAll, 150));
+  let lastW = innerWidth;
+  addEventListener("resize", debounce(() => { if (innerWidth === lastW) return; lastW = innerWidth; redrawAll(); }, 150));
 }
 
 function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
@@ -99,7 +100,8 @@ function kDur() { return kettle.duration || S.k.duration; }
 
 /* ------------------------------------------------------------------ drawing */
 function sizeCanvas(cv) {
-  const w = cv.clientWidth || 600, h = Number(cv.getAttribute("height")) || 100;
+  if (!cv.dataset.h) cv.dataset.h = cv.getAttribute("height") || 100;
+  const w = cv.clientWidth || 600, h = Number(cv.dataset.h);
   cv.style.height = h + "px";
   cv.width = Math.round(w * dpr()); cv.height = Math.round(h * dpr());
   const g = cv.getContext("2d"); g.setTransform(dpr(), 0, 0, dpr(), 0, 0);
@@ -290,7 +292,7 @@ function drawZoom() {
   // overview
   const ov = $("#zoomOverview");
   drawWave(ov, S.k.peaks, { color: "#c9b9a6", bg: C.card });
-  const g0 = ov.getContext("2d"), w0 = ov.clientWidth, h0 = Number(ov.getAttribute("height"));
+  const g0 = ov.getContext("2d"), w0 = ov.clientWidth, h0 = ov.clientHeight;
   g0.fillStyle = "rgba(124,43,38,.18)"; g0.strokeStyle = C.blood; g0.lineWidth = 1.5;
   const x0 = (a / D) * w0, ww = Math.max(3, (span / D) * w0);
   g0.fillRect(x0, 0, ww, h0); g0.strokeRect(x0 + 0.5, 0.5, ww - 1, h0 - 1);
@@ -482,7 +484,7 @@ function drawBounce() {
   const c = S.clips.bouncing_ball, cv = $("#bounceWave");
   drawWave(cv, c.peaks, { color: C.blood, bg: C.card });
   if (!bounceShown) return;
-  const g = cv.getContext("2d"), w = cv.clientWidth, h = Number(cv.getAttribute("height"));
+  const g = cv.getContext("2d"), w = cv.clientWidth, h = cv.clientHeight;
   const xs = S.bounce.onsets.map((t) => (t / c.duration) * w), lastX = xs[xs.length - 1];
   let prev = -99;
   xs.forEach((x, i) => {
@@ -878,7 +880,7 @@ function drawSelf() {
   if (!RM.d) return;
   const s = RM.d.selfsim.maps[RM.self], cv = $("#selfCanvas");
   const side = Math.min(cv.parentElement.clientWidth || 340, 340);
-  cv.style.width = side + "px"; cv.setAttribute("height", side);
+  cv.style.width = side + "px"; cv.dataset.h = side;
   const { g, w, h } = sizeCanvas(cv);
   const raw = Uint8Array.from(atob(s.b64), (c) => c.charCodeAt(0)), n = s.n, o = document.createElement("canvas");
   o.width = n; o.height = n;
