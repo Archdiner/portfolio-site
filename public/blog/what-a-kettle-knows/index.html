@@ -269,7 +269,7 @@
     </div>
     <div class="rows" id="earRows"></div>
   </div>
-  <figcaption>Top row: what actually happened, marked by hand. Below: every label the Ear produced, and when. Click a row to jump there.</figcaption>
+  <figcaption>Top row: what actually happened, picked out from the kettle's loudness. Below: every label the Ear produced, and when. Click a row to jump there.</figcaption>
 </figure>
 
 <section class="col">
@@ -324,6 +324,7 @@
 
   <h2>Keep a diary</h2>
   <p>So here's the idea the rest of this post rests on. Instead of asking a model to remember audio, have the listener keep a diary. Every time something changes, it writes down what turned on or off, and when. It also smooths over the flicker, so that one long boil becomes one entry rather than thirty.<sup><a href="#fn6" id="r6">6</a></sup></p>
+  <p>This isn't a new idea, and I didn't come up with it. In video, Socratic Models (2022) turned first-person footage into a running text log and answered questions by reading it, and a 2024 study found that approach beat models looking at the frames directly whenever a task depended on a long history. For audio, a 2026 paper turns long recordings into timestamped events in a database for exactly this kind of question answering. What I wanted to find out is whether a small, cheap listener can keep a diary good enough to be useful in a real home. (Links are in the further reading at the end.)</p>
   <p>Once the diary exists, the hard questions become arithmetic on a list. Here's the kettle's diary. Go ahead and ask it something:</p>
 </section>
 
@@ -340,8 +341,8 @@
 </figure>
 
 <section class="col">
-  <p>I have a confession to make: that diary isn't the Ear's. I wrote it by hand from the recording, because the Ear, as we saw, thinks this kettle is a vacuum cleaner and loses interest after 53 seconds. The kettle is here to show you what a diary is, and it can't tell us whether a machine can keep one.</p>
-  <p>For that, back to the week in the SINS home. This time a listener (a larger model plus a fixed vocabulary of household activities and the smoothing step) wrote the diary itself, from the audio, and the same 298 questions were answered from that diary:</p>
+  <p>One thing to be clear about: the kettle's diary didn't come from the Ear, which, as we saw, thinks this kettle is a vacuum cleaner and loses interest after 53 seconds. It came from a much simpler system that follows the kettle's loudness and marks where it jumps, checked against the recording's description. That works for one loud kettle in a quiet room, but it's here to show what a diary looks like. It can't tell us whether a listener can keep one across a real week.</p>
+  <p>For that, back to the week in the SINS home. This time the full system (a larger model, a vocabulary of household activities, and the smoothing step) wrote the diary from the audio, and the same 298 questions were answered from that diary:</p>
 </section>
 
 <figure class="wide">
@@ -351,7 +352,8 @@
 
 <section class="col">
   <p>The diary gets 0.87 overall against Audio Flamingo's 0.19, and a perfect 1.00 on "when did it happen?". Its weak spot is "how many times?" (0.41), which is our old counting problem showing up again, and probably the clearest thing to fix next.</p>
-  <p>I should be upfront that this is one home. A second house with different appliances, different habits and more than one person in it would be the real test, and I haven't run it yet.</p>
+  <p>It's also not a perfectly fair fight. The diary's vocabulary was built around the kinds of household activities this dataset labels, while Audio Flamingo had to handle open-ended questions about a home it had never heard. Some of that gap is home advantage. And since a diary can only answer questions about what it chose to write down, anything outside its vocabulary is simply invisible to it, which is the Ear's vacuum cleaner problem all over again.</p>
+  <p>I should also be upfront that this is one home. A second house with different appliances, different habits and more than one person in it would be the real test, and I haven't run it yet.</p>
 
   <h2>Can you leave it on?</h2>
   <p>A diary is only useful if whatever writes it never stops listening, which raises the question of cost. Here's how much of a single ordinary computer processor each option needs to keep up with a full day of audio:</p>
@@ -400,8 +402,9 @@
 
 <section class="col">
   <p>So what does a kettle know? Not that it's a kettle: the Ear never worked that out, and it turns out it didn't need to. What matters is that something switched on at 0:02.7, boiled for 86 seconds and switched itself off. These are small facts, but they're exactly the ones people ask about.</p>
-  <p>What I still find puzzling is why the big models struggle with this. They clearly hear well enough, and the information is right there in the audio. Maybe it's the training data, which is mostly short clips with one-line captions, so nothing ever rewards a model for keeping track of time. Maybe it's the embeddings, which throw away the count before any reasoning starts. I don't know yet, and that open gap between hearing and remembering is what makes this corner of audio interesting to me.</p>
-  <p>For now, the models we have are already good at hearing. What they're missing is somewhere to write things down.</p>
+  <p>What I still find puzzling is why the big models struggle with this. They clearly hear well enough, and the information is right there in the audio. Maybe it's the training data, which is mostly short clips with one-line captions, so nothing ever rewards a model for keeping track of time. Maybe it's the embeddings, which throw away the count before any reasoning starts. I don't know yet.</p>
+  <p>I'm also aware that the diary is the kind of fix that tends not to age well. Somebody (me) chose its format: which activities exist, what counts as "on", how much to smooth. Rich Sutton's bitter lesson is that structure designed by people like this usually loses, in the long run, to general methods given more data and compute. The version that would age well is a model that learns for itself what to write down, trained on long recordings where keeping time is actually rewarded. As far as I can tell nobody is training models that way yet, so for now the diary is less an answer than a bar: cheap, simple, and still well ahead of what end-to-end models manage today.</p>
+  <p>That gap between hearing and remembering is what makes this corner of audio interesting to me. Writing things down doesn't make a model hear any better. It just means the model doesn't have to remember everything itself.</p>
   <p class="sign">Asad</p>
 </section>
 
@@ -437,6 +440,15 @@
     <li><b>Huh et al., 2023.</b> EPIC-SOUNDS: a large-scale dataset of actions that sound. The kitchen recordings behind the short-events results.</li>
     <li><b>Cao et al., 2014.</b> CREMA-D: crowd-sourced emotional multimodal actors dataset. The acted voices in note 7.</li>
   </ul>
+  <p>On writing things down instead of remembering:</p>
+  <ul>
+    <li><b>Zeng et al., 2022.</b> <a href="https://arxiv.org/abs/2204.00598">Socratic Models: composing zero-shot multimodal reasoning with language</a>. Turns first-person video into a text log and answers questions by reading it. The earliest clear version of the diary idea I know of.</li>
+    <li><b>2024.</b> <a href="https://arxiv.org/abs/2408.03160">User-in-the-loop evaluation of multimodal LLMs for activity assistance</a>. Finds that the text-log approach beats models looking at frames directly when a task needs a long history, including in a live cooking study.</li>
+    <li><b>2024.</b> <a href="https://www.ecva.net/papers/eccv_2024/papers_ECCV/papers/03241.pdf">VideoAgent: a memory-augmented multimodal agent for video understanding</a> (ECCV). A structured memory of events and objects that a language model queries with tools.</li>
+    <li><b>2026.</b> <a href="https://arxiv.org/abs/2602.14612">Event-grounded question answering over long audio via structured retrieval</a>. The audio version: long recordings become timestamped events in a database, with smart-home monitoring as a target use. The closest thing to this post's diary.</li>
+    <li><b>2026.</b> <a href="https://arxiv.org/abs/2609.01542">TAG-Bench: benchmarking temporal audio grounding in large audio language models</a>. Twenty-one systems asked when sounds happen, with the best model counting repeated sounds correctly under 14% of the time. Independent evidence for the counting problem.</li>
+    <li><b>Sutton, 2019.</b> <a href="http://www.incompleteideas.net/IncIdeas/BitterLesson.html">The bitter lesson</a>. Why a diary format designed by a person is probably a stepping stone, not the destination.</li>
+  </ul>
 </section>
 
 <!-- ======================================================= APPENDIX -->
@@ -455,7 +467,7 @@
   <details>
     <summary>Recordings and licences</summary>
     <div class="table-scroll"><table id="srcTable"></table></div>
-    <p class="small">All recordings are from Freesound, transcoded to 16 kHz mono. The glass clink is CC BY 4.0 (KVV_Audio); everything else is CC0. The kettle's four states were marked from the recording's loudness and checked against its description. The bouncing ball is synthesised.</p>
+    <p class="small">All recordings are from Freesound, transcoded to 16 kHz mono. The glass clink is CC BY 4.0 (KVV_Audio); everything else is CC0. The kettle's four states were picked out automatically from the recording's loudness envelope and checked against its description. The bouncing ball is synthesised.</p>
   </details>
   <details>
     <summary>Method</summary>
