@@ -28,9 +28,9 @@ Left out on purpose: `assets/source/` (raw clips the page does not fetch), `_bui
 
 ## Known nits
 
-- The hero footer clock in `index.html` is hardcoded `0:00 / 1:50`. `syncAll()` in `app.js` updates the dock clock and does not update the hero clock.
-- `progressWaves()` paints an opaque `#f3a27f` rectangle over the played portion of the waveform instead of recoloring the peaks, so the hero looks like an orange block while playing.
+- The hero footer clock (`#heroTime`) is updated in `syncAll()` from the audio element’s `currentTime` and `duration`.
+- `progressWaves()` redraws peaks in `#f3a27f` inside the played region. It does not paint a full-height rectangle over the wave.
 
 ## Continue
 
-Stay on branch `wireframe/what-a-kettle-knows`. Edit this folder in place: `drafts/what-a-kettle-knows/`. Do not commit on `main`.
+Edit this folder in place: `drafts/what-a-kettle-knows/`. Do not commit on `main`. Bracket notes stay. Do not write the essay. Do not invent research numbers.

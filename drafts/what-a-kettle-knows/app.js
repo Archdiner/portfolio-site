@@ -25,7 +25,8 @@ const fcolor = (f) => FAMILY_COLOR[f] || "#2f6f5e";
 const flabel = (f) => FAMILY_LABEL[f] || "SSL ViT";
 
 const CLIP_NAMES = ["kettle", "cup_spoon", "stir", "pour", "codec_original", "codec_8khz",
-  "codec_4khz", "hpss_mix", "hpss_harmonic", "hpss_percussive", "bouncing_ball", "making_tea"];
+  "codec_4khz", "hpss_mix", "hpss_harmonic", "hpss_percussive", "bouncing_ball", "making_tea",
+  "reference"];
 const MINI = [
   ["kettle", "Electric kettle", "1:50"],
   ["cup_spoon", "Cup and spoon", "0:14"],
@@ -35,13 +36,13 @@ const MINI = [
 
 const state = {
   results: null, kettle: null, taps: null, similarity: null, sources: null,
-  timeline: null, bounce: null, clips: {}, clip: "kettle",
+  timeline: null, bounce: null, manifest: null, clips: {}, clip: "kettle",
   simModel: "dsp_rich", codec: "codec_original", selectedEncoder: "mn10_as",
 };
 
 /* ---------------------------------------------------------------- loading */
 async function boot() {
-  const [results, kettle, taps, similarity, sources, timeline, bounce] = await Promise.all([
+  const [results, kettle, taps, similarity, sources, timeline, bounce, manifest] = await Promise.all([
     fetch("assets/data/results.json").then((r) => r.json()),
     fetch("assets/data/kettle.json").then((r) => r.json()),
     fetch("assets/data/taps.json").then((r) => r.json()),
@@ -49,8 +50,9 @@ async function boot() {
     fetch("assets/data/sources.json").then((r) => r.json()),
     fetch("assets/data/timeline.json").then((r) => r.json()),
     fetch("assets/data/bouncing_onsets.json").then((r) => r.json()),
+    fetch("assets/data/manifest.json").then((r) => r.json()),
   ]);
-  Object.assign(state, { results, kettle, taps, similarity, sources, timeline, bounce });
+  Object.assign(state, { results, kettle, taps, similarity, sources, timeline, bounce, manifest });
 
   const loaded = await Promise.all(CLIP_NAMES.map((n) =>
     fetch(`assets/data/${n}.json`).then((r) => r.json())
@@ -63,7 +65,9 @@ async function boot() {
   buildMiniClips();
   buildDock();
   buildRecognition();
+  buildCause();
   buildPhysics();
+  buildRegime();
   buildCodec();
   buildTaps();
   buildSimilarity();
@@ -72,6 +76,7 @@ async function boot() {
   buildBounce();
   buildF2();
   buildMemory();
+  buildHomeSlice();
   buildKettleQuestions();
   buildPrediction();
   buildCremad();
@@ -128,16 +133,21 @@ function wireKeys() {
 /* ---------------------------------------------------------------- audio core */
 let audio, heroBase, deskBase;
 
-function buildHero() {
+function redrawHeroWave() {
   const cv = $("#heroWave");
   drawWave(cv, state.kettle.peaks, "#6fbfa8", "#171614", "rgba(241,234,220,.10)");
   heroBase = snapshot(cv);
+}
+
+function buildHero() {
+  redrawHeroWave();
   $("#heroPlay").addEventListener("click", () => { togglePlay(); });
   $("#heroReveal").addEventListener("click", revealHero);
+  $("#heroWave").addEventListener("click", (e) => seekOn($("#heroWave"), e));
   addEventListener("scroll", debounce(() => {
     if ($("#heroListen").getBoundingClientRect().bottom > 0) {
-      drawWave(cv, state.kettle.peaks, "#6fbfa8", "#171614", "rgba(241,234,220,.10)");
-      heroBase = snapshot(cv); progressWaves();
+      redrawHeroWave();
+      progressWaves();
     }
   }, 200));
 }
@@ -154,6 +164,7 @@ function buildDesk() {
   audio = new Audio("assets/audio/kettle.mp3");
   audio.preload = "metadata";
   audio.addEventListener("timeupdate", syncAll);
+  audio.addEventListener("seeked", syncAll);
   audio.addEventListener("play", () => setPlaying(true));
   audio.addEventListener("pause", () => setPlaying(false));
   audio.addEventListener("ended", () => setPlaying(false));
@@ -167,7 +178,9 @@ function buildDesk() {
 
   drawDesk();
   addEventListener("resize", debounce(() => {
-    drawDesk(); progressWaves();
+    redrawHeroWave();
+    drawDesk();
+    progressWaves();
   }, 150));
 }
 
@@ -203,19 +216,21 @@ function togglePlay() {
 }
 
 function setPlaying(on) {
-  $$("#playBtn, #heroPlay").forEach((b) => {
+  $$("#playBtn, #heroPlay, #dockPlay").forEach((b) => {
     b.classList.toggle("playing", on);
     const label = b.querySelector("span:last-child");
-    if (label) label.textContent = on ? "Pause" : "Play";
+    if (label && (b.id === "playBtn" || b.id === "heroPlay")) label.textContent = on ? "Pause" : "Play";
   });
 }
 
-function seekMain(e) {
-  const r = $("#wave").getBoundingClientRect();
+function seekOn(canvas, e) {
+  const r = canvas.getBoundingClientRect();
   const f = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
-  audio.currentTime = f * (audio.duration || state.kettle.duration);
+  audio.currentTime = f * (audio.duration || clip().duration || state.kettle.duration);
   syncAll();
 }
+
+function seekMain(e) { seekOn($("#wave"), e); }
 
 function hoverMain(e) {
   const r = $("#wave").getBoundingClientRect();
@@ -228,10 +243,13 @@ function hoverMain(e) {
 function syncAll() {
   const d = audio.duration || clip().duration;
   const t = audio.currentTime || 0;
-  const f = Math.min(1, t / d);
+  const f = d > 0 ? Math.min(1, t / d) : 0;
   $("#playhead").style.left = `${f * 100}%`;
   $("#dockProgress").style.width = `${f * 100}%`;
-  $("#dockTime").textContent = `${clock(t)} / ${clock(d)}`;
+  const stamp = `${clock(t)} / ${clock(d)}`;
+  $("#dockTime").textContent = stamp;
+  const heroTime = $("#heroTime");
+  if (heroTime) heroTime.textContent = stamp;
   const active = clip().events.filter((e) => t >= e.start && t <= e.end);
   const label = active.length ? [...new Set(active.map((e) => e.text || e.label))].join(" · ") : "—";
   $("#nowEvent").textContent = label;
@@ -241,19 +259,42 @@ function syncAll() {
   progressWaves(f);
 }
 
-function progressWaves(f = Math.min(1, (audio.currentTime || 0) / (audio.duration || clip().duration))) {
-  ["#heroWave", "#wave"].forEach((sel) => {
-    const cv = $(sel);
-    if (!cv) return;
-    const base = sel === "#heroWave" ? heroBase : deskBase;
-    const g = cv.getContext("2d");
-    const dpr = window.devicePixelRatio || 1;
-    if (base) g.drawImage(base, 0, 0, cv.width / dpr, cv.height / dpr);
-    if (f > 0) {
-      g.save(); g.beginPath(); g.rect(0, 0, (cv.width / dpr) * f, cv.height / dpr); g.clip();
-      g.fillStyle = "#f3a27f"; g.fillRect(0, 0, (cv.width / dpr) * f, cv.height / dpr); g.restore();
-    }
-  });
+function progressWaves(f) {
+  if (!audio) return;
+  const d = audio.duration || clip().duration || 0;
+  const played = f == null ? (d > 0 ? Math.min(1, (audio.currentTime || 0) / d) : 0) : f;
+  paintPlayed($("#heroWave"), heroBase, state.kettle.peaks, played);
+  paintPlayed($("#wave"), deskBase, clip().peaks, played);
+}
+
+/* Recolor peaks in the played region. A full-height fill would hide the wave. */
+function paintPlayed(cv, base, peaks, f) {
+  if (!cv || !base || !peaks) return;
+  const dpr = window.devicePixelRatio || 1;
+  const w = cv.width / dpr;
+  const h = cv.height / dpr;
+  const g = cv.getContext("2d");
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.drawImage(base, 0, 0, w, h);
+  if (!(f > 0)) return;
+  const playedW = w * Math.min(1, f);
+  g.save();
+  g.beginPath();
+  g.rect(0, 0, playedW, h);
+  g.clip();
+  const n = peaks.hi.length;
+  const mid = h / 2;
+  const amp = h * 0.44;
+  const barW = Math.max(1, w / n);
+  g.fillStyle = "#f3a27f";
+  for (let i = 0; i < n; i++) {
+    const x = (i / n) * w;
+    if (x > playedW) break;
+    const y1 = mid + (peaks.lo[i] / 127) * amp;
+    const y2 = mid + (peaks.hi[i] / 127) * amp;
+    g.fillRect(x, Math.min(y1, y2), barW, Math.max(1, Math.abs(y2 - y1)));
+  }
+  g.restore();
 }
 
 function drawWave(cv, peaks, color, bg, midline = "rgba(241,234,220,.12)") {
@@ -372,11 +413,7 @@ function buildMiniClips() {
 function buildDock() {
   drawWave($("#dockWave"), state.kettle.peaks, "#6fbfa8", "#171614");
   $("#dockPlay").addEventListener("click", togglePlay);
-  $("#dockWave").addEventListener("click", (e) => {
-    const r = $("#dockWave").getBoundingClientRect();
-    const f = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
-    audio.currentTime = f * (audio.duration || state.kettle.duration); syncAll();
-  });
+  $("#dockWave").addEventListener("click", (e) => seekOn($("#dockWave"), e));
   const io = new IntersectionObserver(([e]) => {
     $("#dock").classList.toggle("on", !e.isIntersecting && e.boundingClientRect.top < 0);
   }, { threshold: 0 });
@@ -422,6 +459,51 @@ function buildRecognition() {
   $("#tagTimeline").innerHTML = svgWrap(w, h, b, "Human states versus ear labels");
 }
 
+/* Play a few seconds, then reveal the human name. The ear label is already in the file. */
+let causeAudio;
+let causeToken = 0;
+function buildCause() {
+  causeAudio = new Audio();
+  const names = ["kettle", "pour", "cup_spoon"];
+  const frame = $("#causeFrame");
+  if (!frame) return;
+  frame.innerHTML = names.map((name) => {
+    const c = state.clips[name];
+    const ear = c.events[0];
+    const heard = ear ? `${ear.text} · ${ear.p.toFixed(2)}` : "—";
+    return `<div class="cause" data-cause="${name}">
+      <button type="button" class="mini-play" data-cause-play="${name}"><span class="play-icon"></span> play 3 s</button>
+      <span class="ear">${esc(heard)}</span>
+      <span class="human">${esc(c.label)}</span>
+      <button type="button" class="reveal" data-cause-reveal>reveal</button>
+    </div>`;
+  }).join("");
+  $$("[data-cause-play]", frame).forEach((b) => b.addEventListener("click", () => playCause(b.dataset.causePlay)));
+  $$("[data-cause-reveal]", frame).forEach((b) => b.addEventListener("click", () => {
+    const row = b.closest(".cause");
+    const on = row.classList.toggle("revealed");
+    b.textContent = on ? "hide" : "reveal";
+  }));
+}
+
+function playCause(name) {
+  const c = state.clips[name];
+  const start = c.events[0] ? Math.max(0, c.events[0].start) : 0;
+  const token = ++causeToken;
+  causeAudio.pause();
+  causeAudio.src = `assets/audio/${name}.mp3`;
+  const go = () => {
+    if (token !== causeToken) return;
+    const dur = causeAudio.duration || c.duration;
+    causeAudio.currentTime = Math.min(start, Math.max(0, dur - 0.05));
+    causeAudio.play().catch(() => {});
+    const slice = Math.min(3, Math.max(0.3, dur - causeAudio.currentTime));
+    setTimeout(() => { if (token === causeToken) causeAudio.pause(); }, slice * 1000);
+  };
+  causeAudio.addEventListener("loadedmetadata", go, { once: true });
+  causeAudio.load();
+}
+
 /* ---------------------------------------------------------------- physics */
 function buildPhysics() {
   const cards = [
@@ -443,6 +525,20 @@ function buildPhysics() {
     drawSpec($(`[data-s="${name}"]`), state.clips[name].spec);
   });
   $$("[data-play]").forEach((b) => b.addEventListener("click", () => loadClip(b.dataset.play, true)));
+}
+
+function buildRegime() {
+  const host = $("#regimeBar");
+  if (!host) return;
+  const k = state.kettle;
+  const secs = (n) => (Math.round(n * 10) / 10).toFixed(1);
+  host.innerHTML = `<div class="regime-bar">${k.stages.map((s) => {
+    const w = ((s.end - s.start) / k.duration) * 100;
+    return `<div class="regime-seg" style="width:${w}%;background:${STAGE_COLOR[s.kind] || "#3b362d"}" title="${esc(s.label)} · ${secs(s.end - s.start)} s"></div>`;
+  }).join("")}</div>
+  <div class="regime-legend mono">${k.stages.map((s) =>
+    `<span><i style="background:${STAGE_COLOR[s.kind] || "#3b362d"}"></i>${esc(s.label)} ${secs(s.end - s.start)} s</span>`
+  ).join("")}</div>`;
 }
 
 /* ---------------------------------------------------------------- codec */
@@ -712,6 +808,42 @@ function buildMemory() {
   $("#memoryBars").innerHTML = svgWrap(w2, h2, b2, "Long-horizon memory accuracy");
 }
 
+let homeAudio;
+function buildHomeSlice() {
+  const c = state.clips.reference;
+  const host = $("#homeLanes");
+  if (!c || !host) return;
+  homeAudio = new Audio("assets/audio/reference.mp3");
+  homeAudio.preload = "metadata";
+  $("#homeLabel").textContent = c.label;
+  drawWave($("#homeWave"), c.peaks, "#7c2b26", "#fbf7ee", "rgba(27,25,22,.12)");
+  const win = state.timeline.reference_window;
+  const left = (win.start / state.timeline.duration) * 100;
+  const width = ((win.end - win.start) / state.timeline.duration) * 100;
+  $("#homePos").innerHTML = `<i style="left:${left}%;width:${width}%"></i>`;
+  const bars = (events, cls) => events.map((e) => {
+    const x = (e.start / c.duration) * 100;
+    const w = Math.max(0.4, ((Math.min(e.end, c.duration) - e.start) / c.duration) * 100);
+    return `<i class="${cls}" style="left:${x}%;width:${w}%" title="${esc(e.label)} · ${e.start.toFixed(1)}–${e.end.toFixed(1)}s"></i>`;
+  }).join("");
+  host.innerHTML = `
+    <div class="home-lane"><span class="mono">predicted</span><span class="lane-track">${bars(c.pred, "pred")}</span></div>
+    <div class="home-lane"><span class="mono">annotated</span><span class="lane-track">${bars(c.gt, "gt")}</span></div>`;
+  $("#homeMeta").textContent = `${c.label} · ${c.pred.length} predicted · ${c.gt.length} annotated · ${clock(c.duration)}`;
+  const btn = $("#homePlay");
+  const setHome = (on) => {
+    btn.classList.toggle("playing", on);
+    btn.querySelector("span:last-child").textContent = on ? "Pause" : "Play";
+  };
+  btn.addEventListener("click", () => {
+    if (homeAudio.paused) homeAudio.play().catch(() => {});
+    else homeAudio.pause();
+  });
+  homeAudio.addEventListener("play", () => setHome(true));
+  homeAudio.addEventListener("pause", () => setHome(false));
+  homeAudio.addEventListener("ended", () => setHome(false));
+}
+
 function buildKettleQuestions() {
   const qs = state.kettle.questions;
   const wrap = $("#kettleQuestions");
@@ -940,6 +1072,83 @@ function buildSources() {
     ["PhysioNet / CirCor", "closed medical line · failure ledger", "268 balanced recordings"],
   ];
   $("#dataTable").innerHTML = rows.map(([a, b, c]) => `<div class="data-row"><div><b style="font-weight:500">${a}</b><div style="font-size:11.5px;color:#6f675c">${b}</div></div><span>${c}</span></div>`).join("");
+  buildPassport();
+  buildGlossary();
+  buildLimits();
+  buildCite();
+}
+
+function buildPassport() {
+  const host = $("#kettlePassport");
+  if (!host) return;
+  const k = state.kettle;
+  const src = state.sources.find((s) => s.key === "kettle");
+  const khz = state.manifest.sr / 1000;
+  host.innerHTML = `
+    <div class="passport">
+      <canvas id="passWave" height="48" aria-label="Kettle waveform"></canvas>
+      <dl>
+        <div><dt>recording</dt><dd>${esc(src.title)}</dd></div>
+        <div><dt>author</dt><dd>${esc(src.author)}</dd></div>
+        <div><dt>licence</dt><dd>${esc(src.license)}</dd></div>
+        <div><dt>freesound</dt><dd><a href="${src.url}" target="_blank" rel="noopener">${src.freesound}</a></dd></div>
+        <div><dt>duration</dt><dd>${clock(k.duration)} · ${k.duration.toFixed(1)} s</dd></div>
+        <div><dt>rate</dt><dd>${khz} kHz</dd></div>
+        <div><dt>states</dt><dd>${k.stages.length}</dd></div>
+        <div><dt>episodes</dt><dd>${k.events.length}</dd></div>
+      </dl>
+    </div>`;
+  drawWave($("#passWave"), k.peaks, "#7c2b26", "#fbf7ee", "rgba(27,25,22,.12)");
+}
+
+function buildGlossary() {
+  const host = $("#glossaryFrame");
+  if (!host) return;
+  const k = state.kettle;
+  const mn04 = state.results.encoders.find((e) => e.id === "mn04_as");
+  const boil = k.questions.find((q) => q.type === "dur" && q.q.startsWith("How long did the kettle boil"));
+  const click = k.events[0];
+  const rows = [
+    ["RTF", `${mn04.id} · ${mn04.rtf_1c} · 1 core`],
+    ["episode", `${k.events.length} predicted on the kettle`],
+    ["onset", `${click.start.toFixed(2)}–${click.end.toFixed(2)} s · ${click.text}`],
+    ["boil", boil.answer],
+    ["NCC", `waveform · ${state.results.g1.f2_ncc}`],
+    ["G1", `n = ${state.results.g1.n}`],
+    ["HPSS", "cup · mixture / harmonic / percussive"],
+    ["actor-disjoint", `CREMA-D · n = ${state.results.cremad.n}`],
+  ];
+  host.innerHTML = rows.map(([term, ex]) => `<dt>${esc(term)}</dt><dd>${esc(ex)}</dd>`).join("");
+}
+
+function buildLimits() {
+  const host = $("#limitsFrame");
+  if (!host) return;
+  const k = state.kettle;
+  const chips = [
+    `kettle · ${clock(k.duration)}`,
+    `${state.similarity.labels.length} taps`,
+    `${state.results.encoders.length} encoders`,
+    `memory · n = ${state.results.t1.n}`,
+    `CREMA-D · n = ${state.results.cremad.n}`,
+    "fp32 · unquantized",
+  ];
+  host.innerHTML = chips.map((c) => `<span>${esc(c)}</span>`).join("");
+}
+
+function buildCite() {
+  const host = $("#citeFrame");
+  if (!host) return;
+  const src = state.sources.find((s) => s.key === "kettle");
+  const rows = [
+    ["author", "Asad Rizvi"],
+    ["title", "What a Kettle Knows"],
+    ["date", "November 2026"],
+    ["recording", `${src.author} · Freesound ${src.freesound} · ${src.license}`],
+    ["url", "—"],
+    ["commit", "—"],
+  ];
+  host.innerHTML = rows.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("");
 }
 
 function buildAllTable() {

@@ -17,7 +17,7 @@
 <header class="masthead">
   <a class="wordmark" href="#top">Asad Rizvi <span>/ research</span></a>
   <div class="masthead-right">
-    <span class="mono">wireframe · v0.2 · tea cut</span>
+    <span class="mono">wireframe · v0.3 · tea cut</span>
     <a class="mono" href="#appendix">appendix</a>
   </div>
 </header>
@@ -52,7 +52,7 @@
       </div>
       <canvas id="heroWave" height="120"></canvas>
       <div class="hero-listen-foot">
-        <span class="mono">0:00 / 1:50</span>
+        <span class="mono" id="heroTime">0:00 / 1:50</span>
         <button id="heroReveal" class="reveal-btn">reveal what it is</button>
       </div>
     </div>
@@ -156,6 +156,7 @@
       <p class="mono">the physical-grounding detour</p>
       <p class="bracket">[EPIC-SOUNDS — Audio-first, video-reveal interaction. Play a 3-second kitchen action; the reader guesses the cause; reveal the first-person frame and the action label. Link out to the dataset rather than re-hosting restricted video.]</p>
       <p class="bracket">[WHY HERE — Recognition is cheaper when you can see the cause. The rest of the essay is about what a machine can do when it cannot.]</p>
+      <div class="cause-frame" id="causeFrame"></div>
     </div>
   </section>
 
@@ -172,6 +173,7 @@
     <div class="callout card">
       <p class="mono">the one sentence to land</p>
       <p class="bracket">[CALLOUT — “A kettle is easy to hear and hard to describe: one long event with no fixed boundary, made of the same broadband noise as a hundred other machines.” This is why the next section is about representation, not detection.]</p>
+      <div class="regime" id="regimeBar"></div>
     </div>
   </section>
 
@@ -342,6 +344,21 @@
       <div id="memoryBars" class="chart"></div>
       <figcaption class="bracket">[FIGURE 6 — Overall and by question type. The kettle question is the toy version; this is the same question over a real home week. AF3 sees a 10-minute window and covers 0.911 of the timeline.]</figcaption>
     </figure>
+
+    <figure class="card home-slice">
+      <div class="chart-head">
+        <div>
+          <p class="eyebrow">same home · one window</p>
+          <h3 id="homeLabel">Kitchen window</h3>
+        </div>
+        <button id="homePlay" class="play small" type="button"><span class="play-icon"></span><span>Play</span></button>
+      </div>
+      <div class="home-pos" id="homePos" aria-hidden="true"></div>
+      <canvas id="homeWave" height="64" aria-label="Two-minute home window"></canvas>
+      <div id="homeLanes"></div>
+      <p class="mono home-meta" id="homeMeta"></p>
+      <figcaption class="bracket">[FIGURE — The two-minute window inside the home timeline. Predicted episodes on the first lane, annotated events on the second. Same schema as the kettle questions, longer recording.]</figcaption>
+    </figure>
   </section>
 
   <!-- ============================== 10 · PREDICTION ============================== -->
@@ -495,10 +512,13 @@
         <p class="eyebrow">datasets</p>
         <div id="dataTable"></div>
       </div>
-      <div class="card bracket">
+      <div class="card">
         <p class="eyebrow">method</p>
-        <p>[METHOD — Three seeds or a stated CI. Held-out sources only. One pipeline path for thresholds, calibration and test. Sealed test sets opened once, inside the runner. Name the runner and the commit.]</p>
-        <p>[COMMANDS — ./rx new → ./rx check → ./rx run → ./rx verdict. Spec ids: c01_profile, c01_g1, c01_cremad, c01_epic, glb_t1, glb_t5, words2, novel1.]</p>
+        <div id="kettlePassport"></div>
+        <div class="bracket">
+          <p>[METHOD — Three seeds or a stated CI. Held-out sources only. One pipeline path for thresholds, calibration and test. Sealed test sets opened once, inside the runner. Name the runner and the commit.]</p>
+          <p>[COMMANDS — ./rx new → ./rx check → ./rx run → ./rx verdict. Spec ids: c01_profile, c01_g1, c01_cremad, c01_epic, glb_t1, glb_t5, words2, novel1.]</p>
+        </div>
       </div>
     </div>
   </section>
@@ -516,13 +536,15 @@
     </div>
 
     <div class="two-col appendix-notes">
-      <div class="card bracket">
+      <div class="card">
         <p class="eyebrow">glossary</p>
-        <p>[GLOSSARY — RTF, episode, onset, dense F1, disc512, actor-disjoint, NCC, sealed set, G1 F1/F2/F4, HPSS, NMF.]</p>
+        <dl class="gloss" id="glossaryFrame"></dl>
+        <p class="bracket">[GLOSSARY — RTF, episode, onset, dense F1, disc512, actor-disjoint, NCC, sealed set, G1 F1/F2/F4, HPSS, NMF.]</p>
       </div>
-      <div class="card bracket">
+      <div class="card">
         <p class="eyebrow">what this post does not claim</p>
-        <p>[LIMITS — One home for the memory result. Fixed sentences for CREMA-D. EPIC kitchens only. fp32, unquantized. No phone/MCU measurement yet. The 5M frontier is task-dependent, not universal. The similarity matrices are four taps, not a benchmark.]</p>
+        <div class="scope" id="limitsFrame"></div>
+        <p class="bracket">[LIMITS — One home for the memory result. Fixed sentences for CREMA-D. EPIC kitchens only. fp32, unquantized. No phone/MCU measurement yet. The 5M frontier is task-dependent, not universal. The similarity matrices are four taps, not a benchmark.]</p>
       </div>
     </div>
   </section>
@@ -532,14 +554,25 @@
 <footer class="footer">
   <div>
     <p class="mono">cite this</p>
+    <dl class="cite" id="citeFrame"></dl>
     <p class="bracket">[CITATION BLOCK — author, title, date, URL, commit hash. BibTeX toggle.]</p>
   </div>
   <div>
     <p class="mono">thread</p>
+    <ol class="thread-frame">
+      <li><a href="#hero">blind clip</a></li>
+      <li><a href="#hero">reveal</a></li>
+      <li><a href="#s02">ear labels</a></li>
+      <li><a href="#s05">four taps</a></li>
+      <li><a href="#s09">long-horizon chart</a></li>
+      <li><a href="#s13">failure ledger</a></li>
+      <li><a href="#top">the note</a></li>
+    </ol>
     <p class="bracket">[TWITTER PLAN — 7 posts: the blind kettle clip → “you know what it is” → the ear’s wrong labels → the four taps matrix → the 0.869 vs 0.188 chart → the failure ledger → link. One asset per post.]</p>
   </div>
   <div>
     <p class="mono">next note</p>
+    <p><a href="#s14">Phase 3A · hybrid ear</a></p>
     <p class="bracket">[NEXT POST — Phase 3A hybrid result, or “how the G1 battery was thrown away and rebuilt”.]</p>
   </div>
 </footer>
