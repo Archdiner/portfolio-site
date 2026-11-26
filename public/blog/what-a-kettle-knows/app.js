@@ -48,6 +48,8 @@ async function boot() {
   buildCost();
   buildTables();
   wireProgress();
+  const plan = $("#plan");
+  new IntersectionObserver((es, io) => { if (es[0].isIntersecting) { plan.classList.add("go"); io.disconnect(); } }, { threshold: 0.4 }).observe(plan);
   addEventListener("resize", debounce(redrawAll, 150));
 }
 
@@ -510,17 +512,21 @@ function buildDiary() {
 
 /* ------------------------------------------------------------------ memory */
 function buildMemory() {
+  memoryChart("#memoryChartA", ["af3", "const"], "A week in one home: just ask a big model");
+  memoryChart("#memoryChart", ["ours", "af3", "const"], "The same questions, answered from the diary");
+}
+function memoryChart(target, keys, title) {
   const T = S.results.t1;
   const groups = [
     ["When did it happen?", T.by_type.at], ["How long did it last?", T.by_type.dur], ["How long since it last happened?", T.by_type.since],
     ["How long ago was it?", T.by_type.ago], ["How many times?", T.by_type.count], ["All 298 questions", { ours: T.ours, af3: T.af3, const: T.const, n: T.n }, true],
   ];
-  const series = [["ours", "The diary", C.teal], ["af3", "Audio Flamingo 3", C.blood], ["const", "Same answer each time", "#c9bca4"]];
+  const series = [["ours", "The diary", C.teal], ["af3", "Audio Flamingo 3", C.blood], ["const", "Same answer each time", "#c9bca4"]].filter(([k]) => keys.includes(k));
   const W = 640, labelW = 226, bh = 11, gap = 3, gh = series.length * (bh + gap) + 16, top = 34, H = top + groups.length * gh + 4;
   const X = (v) => labelW + v * (W - labelW - 46);
   let b = "";
   series.forEach(([, l, c], i) => {
-    const x = labelW + [0, 100, 236][i];
+    const x = labelW + (series.length === 3 ? [0, 100, 236] : [0, 136])[i];
     b += `<rect x="${x}" y="6" width="11" height="11" rx="2" fill="${c}"/><text x="${x + 17}" y="15.5" font-size="12" fill="${C.muted}">${l}</text>`;
   });
   groups.forEach(([label, d, strong], gi) => {
@@ -534,7 +540,7 @@ function buildMemory() {
       b += `<text x="${X(d[k]) + 5}" y="${yy + 9.5}" font-size="11" font-family="IBM Plex Mono" fill="${C.ink}">${d[k].toFixed(2)}</text>`;
     });
   });
-  $("#memoryChart").innerHTML = `<div class="chart"><p class="chart-title">A week in one home: questions about days 4 to 7</p>${svg(W, H, b, "Memory question scores")}</div>`;
+  $(target).innerHTML = `<div class="chart"><p class="chart-title">${title}</p>${svg(W, H, b, title)}</div>`;
 }
 
 /* ------------------------------------------------------------------ cost */
