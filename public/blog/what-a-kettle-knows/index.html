@@ -188,7 +188,7 @@
     <div class="tq">Does it learn at all?</div>
     <div class="tb"><span class="tn">no</span><div class="tl gold">The recipe<small>70 hand-picked measurements</small></div></div>
     <div class="tq">Does it get labels?</div>
-    <div class="tb"><span class="tn">yes</span><div class="tl blood">AudioSet taggers<small>two million labeled YouTube clips</small></div></div>
+    <div class="tb"><span class="tn">yes</span><div class="tl blood">AudioSet taggers<small>two million labelled YouTube clips</small></div></div>
     <div class="tq">No labels. So what does it predict about the patches it can't see?</div>
     <div class="tb four">
       <div class="tl teal">the pixels<small>Dasheng</small></div>
@@ -204,7 +204,7 @@
   <p>You only need to remember three of these. <b>EAT</b>, which learned by matching a slowly updated copy of itself, is the one I'll teach to name sounds. <b>Dasheng</b>, which learned by redrawing hidden patches, and <b>USAD</b>, which learned by copying two expert models, turn out to hear repeats best. (How each one learns, and why it matters, is the subject of the <a href="learning-to-hear/">next post</a>.)</p>
 
   <h2>Teaching it fifteen words</h2>
-  <p>None of these models outputs a name out of the box, and a name is the first thing a home listener needs. To get names, you <em>fine-tune</em>: add a small layer on top that turns the model's view of each moment into labels, then keep training on labeled examples. I did this with EAT, on RealDESED, a set of real home recordings labeled with fifteen everyday sounds: footsteps, dishes, doors, a light switch, a vacuum, a coffee machine and the rest. It took under an hour on one rented GPU.</p>
+  <p>None of these models outputs a name out of the box, and a name is the first thing a home listener needs. To get names, you <em>fine-tune</em>: add a small layer on top that turns the model's view of each moment into labels, then keep training on labelled examples. I did this with EAT, on RealDESED, a set of real home recordings labelled with fifteen everyday sounds: footsteps, dishes, doors, a light switch, a vacuum, a coffee machine and the rest. It took under an hour on one rented GPU.</p>
   <p>On recordings it hadn't trained on, it gets about nine in ten right. That score is per ten-second window, asking only whether each sound happened at all, not exactly when, which will matter in a moment. I'll call the result the Ear. Here's everything it reported while listening to our kettle:</p>
 </section>
 
@@ -371,7 +371,7 @@
 
 how_long(kettle_diary, "boiling")   # 86.3 seconds</pre>
   <p> Writing things down turned out to be only half of it. The other half was doing the arithmetic properly.</p>
-  <p>Treat this as a demonstration rather than a benchmark. It's one home, and the diary's vocabulary was set up for that home's activities, which Audio Flamingo didn't get. The whole system runs on an ordinary laptop processor, using about 7% of one core to keep up with a home around the clock. Plenty didn't work along the way, including a test where I'd swapped "added" and "removed", and a result that turned out to be a home memorizing itself. The full list is in the appendix.</p>
+  <p>Treat this as a demonstration rather than a benchmark. It's one home, and the diary's vocabulary was set up for that home's activities, which Audio Flamingo didn't get. The whole system runs on an ordinary laptop processor, using about 7% of one core to keep up with a home around the clock. Plenty didn't work along the way, including a test where I'd swapped "added" and "removed", and a result that turned out to be a home memorising itself. The full list is in the appendix.</p>
 
   <h2>Back to the kettle</h2>
   <p>Let's play it one last time, and this time watch the diary:</p>
@@ -407,7 +407,7 @@ how_long(kettle_diary, "boiling")   # 86.3 seconds</pre>
     <li id="fn3">My original test kept each recording's full sequence of moments; only the two-second example was averaged into one summary. Peaks had to be at least 1.5 seconds apart, and the threshold was chosen on the first 50 items and scored on the last 50. <a href="#r3">↩</a></li>
     <li id="fn4">The re-creation uses 22 seconds of the kettle's boil with a hard mug tap added six times, about twice as loud as the boil's peaks. The example is the two seconds from 1.0 to 3.0, around the first tap. "Stands well clear" means more than 2.5 robust standard deviations from the curve's median. The models are EAT, Dasheng and USAD2-Small run on CPU, and the script is build/real_models.py. <a href="#r4">↩</a></li>
     <li id="fn5">The rebuilt test has 120 items, each 20 seconds of the kettle's boil with one short sound (a mug, glass or metal tap, a ball bounce, or a spoon clink) repeated 2 to 8 times, at least 1.5 seconds apart and at varying loudness. As in the original, the example is two seconds around the first event and repeats must be 1.5 seconds apart. Each rule's threshold is tuned on the first 60 items and scored on the other 60. "Position removed" subtracts the average output at each of the 64 (EAT) or 250 (Dasheng) positions in a stretch. The script is build/repeats_bench.py. <a href="#r5">↩</a></li>
-    <li id="fn6">SINS, a public dataset recorded continuously in one home for a week, with daily activities like cooking, washing up and vacuuming labeled. The questions cover days four to seven. <a href="#r6">↩</a></li>
+    <li id="fn6">SINS, a public dataset recorded continuously in one home for a week, with daily activities like cooking, washing up and vacuuming labelled. The questions cover days four to seven. <a href="#r6">↩</a></li>
     <li id="fn7">The smoothing is a Viterbi pass. Given second-by-second guesses about whether something is on, it finds the most likely sequence of on and off stretches, so a single noisy second can't split one boil into two. <a href="#r7">↩</a></li>
   </ol>
 </section>
@@ -457,7 +457,7 @@ how_long(kettle_diary, "boiling")   # 86.3 seconds</pre>
   <details>
     <summary>Every listener, every number</summary>
     <div class="table-scroll"><table id="allTable"></table></div>
-    <p class="small">Speed is the share of real time one CPU core needs (fp32, not quantized). "Notice", "count" and "describe the change" are F1, F2 and F4 on my test battery (125 change clips, 100 counting clips scored on the last 50, and 120 property clips); shuffled controls score 0.192, 0.130 and 0.467. "Voice emotion" is CREMA-D accuracy on 1,066 test clips with the actors held out (chance 0.167). "Kitchen" is the frame-level score on EPIC-SOUNDS, 21 classes.</p>
+    <p class="small">Speed is the share of real time one CPU core needs (fp32, not quantised). "Notice", "count" and "describe the change" are F1, F2 and F4 on my test battery (125 change clips, 100 counting clips scored on the last 50, and 120 property clips); shuffled controls score 0.192, 0.130 and 0.467. "Voice emotion" is CREMA-D accuracy on 1,066 test clips with the actors held out (chance 0.167). "Kitchen" is the frame-level score on EPIC-SOUNDS, 21 classes.</p>
   </details>
   <details>
     <summary>What failed, in full</summary>
@@ -465,9 +465,9 @@ how_long(kettle_diary, "boiling")   # 86.3 seconds</pre>
     <p class="small">"Void" means the test didn't measure what it was meant to (the same-home run used a home that wasn't held out). "Inconclusive" means the comparison didn't finish.</p>
   </details>
   <details>
-    <summary>Recordings and licenses</summary>
+    <summary>Recordings and licences</summary>
     <div class="table-scroll"><table id="srcTable"></table></div>
-    <p class="small">All recordings are from Freesound, transcoded to 16 kHz mono. The glass clink is CC BY 4.0 (KVV_Audio); everything else is CC0. The kettle's four states were picked out automatically from the recording's loudness envelope and checked against its description. The bouncing ball is synthesized.</p>
+    <p class="small">All recordings are from Freesound, transcoded to 16 kHz mono. The glass clink is CC BY 4.0 (KVV_Audio); everything else is CC0. The kettle's four states were picked out automatically from the recording's loudness envelope and checked against its description. The bouncing ball is synthesised.</p>
   </details>
   <details>
     <summary>Method</summary>

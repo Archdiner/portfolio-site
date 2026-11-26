@@ -579,7 +579,7 @@ function buildCost() {
 /* ------------------------------------------------------------------ appendix */
 const FAILURES = [
   ["Synthetic listening drills (RL)", "fail", "drills 0.565 → 0.709; STAR-Bench flat or worse", "Gains on the drills only."],
-  ["Same-home self-supervised training", "void", "0.746 → 0.783 on the same home", "That home wasn't held out, so it isn't generalization."],
+  ["Same-home self-supervised training", "void", "0.746 → 0.783 on the same home", "That home wasn't held out, so it isn't generalisation."],
   ["Heart-murmur recipe transfer", "inconclusive", "murmur 0.95–0.96, lung 0.885, valve 0.395", "The domain shift broke every method."],
   ["Heads for short kitchen events", "fail", "0.179–0.213 vs linear 0.228", "Limited by data from five kitchens."],
   ["Dasheng on short kitchen events", "fail", "0.388 vs BEATs 0.438", "Self-supervision didn't rescue a small label set."],
@@ -598,7 +598,7 @@ function buildTables() {
     E.map((e) => `<tr><td>${ENC[e.id][0]}</td><td><code>${e.id}</code></td>${cols.map(([k, , d]) => `<td class="n ${e[k] === best[k] ? "best" : ""}">${e[k].toFixed(d)}</td>`).join("")}</tr>`).join("")}</tbody>`;
   if ($("#failTable")) $("#failTable").innerHTML = `<thead><tr><th>idea</th><th>verdict</th><th>number</th><th>note</th></tr></thead><tbody>${
     FAILURES.map((r) => `<tr>${r.map((c) => `<td>${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody>`;
-  $("#srcTable").innerHTML = `<thead><tr><th>recording</th><th>author</th><th>license</th></tr></thead><tbody>${
+  $("#srcTable").innerHTML = `<thead><tr><th>recording</th><th>author</th><th>licence</th></tr></thead><tbody>${
     S.sources.map((s) => `<tr><td><a href="${s.url}">${esc(s.title)}</a></td><td>${esc(s.author)}</td><td>${esc(s.license)}</td></tr>`).join("")}</tbody>`;
 }
 
@@ -643,8 +643,8 @@ const PATCH_NOTES = {
   cut: "Cut into a grid. Each square gets flattened into a list of numbers and becomes one token, like a word in a sentence.",
   hide: "Now hide three quarters of them. Training is a guessing game about the hidden squares. Pick what the model has to guess:",
   redraw: "Dasheng redraws each hidden patch from the ones it can see. Here they're filled with a blurred copy of the real patch, which is roughly what an early, half-trained model manages.",
-  code: "BEATs only has to name each hidden patch: which entry in a codebook it is. Patches that look alike share a code, shown by color and number.",
-  teacher: "EAT has to match a teacher: a slowly updated copy of itself that sees every patch. Its target is the teacher's summary of each patch (shown as a single color) and of the whole clip (the bar underneath).",
+  code: "BEATs only has to name each hidden patch: which entry in a codebook it is. Patches that look alike share a code, shown by colour and number.",
+  teacher: "EAT has to match a teacher: a slowly updated copy of itself that sees every patch. Its target is the teacher's summary of each patch (shown as a single colour) and of the whole clip (the bar underneath).",
 };
 function drawPatches() {
   const d = PT.data, cv = $("#patchCanvas");
