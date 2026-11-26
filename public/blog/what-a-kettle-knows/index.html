@@ -296,6 +296,26 @@
 <section class="col">
   <p>With labels, the five sounds pull cleanly apart, because that's exactly what the network was asked to do. It ends up with five tidy islands and no opinion about how the islands relate.</p>
   <p>Without labels, the network arranges the sounds by how they sound. Pouring ends up off on its own, because nothing else here sounds like it. Stirring and the spoon tapping a cup end up overlapping, which is fair, since both are a spoon hitting china. And the crackly heating phase lands partly with the boil and partly with the clinks. Nobody told it any of that. It found the structure that helped it redraw the missing patches.</p>
+  <p>Does the same thing happen in real models? I ran three of the big self-taught ones, EAT, Dasheng and USAD, on exactly the same five kinds of sound. (BEATs wasn't available in a form I could run here.) For comparison, there's also the raw spectrogram with no model at all:</p>
+</section>
+
+<figure class="wide">
+  <div class="card" id="realMaps">
+    <div class="tabs" id="realTabs" role="tablist">
+      <button class="tab on" data-m="spectrogram">raw spectrogram</button>
+      <button class="tab" data-m="EAT">EAT</button>
+      <button class="tab" data-m="Dasheng">Dasheng</button>
+      <button class="tab" data-m="USAD">USAD</button>
+    </div>
+    <canvas id="realCanvas" height="280" aria-label="Sound windows arranged by a real model"></canvas>
+    <p class="patch-note" id="realNote"></p>
+    <div class="tiny-legend" id="realLegend"></div>
+  </div>
+  <figcaption>Real pretrained models, run on this post's recordings. Each dot is half a second of sound, coloured by what it really is. None of these models was ever told the labels. The plot shows the two directions along which the dots differ most, so some separation is hidden. The percentage is measured in the model's full space: how often a window is closest to the average of its own kind.</figcaption>
+</figure>
+
+<section class="col">
+  <p>Even the raw spectrogram sorts the windows somewhat (76%), because pouring and boiling really do look different. Each learned model does better, with EAT at 90%, USAD at 91% and Dasheng at 96%, and none of them was ever told what these sounds are. Their pictures also differ, though: each one decided different directions were the important ones. That's the training goal showing through.</p>
   <p>The big models do the same thing at a vastly larger scale, and you can see the effect in what they think sounds alike. Here's a small test, so play the four taps first:</p>
 </section>
 
@@ -409,7 +429,49 @@
 
 <section class="col">
   <p>Noticing a change is fine: EAT scores 0.78 and the recipe 0.74. Finding repeats is a wipeout. Waveform matching gets 0.94, and no model gets above 0.14, which is barely better than luck.</p>
-  <p>The recording still had its time steps, so time wasn't thrown away.<sup><a href="#fn4" id="r4">4</a></sup> What failed was matching one averaged example against those frames. I don't know why yet. My best guess is that a transformer mixes information from the whole clip into every frame, so the frame where the ball lands doesn't stand out from its neighbours the way it does in the raw waveform. Bigger didn't help either: the 90-million-parameter models did no better than the one with a million.</p>
+  <p>The recording still had its time steps, so time wasn't thrown away.<sup><a href="#fn4" id="r4">4</a></sup> Bigger didn't help either: the 90-million-parameter models did no better than the one with a million. So why did they fail?</p>
+  <p>With the real models running, I could finally look. I made a small re-creation of the test: a mug tapped six times over twenty seconds of our kettle boiling. A two-second example around the first tap gets averaged into a single vector, as in the test, and then slid along each model's frames:</p>
+</section>
+
+<figure class="wide">
+  <div class="card" id="repeats">
+    <div class="player-top">
+      <button class="play" id="repPlay" aria-label="Play the re-created test"><span class="play-icon"></span></button>
+      <span class="mono dim">a mug tapped six times over a boiling kettle · 22 s</span>
+    </div>
+    <div class="tabs" id="repMode" role="tablist">
+      <button class="tab on" data-mode="peaks">count the peaks (what the test did)</button>
+      <button class="tab" data-mode="dips">count the dips</button>
+    </div>
+    <div id="repRows"></div>
+  </div>
+  <figcaption>Each row is one listener's match between the two-second example (shaded) and every moment of the recording. The marks along the top are where the taps really are. Counts use the same rule as the full test: marks at least 1.5 seconds apart that stand well clear of the rest of the curve.<sup><a href="#fn5" id="r5">5</a></sup></figcaption>
+</figure>
+
+<section class="col">
+  <p>Look at where the taps are. In every model's curve they're <em>dips</em>, not peaks. The two-second example is mostly boil with a fraction of a second of tap in it, so its average looks like boil, and the moments that match it least are the taps. Counting peaks, every model finds nothing. Switch to counting dips, and USAD finds all six taps and nothing else, and Dasheng finds all six plus two false alarms. EAT finds three dips and none of them is a tap. They sit at the start of each of its ten-second windows, for a reason the next figure shows.</p>
+  <p>In this re-creation, at least, the models heard the taps perfectly well, and the peak-counting was looking the wrong way. I haven't rerun the full 345-clip test with dips yet, so I can't say this explains all of the failure, but it's the first thing I'd check.</p>
+  <p>The waveform shows the opposite problem. It nails the clean bouncing ball, but with a kettle boiling underneath, the later taps barely match the first one, because the noise on top of each is different. It finds seven peaks, and only two of them are taps, one being the tap it was copied from.</p>
+  <p>EAT's poor showing has a second cause, which you can see if you compare every moment of the kettle with every other moment:</p>
+</section>
+
+<figure class="wide">
+  <div class="card" id="selfSim">
+    <div class="tabs" id="simModelTabs" role="tablist">
+      <button class="tab on" data-m="spectrogram">raw spectrogram</button>
+      <button class="tab" data-m="EAT">EAT</button>
+      <button class="tab" data-m="Dasheng">Dasheng</button>
+      <button class="tab" data-m="USAD">USAD</button>
+    </div>
+    <div class="selfsim-wrap"><canvas id="selfCanvas" height="340" aria-label="Every moment of the kettle compared with every other moment"></canvas></div>
+    <p class="patch-note" id="selfNote"></p>
+  </div>
+  <figcaption>The whole 1:50 of the kettle, compared with itself. Both axes are time, from the start at the top left. Each point compares two moments, and brighter means the model thinks they sound more alike.</figcaption>
+</figure>
+
+<section class="col">
+  <p>The spectrogram's map follows the sound itself: after the click, one big block while the boil is loudest, then a second block once the roar dulls and the kettle switches off. EAT and Dasheng show a grid instead. I fed them the recording ten seconds at a time, and their frames turn out to remember where they sit inside each ten-second window. During the steady boil, two EAT frames from the same spot in different windows are 0.98 alike, against 0.89 for frames half a window apart. For Dasheng it's 0.77 against 0.54.</p>
+  <p>That's a side effect of how transformers work. Each patch is told its position so the model can keep track of order, and some of that position survives all the way to the output. For classifying a clip it barely matters, but for matching a sample against a long recording it's noise. EAT also produces only about six frames a second, which is coarse for a tap. USAD, fed thirty seconds at a time, shows a much weaker version (0.91 against 0.88). Its big blocks are the thirty-second windows themselves.</p>
 
   <h2>What about a bigger model?</h2>
   <p>At this point you might reasonably ask why I'm fiddling with listeners like these at all. There are now large audio-language models that you can hand a recording and question in plain English. They're built like this:</p>
@@ -426,7 +488,7 @@
 </figure>
 
 <section class="col">
-  <p>So I tried one, Audio Flamingo 3, on a much harder version of the kettle question: a week of audio recorded continuously in one person's home,<sup><a href="#fn5" id="r5">5</a></sup> with 298 questions like whether the vacuum was on at a given moment, since when, for how long, and how many times. Each question came with ten minutes of audio.</p>
+  <p>So I tried one, Audio Flamingo 3, on a much harder version of the kettle question: a week of audio recorded continuously in one person's home,<sup><a href="#fn6" id="r6">6</a></sup> with 298 questions like whether the vacuum was on at a given moment, since when, for how long, and how many times. Each question came with ten minutes of audio.</p>
   <p>It mostly answered "none". Overall it scored 0.19, below the 0.26 you get from a baseline that ignores the audio and always gives the most common answer. Some of that was my prompt and my scoring, so I wouldn't read much into the exact number. But it shows something about the design: the language model only sees what the encoder hands it, and nothing in either half was trained to keep time across ten minutes.</p>
 
   <h2>Knowing when to listen</h2>
@@ -435,7 +497,7 @@
   <p>A common explanation is that the end of an online video is often quiet, and the subtitles over that quiet often say exactly this, so to Whisper an empty room sounds like the end of a video. Putting a small voice-activity detector in front of it, so that Whisper only hears the parts where someone is actually talking, made the invented words disappear. With speech mixed into the home's background noise, the word error rate fell from 25% to 4%. Whisper itself didn't change at all.</p>
 
   <h2>Keeping a diary</h2>
-  <p>Which brings us back to the questions about time. The approach I ended up with doesn't ask a model to remember audio at all. A listener writes a diary instead: every time something changes, it notes what turned on or off, and when, and it smooths over the flicker so that one long boil becomes one entry rather than thirty.<sup><a href="#fn6" id="r6">6</a></sup></p>
+  <p>Which brings us back to the questions about time. The approach I ended up with doesn't ask a model to remember audio at all. A listener writes a diary instead: every time something changes, it notes what turned on or off, and when, and it smooths over the flicker so that one long boil becomes one entry rather than thirty.<sup><a href="#fn7" id="r7">7</a></sup></p>
   <p>This isn't a new idea, and I didn't come up with it. In video, Socratic Models (2022) turned first-person footage into a running text log and answered questions by reading it, and a 2026 paper does the same with long audio recordings. (Links are in the further reading.) Once the diary exists, questions about time become arithmetic on a list. Ask the kettle's diary something:</p>
 </section>
 
@@ -498,8 +560,10 @@
     <li id="fn2">It's called harmonic–percussive source separation (HPSS). Learned versions exist, but HPSS is cheap, needs no training data, and is easy to hear. <a href="#r2">↩</a></li>
     <li id="fn3">Real audio transformers typically use 16 × 16 patches on spectrograms with 128 pitch bands and 10 ms time steps, so each patch covers about a sixth of a second. The patches in the figure are much bigger so they're visible. <a href="#r3">↩</a></li>
     <li id="fn4">Inside BEATs and EAT, the patches at each moment are averaged across pitch, but the sequence over time is kept. The two-second example is the only part that gets averaged into a single vector. Peaks had to be at least 1.5 seconds apart, and the threshold was chosen on the first 50 items and scored on the last 50. <a href="#r4">↩</a></li>
-    <li id="fn5">SINS, a public dataset recorded continuously in one home for a week, with daily activities like cooking, washing up and vacuuming labelled. The questions cover days four to seven. <a href="#r5">↩</a></li>
-    <li id="fn6">The smoothing is a Viterbi pass. Given second-by-second guesses about whether something is on, it finds the most likely sequence of on and off stretches, so a single noisy second can't split one boil into two. <a href="#r6">↩</a></li>
+
+    <li id="fn5">The re-creation uses 22 seconds of the kettle's boil with a hard mug tap added six times, about twice as loud as the boil's peaks. The example is the two seconds from 1.0 to 3.0, around the first tap. "Stands well clear" means more than 2.5 robust standard deviations from the curve's median. The models are EAT, Dasheng and USAD2-Small run on CPU, and the script is in the post's folder. <a href="#r5">↩</a></li>
+    <li id="fn6">SINS, a public dataset recorded continuously in one home for a week, with daily activities like cooking, washing up and vacuuming labelled. The questions cover days four to seven. <a href="#r6">↩</a></li>
+    <li id="fn7">The smoothing is a Viterbi pass. Given second-by-second guesses about whether something is on, it finds the most likely sequence of on and off stretches, so a single noisy second can't split one boil into two. <a href="#r7">↩</a></li>
   </ol>
 </section>
 
@@ -557,7 +621,7 @@
   </details>
   <details>
     <summary>Method</summary>
-    <p class="small">Three seeds, or a confidence interval reported with the number. Sources in the test set are held out from training. Thresholds, calibration and the test pass go through one code path, and sealed test sets are opened once, inside the runner, not while exploring. The SINS memory result is one home; the cost numbers are one core in fp32, not a phone. Audio Flamingo 3 was run on an A100 on the same 298 items.</p>
+    <p class="small">Three seeds, or a confidence interval reported with the number. Sources in the test set are held out from training. Thresholds, calibration and the test pass go through one code path, and sealed test sets are opened once, inside the runner, not while exploring. The SINS memory result is one home; the cost numbers are one core in fp32, not a phone. Audio Flamingo 3 was run on an A100 on the same 298 items. The real-model figures (the five sound types, the repeat re-creation and the self-comparison maps) use the public checkpoints worstchan/EAT-base_epoch30_pretrain, mispeech/dasheng-base and MIT-SLS/USAD2-Small, run on a CPU with build/real_models.py. The tiny-model animation is build/tiny.py.</p>
   </details>
 </section>
 

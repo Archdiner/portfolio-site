@@ -278,3 +278,10 @@ blockquote{margin:0 0 1.05em;padding:4px 0 4px 18px;border-left:3px solid var(--
   .alm{grid-template-columns:1fr}
   .alm-arrow{transform:rotate(90deg);justify-self:start;margin-left:8px}
 }
+
+.rep-row{margin-top:10px}
+.rep-head{display:flex;justify-content:space-between;align-items:baseline;font:500 13px var(--sans);color:var(--ink);margin-bottom:4px}
+.rep-head .mono{text-transform:none;letter-spacing:.02em;color:var(--muted)}
+.rep-row canvas{border-radius:4px}
+.selfsim-wrap{display:flex;justify-content:center}
+#selfCanvas{border-radius:4px}

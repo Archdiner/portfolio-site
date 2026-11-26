@@ -48,6 +48,7 @@ async function boot() {
   buildTiny();
   buildFlip();
   buildCurve();
+  buildReal();
   buildDiary();
   if ($("#memoryChart")) buildMemory();
   if ($("#costChart")) buildCost();
@@ -604,7 +605,7 @@ function wireProgress() {
   addEventListener("scroll", on, { passive: true }); on();
 }
 function redrawAll() {
-  drawBlind(); drawKettleViews(); drawZoom(); syncSwitchers(); drawTaps(); drawBounce(); drawProbe(); drawPatches(); drawTiny();
+  drawBlind(); drawKettleViews(); drawZoom(); syncSwitchers(); drawTaps(); drawBounce(); drawProbe(); drawPatches(); drawTiny(); drawRealMap(); drawSelf(); drawRepeats();
 }
 
 
@@ -824,6 +825,102 @@ function drawProbe() {
   }
   g.fillStyle = C.blood; peaks.forEach((i) => { g.beginPath(); g.arc(X(i), Y(PR.sim[i]), 3.5, 0, 7); g.fill(); });
   $("#probeRead").textContent = `${peaks.length} peak${peaks.length === 1 ? "" : "s"} above the line · the ball really bounced ${S.bounce.onsets.length} times`;
+}
+
+
+/* ------------------------------------------------------------------ real pretrained models */
+const RM = { d: null, map: "spectrogram", self: "spectrogram", mode: "peaks", audio: null };
+const REAL_NOTES = {
+  spectrogram: "No model, just the picture. Pouring sits on its own and the heating runs into the boil, but stirring and tapping are spread out.",
+  EAT: "In its two biggest directions EAT looks the messiest of the four, even though in its full space it sorts the windows better than the raw picture. Something other than these five sounds dominates its biggest directions.",
+  Dasheng: "Dasheng draws the heating and the boil as one continuous path, which is what they are, and keeps the other three sounds in tight, separate groups.",
+  USAD: "USAD also draws the heating flowing into the boil, packs pouring tightly at one edge, and spreads the spoon sounds along the top.",
+};
+const SELF_NOTES = {
+  spectrogram: "Blocks that follow the sound: one while the boil is loudest, another once the roar dulls and the kettle switches off.",
+  EAT: "A grid, not blocks: frames that sit at the same spot in their ten-second window look alike, whatever is playing.",
+  Dasheng: "The same grid, fainter, with diagonal stripes every ten seconds for the same reason.",
+  USAD: "Big blocks every thirty seconds, the size of the windows USAD was fed. Inside each block the effect is weak.",
+};
+async function buildReal() {
+  RM.d = await json("real_models");
+  $("#realLegend").innerHTML = RM.d.maps.classes.map((c, i) => `<span><i style="background:${TINY_COLORS[i]}"></i>${esc(c)}</span>`).join("");
+  $$("#realTabs .tab").forEach((b) => b.addEventListener("click", () => { RM.map = b.dataset.m; $$("#realTabs .tab").forEach((x) => x.classList.toggle("on", x === b)); drawRealMap(); }));
+  $$("#simModelTabs .tab").forEach((b) => b.addEventListener("click", () => { RM.self = b.dataset.m; $$("#simModelTabs .tab").forEach((x) => x.classList.toggle("on", x === b)); drawSelf(); }));
+  $$("#repMode .tab").forEach((b) => b.addEventListener("click", () => { RM.mode = b.dataset.mode; $$("#repMode .tab").forEach((x) => x.classList.toggle("on", x === b)); drawRepeats(); }));
+  RM.audio = makeAudio("assets/audio/repeats.mp3");
+  $("#repPlay").addEventListener("click", () => { if (RM.audio.paused) RM.audio.play().catch(() => {}); else RM.audio.pause(); });
+  RM.audio.addEventListener("play", () => { $("#repPlay").classList.add("on"); const tick = () => { drawRepeatHead(); if (!RM.audio.paused) requestAnimationFrame(tick); }; tick(); });
+  RM.audio.addEventListener("pause", () => $("#repPlay").classList.remove("on"));
+  drawRealMap(); drawSelf(); drawRepeats();
+}
+function drawRealMap() {
+  if (!RM.d) return;
+  const m = RM.d.maps.models[RM.map], y = RM.d.maps.labels, cv = $("#realCanvas"), { g, w, h } = sizeCanvas(cv);
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  m.z.forEach(([a, b]) => { x0 = Math.min(x0, a); x1 = Math.max(x1, a); y0 = Math.min(y0, b); y1 = Math.max(y1, b); });
+  const pad = 18, sx = (a) => pad + ((a - x0) / (x1 - x0 || 1)) * (w - 2 * pad), sy = (b) => pad + ((b - y0) / (y1 - y0 || 1)) * (h - 2 * pad);
+  g.fillStyle = "#faf6ee"; g.fillRect(0, 0, w, h);
+  m.z.forEach(([a, b], i) => { g.fillStyle = TINY_COLORS[y[i]]; g.globalAlpha = 0.85; g.beginPath(); g.arc(sx(a), sy(b), 4, 0, 7); g.fill(); });
+  g.globalAlpha = 1;
+  $("#realNote").innerHTML = `<b>${Math.round(m.acc * 100)}% of windows sit closest to their own kind.</b> ${esc(REAL_NOTES[RM.map])}`;
+}
+function drawSelf() {
+  if (!RM.d) return;
+  const s = RM.d.selfsim.maps[RM.self], cv = $("#selfCanvas");
+  const side = Math.min(cv.parentElement.clientWidth || 340, 340);
+  cv.style.width = side + "px"; cv.setAttribute("height", side);
+  const { g, w, h } = sizeCanvas(cv);
+  const raw = Uint8Array.from(atob(s.b64), (c) => c.charCodeAt(0)), n = s.n, o = document.createElement("canvas");
+  o.width = n; o.height = n;
+  const x = o.getContext("2d"), img = x.createImageData(n, n), L = lut();
+  for (let i = 0; i < n * n; i++) { const c = L[raw[i]]; img.data[i * 4] = c[0]; img.data[i * 4 + 1] = c[1]; img.data[i * 4 + 2] = c[2]; img.data[i * 4 + 3] = 255; }
+  x.putImageData(img, 0, 0); g.imageSmoothingEnabled = false; g.drawImage(o, 0, 0, w, h);
+  $("#selfNote").textContent = SELF_NOTES[RM.self];
+}
+function countMarks(c, mode, rate = 25) {
+  const med = (a) => { const b = [...a].sort((p, q) => p - q); return b[b.length >> 1]; };
+  const m = med(c), mad = med(c.map((v) => Math.abs(v - m))) * 1.4826 || 1e-9;
+  const z = c.map((v) => ((v - m) / mad) * (mode === "dips" ? -1 : 1));
+  const cand = [];
+  for (let i = 1; i < z.length - 1; i++) if (z[i] > 2.5 && z[i] >= z[i - 1] && z[i] >= z[i + 1]) cand.push(i);
+  cand.sort((a, b) => z[b] - z[a]);
+  const keep = [];
+  cand.forEach((i) => { if (keep.every((j) => Math.abs(i - j) > 1.5 * rate)) keep.push(i); });
+  return keep.sort((a, b) => a - b);
+}
+const REP_ROWS = [["USAD", C.teal], ["Dasheng", C.teal], ["EAT", C.teal], ["waveform", C.ink]];
+function drawRepeats() {
+  if (!RM.d) return;
+  const r = RM.d.repeats;
+  if (!$("[data-rep]")) {
+    $("#repRows").innerHTML = REP_ROWS.map(([k]) => `<div class="rep-row"><div class="rep-head"><b>${k === "waveform" ? "raw waveform" : k}</b><span class="mono" data-count="${k}"></span></div><canvas height="62" data-rep="${k}"></canvas></div>`).join("");
+  }
+  REP_ROWS.forEach(([k, col]) => {
+    const c = r.curves[k], cv = $(`[data-rep="${k}"]`), { g, w, h } = sizeCanvas(cv);
+    g.fillStyle = "#faf6ee"; g.fillRect(0, 0, w, h);
+    const X = (t) => (t / r.duration) * w;
+    g.fillStyle = "rgba(124,43,38,.10)"; g.fillRect(X(r.probe[0]), 0, X(r.probe[1]) - X(r.probe[0]), h);
+    r.times.forEach((t) => { g.fillStyle = C.gold; g.beginPath(); g.moveTo(X(t) - 5, 0); g.lineTo(X(t) + 5, 0); g.lineTo(X(t), 7); g.fill(); });
+    const lo = Math.min(...c), hi = Math.max(...c), Y = (v) => h - 6 - ((v - lo) / (hi - lo || 1)) * (h - 16);
+    g.strokeStyle = col; g.lineWidth = 1.3; g.beginPath();
+    c.forEach((v, i) => { const xx = (i / 25 / r.duration) * w; i ? g.lineTo(xx, Y(v)) : g.moveTo(xx, Y(v)); });
+    g.stroke();
+    const marks = countMarks(c, RM.mode);
+    let hits = 0;
+    marks.forEach((i) => {
+      const t = i / 25, real = r.times.some((tt) => Math.abs(tt - t) < 0.4);
+      if (real) hits++;
+      g.fillStyle = real ? C.blood : "#9a9183"; g.beginPath(); g.arc(X(t), Y(c[i]), 4, 0, 7); g.fill();
+    });
+    $(`[data-count="${k}"]`).textContent = `${marks.length} found · ${hits} of 6 real taps`;
+  });
+}
+function drawRepeatHead() {
+  if (!RM.d || !RM.audio) return;
+  drawRepeats();
+  const f = RM.audio.currentTime / RM.d.repeats.duration;
+  $$("[data-rep]").forEach((cv) => { const g = cv.getContext("2d"); g.fillStyle = C.blood; g.fillRect(f * cv.clientWidth - 1, 0, 2, cv.clientHeight); });
 }
 
 boot();
