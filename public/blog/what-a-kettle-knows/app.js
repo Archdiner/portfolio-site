@@ -41,11 +41,11 @@ async function boot() {
   buildTaps();
   buildSim();
   buildEar();
-  buildSkills();
+  if ($("#skillsChart")) buildSkills();
   buildBounce();
   buildDiary();
-  buildMemory();
-  buildCost();
+  if ($("#memoryChart")) buildMemory();
+  if ($("#costChart")) buildCost();
   buildTables();
   wireProgress();
   const plan = $("#plan");

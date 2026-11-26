@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%237c2b26'/%3E%3Cpath d='M10 13h12v7a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4z' fill='none' stroke='%23f4efe4' stroke-width='2'/%3E%3Cpath d='M22 15l4 2-4 2' fill='none' stroke='%23f4efe4' stroke-width='2'/%3E%3C/svg%3E">
 <title>What a Kettle Knows</title>
-<meta name="description" content="Teaching a computer to listen to a kitchen, and finding out that the hard part isn't hearing. It's remembering.">
+<meta name="description" content="One recording of a kettle, heard five different ways by a computer, and what each way of listening keeps and throws away.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -24,7 +24,7 @@
 <header class="title">
   <p class="eyebrow">November 2026 · about 15 minutes · best with sound on</p>
   <h1>What a Kettle Knows</h1>
-  <p class="dek">I tried to teach a computer to listen to a kitchen. Hearing turned out to be the easy part. The hard part was remembering.</p>
+  <p class="dek">One recording of a kettle, heard five different ways by a computer, and what each way of listening keeps and throws away.</p>
 </header>
 
 <!-- ======================================================= COLD OPEN -->
@@ -59,7 +59,6 @@
   </div>
 </figure>
 
-<!-- ======================================================= HOW DID YOU KNOW -->
 <section class="col">
   <h2>How did you know?</h2>
   <p>Someone flicks the kettle on about three seconds in. It rumbles, builds to a roar, boils for a minute and a half and clicks itself off at 1:39. Most people get it, or get close, within a few seconds, which is a little strange when you think about it. Nobody said the word "kettle" and there was no picture. All that reached you was air pushing on your eardrums for a couple of minutes.</p>
@@ -83,47 +82,39 @@
 </figure>
 
 <section class="col">
-  <p>Those are two different skills: putting a name on a sound, and keeping track of what happened and for how long. People do both without noticing they're separate. Machines, it turns out, are much better at the first.</p>
-  <p>As of late 2026, audio models are good at naming sounds and bad at almost anything involving time. Play one a dog barking and it'll tell you it's a dog. Ask it how long the kettle boiled this morning and you'll usually get a wrong answer (later on we'll see exactly how wrong).</p>
-  <p>This post is my first real dive into audio research, and I've written it the way it happened. My project notes describe the goal as a small ear that stays on, pulls the useful sound out of a room, and hands it to some other model to reason about. The idea I started with seemed almost too obvious to test: if models can name sounds but can't remember them, write the names down with times and answer questions from that. So I built it and pitted it against much bigger models. This post is how that went.</p>
-
-  <h2>Why would a computer need to hear a kettle?</h2>
-  <p>The questions people actually ask about a home are mostly about time. Did I leave the stove on? How long has the washing machine been beeping? Was that the smoke alarm, or just the kettle finishing? A small device that listens could answer these without putting a camera in anyone's kitchen, but only if it keeps something like a diary. Here's the plan:</p>
+  <p>Those are two different skills: putting a name on a sound, and keeping track of what happened and for how long. People do both without noticing they're separate. A computer gets neither for free. Someone has to decide how it should look at sound, and every way of looking makes some things easy to see and others invisible.</p>
+  <p>This post is my first real dive into audio research, and it's less a single result than a tour. We'll take this one kettle and look at it the way different models do: as a list of numbers, as a picture, as a point in space, as a list of labels and finally as a diary. At each stop I'll try to show what that way of listening keeps, what it throws away, and what happened when I tried it.</p>
 </section>
 
 <figure class="wide">
-  <div class="card plan" id="plan" aria-label="The plan: sound goes into a listener, the listener writes a diary, and questions are answered from the diary">
-    <div class="plan-step">
-      <p class="plan-k mono">1 · sound</p>
+  <div class="card plan" id="plan" aria-label="Five ways to hear the kettle: numbers, a picture, a point in space, labels, a diary">
+    <div class="plan-step"><p class="plan-k mono">1 · numbers</p>
       <svg viewBox="0 0 120 40" class="plan-wave" preserveAspectRatio="xMinYMid meet" aria-hidden="true"><path d="M0 20 L6 20 L8 4 L10 36 L12 20 L22 20 L24 14 L26 26 L28 12 L30 28 L32 10 L34 30 L36 11 L38 29 L40 12 L42 28 L44 13 L46 27 L48 14 L50 26 L52 15 L54 25 L56 15 L58 25 L60 16 L62 24 L64 16 L66 24 L68 17 L70 23 L72 17 L74 23 L76 18 L78 22 L80 18 L82 22 L84 18 L86 22 L88 6 L90 34 L92 20 L120 20"/></svg>
-      <p class="plan-d">A microphone in the kitchen</p>
-    </div>
+      <p class="plan-d">Keeps everything, but none of it means anything yet</p></div>
     <div class="plan-arrow">→</div>
-    <div class="plan-step">
-      <p class="plan-k mono">2 · listener</p>
-      <div class="plan-tags"><span>click</span><span>water</span><span>roar</span></div>
-      <p class="plan-d">Names what it hears, a few seconds at a time</p>
-    </div>
+    <div class="plan-step"><p class="plan-k mono">2 · a picture</p>
+      <div class="plan-spec" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <p class="plan-d">Which pitches, when</p></div>
     <div class="plan-arrow">→</div>
-    <div class="plan-step">
-      <p class="plan-k mono">3 · diary</p>
-      <ul class="plan-diary"><li><b>0:02.7</b> kettle on</li><li><b>0:12.7</b> boiling</li><li><b>1:39.0</b> kettle off</li></ul>
-      <p class="plan-d">Writes down what changed, and when</p>
-    </div>
+    <div class="plan-step"><p class="plan-k mono">3 · a point</p>
+      <svg viewBox="0 0 80 44" class="plan-pts" aria-hidden="true"><circle cx="18" cy="14" r="4"/><circle cx="24" cy="18" r="4"/><circle cx="56" cy="30" r="4" class="o"/><circle cx="66" cy="12" r="4" class="o"/></svg>
+      <p class="plan-d">What it sounds like, but not when</p></div>
     <div class="plan-arrow">→</div>
-    <div class="plan-step">
-      <p class="plan-k mono">4 · answers</p>
-      <p class="plan-q">How long did it boil?</p>
-      <p class="plan-a mono">86.3 s</p>
-      <p class="plan-d">Arithmetic on the diary</p>
-    </div>
+    <div class="plan-step"><p class="plan-k mono">4 · labels</p>
+      <div class="plan-tags"><span>switch</span><span>water</span><span>vacuum?</span></div>
+      <p class="plan-d">Names, a few seconds at a time</p></div>
+    <div class="plan-arrow">→</div>
+    <div class="plan-step"><p class="plan-k mono">5 · a diary</p>
+      <ul class="plan-diary"><li><b>0:02.7</b> on</li><li><b>0:12.7</b> boiling</li><li><b>1:39.0</b> off</li></ul>
+      <p class="plan-d">What changed, and when</p></div>
   </div>
-  <figcaption>The plan. We'll build up to it one piece at a time, starting from what a microphone actually hands us.</figcaption>
+  <figcaption>The tour: five ways for a computer to hold the same two minutes of sound.</figcaption>
 </figure>
 
-<!-- ======================================================= NUMBERS -->
 <section class="col">
-  <h2>1.76 million numbers</h2>
+  <p>Why care about a kettle? Because the questions people actually ask about a home are mostly about time. Did I leave the stove on? How long has the washing machine been beeping? A small device that listens could answer those without putting a camera in anyone's kitchen, but only if its way of hearing keeps track of time. As we'll see, most of them don't.</p>
+
+  <h2>1. A list of numbers</h2>
   <p>A microphone measures how hard the air is pushing on it, over and over again. This recording took that measurement 16,000 times every second, and each measurement is just a single number, so the whole 1:50 clip is a list of about 1.76 million of them. Drag the slider to zoom in:</p>
 </section>
 
@@ -143,10 +134,10 @@
 
 <section class="col">
   <p>From far away you can see the shape of the event. Zoom into the boil and it turns to fuzz, and if you keep going you reach the individual numbers, each one a dot swinging up and down around zero.</p>
-  <p>Nothing in this list says "kettle". There isn't even a number that means "loud": loudness is how far the dots swing across hundreds of them. And that list is all the computer gets.</p>
+  <p>Nothing in this list says "kettle". There isn't even a number that means "loud": loudness is how far the dots swing across hundreds of them. The list keeps absolutely everything, and that's the problem, because almost none of it matters. Every way of listening after this one is a decision about what to throw away.</p>
 
-  <h2>Throwing most of it away</h2>
-  <p>A good first question is how much we can throw away before the kettle stops sounding like a kettle. Here are the same twenty seconds three ways: the original, a version with half as many numbers per second (about what a phone call carries), and a version with every pitch above 4,000 Hz stripped out, which is roughly the top note on a piano.</p>
+  <h2>How much can we throw away?</h2>
+  <p>A good first experiment is to see how much we can lose before the kettle stops sounding like a kettle. Here are the same twenty seconds three ways: the original, a version with half as many numbers per second (about what a phone call carries), and a version with every pitch above 4,000 Hz stripped out, which is roughly the top note on a piano.</p>
 </section>
 
 <figure class="wide">
@@ -166,11 +157,10 @@
 </figure>
 
 <section class="col">
-  <p>It gets duller and the hiss of the boil goes first, but with most of the detail gone it's still obviously a kettle.</p>
-  <p>The picture under the player shows what changed. It's called a <em>spectrogram</em>, and it'll come up a lot.</p>
+  <p>It gets duller and the hiss of the boil goes first, but with most of the detail gone it's still obviously a kettle. The picture under the player shows what changed, and it's our second way of listening.</p>
 
-  <h2>A picture of sound</h2>
-  <p>Any sound can be treated as a mix of pitches playing at once, from low rumble to high hiss. A spectrogram splits the sound into those pitches and shows how strong each one is over time. Time runs left to right, like in the waveform, pitch runs from low at the bottom to high at the top, and brighter means louder. Here's the kettle again, drawn both ways:</p>
+  <h2>2. A picture</h2>
+  <p>Any sound can be treated as a mix of pitches playing at once, from low rumble to high hiss. A <em>spectrogram</em> splits the sound into those pitches and shows how strong each one is over time. Time runs left to right, like in the waveform, pitch runs from low at the bottom to high at the top, and brighter means louder. Here's the kettle again, drawn both ways:</p>
 </section>
 
 <figure class="wide">
@@ -195,10 +185,7 @@
 <section class="col">
   <p>The switch shows up as a thin vertical line. A click is so short that it contains a bit of every pitch at once, so it lights up a whole column. The boil is a broad smear, because thousands of bursting bubbles make noise at every pitch all the time. Over the boil the top of the picture slowly dims as the roar gets duller, and even after the click-off it doesn't go dark straight away, because the water keeps settling for a few seconds.</p>
   <p>When we cut the quality in the last section, we were really shaving the top off this picture. The kettle survived because most of what makes it sound like a kettle lives in the bottom half.<sup><a href="#fn1" id="r1">1</a></sup></p>
-
-  <h2>Smooth and sharp</h2>
-  <p>Once sound is a picture, simple geometry gets you surprisingly far. Here's a different recording: hot water going into a cup, with a spoon knocking against the side.</p>
-  <p>Steady sounds like running water draw <em>horizontal</em> stripes, because the same pitches carry on over time. Sharp sounds like a spoon hitting china draw <em>vertical</em> lines, because every pitch flares up for an instant. There's a classic trick that splits a spectrogram into its horizontal and vertical parts,<sup><a href="#fn2" id="r2">2</a></sup> and it involves no learning and no training data at all, just "keep what's smooth side to side" and "keep what's smooth top to bottom".</p>
+  <p>A picture also has shapes, and simple geometry gets you surprisingly far. Here's a different recording: hot water going into a cup, with a spoon knocking against the side. Steady sounds like running water draw <em>horizontal</em> stripes, because the same pitches carry on over time. Sharp sounds like a spoon hitting china draw <em>vertical</em> lines, because every pitch flares up for an instant. A classic trick splits the picture into its horizontal and vertical parts,<sup><a href="#fn2" id="r2">2</a></sup> with no learning involved at all:</p>
 </section>
 
 <figure class="wide">
@@ -220,11 +207,10 @@
 </figure>
 
 <section class="col">
-  <p>It isn't perfect (some water leaks into the clicks), but the spoon pops right out. If someone asked how many times the spoon hit the cup, those vertical lines are what you'd count.</p>
+  <p>It isn't perfect (some water leaks into the clicks), but the spoon pops right out. The picture keeps <em>when</em> things happen and <em>what kind</em> of sound they are. What it doesn't do is tell you that two pictures are of the same thing.</p>
 
-  <h2>Which sounds are alike?</h2>
-  <p>Pictures help, but a computer still can't tell that two sounds are "the same" just by comparing pixels. The same mug tapped softly and tapped hard makes two quite different pictures, and we want something that shrugs and says "same mug".</p>
-  <p>The usual answer is to train a model that turns any clip into a short list of numbers, called an <em>embedding</em>, arranged so that clips which sound alike end up with similar lists. Then "how alike are these two sounds?" becomes a simple calculation. Here's a small test, so play the four taps first:</p>
+  <h2>3. A point in space</h2>
+  <p>The same mug tapped softly and tapped hard makes two quite different pictures, and we want something that shrugs and says "same mug". The usual answer is to train a model that turns any clip into a short list of numbers, called an <em>embedding</em>. You can think of it as a point in space, arranged so that clips which sound alike land close together. Here's a small test, so play the four taps first:</p>
 </section>
 
 <figure class="wide">
@@ -232,7 +218,7 @@
 </figure>
 
 <section class="col">
-  <p>To my ear, A and B are clearly the same mug, C is a glass and D is metal. Here's how alike four different listeners think each pair is, on a scale where 1 means identical:</p>
+  <p>To my ear, A and B are clearly the same mug, C is a glass and D is metal. Here's how close four different listeners put each pair, on a scale where 1 means identical:</p>
 </section>
 
 <figure class="wide">
@@ -253,12 +239,28 @@
 
 <section class="col">
   <p>The "recipe" has never been trained on anything. It measures a few dozen things a sound engineer would care about, like brightness and how quickly a sound dies away. The other three are large models that taught themselves by listening to millions of clips.<sup><a href="#fn3" id="r3">3</a></sup></p>
-  <p>All four agree that the two mug taps are the closest pair, which is reassuring, but look at how differently they spread out the rest. The recipe thinks a soft mug tap and a metal bowl have little in common (0.56). EAT gives every single pair 0.96 or more, so as far as it's concerned all four taps are nearly the same sound. On this tiny test, a recipe somebody wrote by hand separates materials better than a model with 90 million learned parameters.</p>
-  <p>Four clips don't prove much, but it's a hint that the big models aren't keeping the details a kitchen cares about.</p>
+  <p>All four agree that the two mug taps are the closest pair, but they spread the rest very differently. The recipe hears the soft mug and the metal bowl as quite different. EAT puts all four taps almost on top of each other. Four clips don't prove much, but they show what an embedding really is: a decision about which differences to ignore.</p>
+  <p>They also show what a single point can't hold. Try counting the bounces of this ball:</p>
+</section>
 
-  <h2>Asking a trained ear</h2>
-  <p>Let's see what a trained model makes of the kettle. I took EAT, one of the self-taught models from the tap test, and fine-tuned it to label fifteen home sounds frame by frame, using RealDESED, a set of real recordings from homes: footsteps, dishes, doors, a light switch, a vacuum, a coffee machine and the rest. (Yes, the same EAT that thought all four taps sounded alike. Here it's trained end to end, so its insides get adjusted for these fifteen labels.)</p>
-  <p>I tried three learning rates for ten epochs each on a rented A100, at about two minutes an epoch, so just under an hour in all. The best run, at a learning rate of 0.0001, peaked at epoch 8 with a validation F1 of 0.897 (out of 1), and every run started getting worse at epoch 9. I'll call the result the Ear. Here's everything it reported while listening to our kettle:</p>
+<figure class="wide">
+  <div class="bounce card">
+    <div class="player-top">
+      <button class="play" id="bouncePlay" aria-label="Play the bouncing ball"><span class="play-icon"></span></button>
+      <span class="mono dim">a bouncing ball · 2.5 s</span>
+      <button class="ghost" id="bounceShow">show the answer</button>
+    </div>
+    <canvas id="bounceWave" height="110" aria-label="Waveform of a bouncing ball"></canvas>
+    <p class="bounce-answer mono" id="bounceAnswer" hidden>11 bounces, each marked where it lands</p>
+  </div>
+  <figcaption>A synthetic ball, so we know exactly when each bounce happens.</figcaption>
+</figure>
+
+<section class="col">
+  <p>Easy for you, and impossible for a single point, because the point describes the whole clip at once, a bit like summing up a song in one sentence. You can say it's upbeat and has a guitar in it, but you've lost how many times the chorus came round. When I tested summary embeddings from eight different models on a few hundred clips like this, none of them could count. A decades-old trick that slides the waveform along a copy of itself and notes where it lines up<sup><a href="#fn4" id="r4">4</a></sup> almost always could.</p>
+
+  <h2>4. A list of labels</h2>
+  <p>Embeddings say what something sounds like. To get names, you train a model to output labels. I took EAT, the same model that thought all four taps sounded alike, and fine-tuned it to label fifteen everyday home sounds, a few seconds at a time: footsteps, dishes, doors, a light switch, a vacuum, a coffee machine and the rest. I'll call it the Ear. Here's everything it reported while listening to our kettle:</p>
 </section>
 
 <figure class="wide">
@@ -276,58 +278,15 @@
 <section class="col">
   <p id="guessCallback">A light switch, then running water, then a coffee machine, and then, for most of the boil, a vacuum cleaner.</p>
   <p>It's easy to laugh, but look at the timing. "Light switch" lands at 2.7 seconds, exactly when the kettle clicks on. "Running water" and "coffee machine" cover the heating, when a kettle really does sound like water being churned around. "Kettle" isn't one of the Ear's fifteen words, so it reached for the nearest ones it had.</p>
-  <p>The more interesting part is what it <em>didn't</em> say. After about 53 seconds it goes quiet, even though the kettle keeps boiling for another 45. And nothing in its output connects the click at the start to the quiet at the end, or says that one object was on the whole time.</p>
-  <p>A model like the Ear answers "what is this sound?" a few seconds at a time. How long it boiled, or whether it's still on, needs something that keeps track <em>between</em> those few seconds.</p>
+  <p>The more interesting part is what it <em>didn't</em> say. After about 53 seconds it goes quiet, even though the kettle keeps boiling for another 45. And nothing in its output connects the click at the start to the quiet at the end, or says that one object was on the whole time. Labels give you names and rough times, a few seconds at a time, but they don't give you the story.</p>
 
-  <h2>Noticing versus counting</h2>
-  <p>Before trying to build that something, I wanted to know which basic skills the models already had. I put together 345 short clips where something changes partway through (a sound starts, stops, or gives way to another) and asked two things of each listener. Did it notice the change? And could it count how many times something repeated?</p>
-</section>
+  <h2>What about a bigger model?</h2>
+  <p>At this point you might reasonably ask why I'm fiddling with listeners like the Ear at all. There are now large audio-language models that you can hand a recording and question in plain English. So I tried one, Audio Flamingo 3, on a much harder version of the kettle question: a week of audio recorded in one person's home,<sup><a href="#fn5" id="r5">5</a></sup> with questions like whether the vacuum was on at a given moment, since when, and for how long.</p>
+  <p>It mostly answered "none". Overall it did worse than a baseline that ignores the audio and always gives the most common answer. Some of that was my prompt and my scoring, so I wouldn't read much into the exact number. But it was a good reminder that a model which can name a sound in a short clip isn't necessarily keeping track of anything over ten minutes, let alone a week.</p>
 
-<figure class="wide">
-  <div class="card" id="skillsChart"></div>
-  <figcaption>Each listener's score on the 345 clips, where 1 is perfect. The dashed lines mark what you'd score by luck, with the answers shuffled. Gold is the hand-written recipe, red are small models trained to tag sounds, and green are large self-taught models.</figcaption>
-</figure>
-
-<section class="col">
-  <p>Noticing goes fine. The best large model scores 0.78, and the hand-written recipe gets 0.74, ahead of every trained model but one.</p>
-  <p>Counting, on the other hand, is a wipeout: no model gets above 0.14. I think the culprit is the embedding itself. It squashes a stretch of audio into one list of numbers, which is a bit like describing a song in one sentence. You can say it's upbeat and has a guitar in it, but you've lost how many times the chorus came round. Try counting the bounces of this ball yourself:</p>
-</section>
-
-<figure class="wide">
-  <div class="bounce card">
-    <div class="player-top">
-      <button class="play" id="bouncePlay" aria-label="Play the bouncing ball"><span class="play-icon"></span></button>
-      <span class="mono dim">a bouncing ball · 2.5 s</span>
-      <button class="ghost" id="bounceShow">show the answer</button>
-    </div>
-    <canvas id="bounceWave" height="110" aria-label="Waveform of a bouncing ball"></canvas>
-    <p class="bounce-answer mono" id="bounceAnswer" hidden>11 bounces, each marked where it lands</p>
-  </div>
-  <figcaption>A synthetic ball, so we know exactly when each bounce happens.</figcaption>
-</figure>
-
-<section class="col">
-  <p>You can probably count those, and so can a very old trick: slide the waveform along a copy of itself and note every place where it lines up.<sup><a href="#fn4" id="r4">4</a></sup> That trick scores 0.94 on the same counting test where the best model managed 0.14. Size didn't help either: the 90-million-parameter models counted no better than the one with a million.</p>
-
-  <h2>Just ask a bigger model?</h2>
-  <p>At this point you might reasonably ask why I'm fiddling with listeners like the Ear at all. There are now large audio-language models that you can hand a recording and question in plain English, so why not give one the audio and ask it how long the kettle boiled?</p>
-  <p>That was the obvious first thing to try, so I tried it at a more realistic scale than one kettle. SINS is a public dataset recorded continuously in one person's home for a week.<sup><a href="#fn5" id="r5">5</a></sup> I asked 298 questions about days four to seven, about activities like cooking, washing up, vacuuming and watching TV. They come in five kinds: is it happening at a given moment, since when, for how long, how long ago, and how many times. I gave them to Audio Flamingo 3, one of the strongest open audio-language models. For a baseline, I also scored a "model" that ignores the audio completely and always gives the most common answer.</p>
-</section>
-
-<figure class="wide">
-  <div class="card" id="memoryChartA"></div>
-  <figcaption>Share of the 298 questions answered correctly, by kind of question.</figcaption>
-</figure>
-
-<section class="col">
-  <p>Audio Flamingo 3 gets 0.19 overall, which is <em>worse</em> than the 0.26 you get by not listening at all. On all 53 "how long ago?" questions it scores exactly zero, and on "is it happening?" it's no better than always guessing the common answer (0.46 against 0.45).</p>
-  <p>It didn't give wild answers, though. Mostly it gave none at all. I also asked it about 461 moments where an activity was just starting, and 87.4% of its answers were the single word "none". It caught 2 of 8 vacuum starts, 1 of 6 TV starts, 0 of 9 cooking starts and 1 of 9 dishwashing starts. Some of that is my fault: when it did say something other than "none", it tended to list everything it could hear ("vacuum cleaning, the TV playing"), and my scorer counted that list as "it started". So its false alarms are partly a prompt problem.</p>
-  <p>For a sense of scale: the Ear looks at a few seconds at a time, our kettle lasts 110 seconds, each question came with ten minutes of audio (which Audio Flamingo got through in about 2.6 seconds on an A100), and the whole week is about 600,000 seconds. My best guess is that models like it are trained on short clips with one-line captions, so nothing has ever rewarded them for keeping time, for noticing when something started and subtracting.</p>
-
-  <h2>Keep a diary</h2>
-  <p>The fix I tried is the obvious one: instead of asking a model to remember audio, have the listener keep a diary. Every time something changes, it writes down what turned on or off, and when. It also smooths over the flicker, so that one long boil becomes one entry rather than thirty.<sup><a href="#fn6" id="r6">6</a></sup></p>
-  <p>This isn't a new idea, and I didn't come up with it. In video, Socratic Models (2022) turned first-person footage into a running text log and answered questions by reading it, and a 2024 study found that approach beat models looking at the frames directly whenever a task depended on a long history. For audio, a 2026 paper turns long recordings into timestamped events in a database for exactly this kind of question answering. What I wanted to find out is whether a small, cheap listener can keep a diary good enough to be useful in a real home. (Links are in the further reading at the end.)</p>
-  <p>Once the diary exists, the hard questions become arithmetic on a list. Here's the kettle's diary. Go ahead and ask it something:</p>
+  <h2>5. A diary</h2>
+  <p>The last way of listening is the one I'd been building towards: instead of asking a model to remember audio, have the listener keep a diary. Every time something changes, it writes down what turned on or off, and when. It also smooths over the flicker, so that one long boil becomes one entry rather than thirty.<sup><a href="#fn6" id="r6">6</a></sup></p>
+  <p>This isn't a new idea, and I didn't come up with it. In video, Socratic Models (2022) turned first-person footage into a running text log and answered questions by reading it, and a 2026 paper does the same with long audio recordings. (Links are in the further reading.) Once the diary exists, questions about time become arithmetic on a list. Ask the kettle's diary something:</p>
 </section>
 
 <figure class="wide">
@@ -339,58 +298,21 @@
     <div class="diary-strip" id="diaryStrip"></div>
     <div class="questions" id="questions"></div>
   </div>
-  <figcaption>Click a question to see the answer and the bit of the diary it came from.</figcaption>
+  <figcaption>Click a question to see the answer and the bit of the diary it came from. This diary comes from a simple loudness-tracking system, not the Ear.</figcaption>
 </figure>
 
 <section class="col">
-  <p>The kettle's diary didn't come from the Ear, which, as we saw, thinks this kettle is a vacuum cleaner and loses interest after 53 seconds. It came from a much simpler system that follows the kettle's loudness and marks where it jumps, checked against the recording's description. That works for one loud kettle in a quiet room.</p>
-  <p>For a real test, back to the week in the SINS home. This time the full system (a larger model, a vocabulary of household activities and the smoothing step) wrote the diary from the audio, and the same 298 questions were answered from it:</p>
-</section>
+  <p>Back in the week-long home recording, a listener built on BEATs (another of the self-taught models) wrote the diary itself, and it answered most of the questions correctly. It was weakest, unsurprisingly, on "how many times?". The whole thing runs on an ordinary laptop processor.</p>
+  <p>The surprising part was which half did the work. Handing the same diary to a general language model and asking in plain English only helped a little. What worked was answering from the diary with small exact queries that look things up and subtract. Writing things down turned out to be only half of it. The other half was doing the arithmetic properly.</p>
+  <p>That's one home, with a vocabulary chosen for its activities, so treat it as a demonstration rather than a benchmark. Plenty didn't work along the way either, including a test where I'd swapped "added" and "removed" and a result that turned out to be a home memorising itself. The full list is in the appendix.</p>
 
-<figure class="wide">
-  <div class="card" id="memoryChart"></div>
-  <figcaption>The same 298 questions, now with the diary. "Same answer each time" ignores the audio and always gives the most common answer.</figcaption>
-</figure>
-
-<section class="col">
-  <p>The diary gets 0.87 overall against Audio Flamingo's 0.19. It scores a perfect 1.00 on "is it happening?", though that one's too easy, because some of the "no" cases are just silence. Its weak spot is "how many times?" (0.41), our old counting problem again. On activity starts it caught 8 of 8 vacuum starts and 6 of 6 TV starts with no false alarms, 8 of 9 cooking starts (with about 3 false starts a day) and 7 of 9 dishwashing starts (about 5 a day).</p>
-  <p>So is it the writing down that does the work? Only partly. I also handed the same timestamped diary to Qwen, a general-purpose language model, and let it answer in plain English. That only moved its score from 0.25 to 0.34. What gets 0.87 is answering from the diary with exact queries: little bits of code that look things up and subtract. That's a bit awkward, given that "hand it to some other model" was the plan in my project notes. The notes help, but most of the win comes from doing the arithmetic exactly.</p>
-  <p>It's also not an even fight. BEATs, the model underneath the diary, never heard this home, but the vocabulary on top was set up for exactly the activities this dataset labels, while Audio Flamingo had to handle open-ended questions about a home it had never heard. Some of that gap is home advantage. And since a diary can only answer questions about what it chose to write down, anything outside its vocabulary is invisible to it, which is the Ear's vacuum cleaner problem all over again.</p>
-  <p>And it's one home. I haven't tried a second one yet, especially one with more than one person in it.</p>
-
-  <h2>Can you leave it on?</h2>
-  <p>A diary is only useful if whatever writes it never stops listening, which raises the question of cost. Here's how much of a single ordinary computer processor each option needs to keep up with a full day of audio:</p>
-</section>
-
-<figure class="wide">
-  <div class="card" id="costChart"></div>
-  <figcaption>Processor time to get through 24 hours of audio on one core, with no graphics card and no speed tricks. A phone would need more work.</figcaption>
-</figure>
-
-<section class="col">
-  <p>The diary system (frozen BEATs, the vocabulary head and the smoothing) runs on a laptop CPU. On one core it needs 252 seconds of compute per hour of audio, which is about an hour and forty minutes a day, or 7% of a core humming along in the background. Spread over ten cores, an hour of audio takes 172 seconds. It does want up to 3.6 GB of memory at its peak, and that's the next thing to bring down. Audio Flamingo, for comparison, needed an A100 graphics card.</p>
-
-  <h2>Voices, briefly</h2>
-  <p>Speech had its own version of this. Whisper, a popular speech-to-text model, is known for making words up when nobody is talking, so I ran the small version on a CPU over sixty minutes of the SINS home with nobody in it. It produced text in 49 of those minutes, 846 words in all, and it kept writing the same sentence:</p>
+  <h2>Knowing when to listen</h2>
+  <p>One more way of listening is to decide when not to. Whisper, a popular speech-to-text model, is known for making words up when nobody is talking. I ran it over an hour of that same home with nobody in it, and it kept writing the same sentence:</p>
   <blockquote>Thank you very much for watching this video and I will see you in much for watching.</blockquote>
-  <p>(Once, for variety, it said "I'll".) Putting a small voice-activity detector (Silero) in front of it, so that Whisper only hears the parts where someone is actually talking, took the invented words to zero. With speech mixed into the home's noise at 10 dB, the word error rate fell from 25% to 4%. Whisper itself didn't change at all.<sup><a href="#fn7" id="r7">7</a></sup></p>
-
-  <h2>What didn't work, and what I got wrong</h2>
-  <p>Plenty:</p>
-  <ul class="tidy">
-    <li><b>Counting.</b> Every learned listener failed the repetition test. For now the diary leans on the waveform trick, and it's still weakest on "how many" questions.</li>
-    <li><b>Flagging anything unusual.</b> A detector for "a sound I've never heard before" raised about 41 false alarms a day and caught only half of the real novelties.</li>
-    <li><b>Listening again when unsure.</b> Letting the system take a second, closer listen to clips it wasn't confident about didn't help.</li>
-    <li><b>Practice drills.</b> Training on synthetic listening exercises improved scores on the exercises and left the real tests flat or worse.</li>
-    <li><b>My first change-detection test.</b> I'd swapped "added" and "removed" in the answers, and another item cancelled out its own cue. Those numbers are void and aren't in this post.</li>
-    <li><b>Testing on the home I trained on.</b> Training on the SINS home and testing on its later days went from 0.746 to 0.783, which looked like progress but was really the home memorising itself. Voided.</li>
-    <li><b>More passes.</b> A later experiment (I called it LoopEar) added extra recurrent passes on top of a frozen USAD model. It didn't help, and at the second stage four passes did worse than one.</li>
-    <li><b>Short kitchen sounds.</b> With recordings from only five kitchens, fancier models for brief events like a drawer closing did worse than the simplest baseline. There just wasn't enough data.</li>
-  </ul>
-  <p>The full list, with numbers, is in the appendix.</p>
+  <p>Putting a small voice-activity detector in front of it, so that Whisper only hears the parts where someone is actually talking, made the invented words disappear. Whisper itself didn't change at all.</p>
 
   <h2>Back to the kettle</h2>
-  <p>Let's play it one last time, and this time watch the diary that a good listener should write:</p>
+  <p>Let's play it one last time, and this time watch the diary:</p>
 </section>
 
 <figure class="wide">
@@ -408,9 +330,8 @@
 </figure>
 
 <section class="col">
-  <p>So what does a kettle know? Not that it's a kettle: the Ear never worked that out. It knows it switched on at 0:02.7, boiled for 86 seconds and switched itself off, which is all anyone was going to ask it.</p>
-  <p>What I still don't understand is why the big models can't do this. They hear well enough, and the information is in the audio. Maybe it's the training data, mostly short clips with one-line captions, so nothing ever rewards keeping time. Maybe the embeddings throw away the count before any reasoning starts. Either way, I don't think the diary is the long-term answer. I chose its format (which activities exist, what counts as "on", how much to smooth), and Rich Sutton's bitter lesson says structure like that usually loses to general methods given enough data and compute. A model that learns for itself what's worth keeping should eventually beat it, and the diary's 0.87 is the bar it has to clear.</p>
-  <p>That's where I'm going next. The most interesting listeners here, BEATs and EAT, never saw a label: they learned by hiding pieces of audio and predicting what was missing, which is called self-supervised training. I want to understand how that works from the inside, and then go the other way, to diffusion models that generate audio instead of describing it.</p>
+  <p>So what does a kettle know? It depends who's listening. To the list of numbers it's 1.76 million values and nothing else. The picture knows where the clicks are. The point in space knows roughly what it sounds like, but not when anything happened. The Ear knows it's a vacuum cleaner, for about fifty seconds. And the diary knows it switched on at 0:02.7, boiled for 86 seconds and switched itself off, which is all anyone was going to ask it.</p>
+  <p>Every one of those is a choice someone made about what to keep, including the diary, whose format I chose myself. Rich Sutton's bitter lesson says hand-made choices like that tend to lose, eventually, to models that learn for themselves what's worth keeping. That's where I'm heading next. BEATs and EAT never saw a label: they learned by hiding pieces of audio and predicting what was missing, which is called self-supervised training. I want to understand how that works from the inside, and then go the other way, to diffusion models that generate sound instead of describing it.</p>
   <p>Thanks for reading!</p>
   <p class="sign">Asad</p>
 </section>
@@ -423,9 +344,8 @@
     <li id="fn2">It's called harmonic–percussive source separation (HPSS). Learned versions exist, but HPSS is cheap, needs no training data, and is easy to hear. <a href="#r2">↩</a></li>
     <li id="fn3">BEATs, EAT and USAD are self-supervised models: they learned by hiding parts of recordings and predicting what was missing, without anyone labelling the sounds. The similarity is the cosine between their clip embeddings. Each tap was loudness-matched and trimmed to three quarters of a second first. <a href="#r3">↩</a></li>
     <li id="fn4">Normalised cross-correlation. If a sound repeats, the waveform lines up with a shifted copy of itself once per repeat. <a href="#r4">↩</a></li>
-    <li id="fn5">SINS is a week of continuous recording in one home, with daily activities like cooking, washing up and vacuuming labelled. The questions cover days four to seven, and the same 298 questions went to every system. <a href="#r5">↩</a></li>
+    <li id="fn5">SINS, a public dataset recorded continuously in one home for a week, with daily activities like cooking, washing up and vacuuming labelled. <a href="#r5">↩</a></li>
     <li id="fn6">The smoothing is a Viterbi pass. Given second-by-second guesses about whether something is on, it finds the most likely sequence of on and off stretches, so a single noisy second can't split one boil into two. <a href="#r6">↩</a></li>
-    <li id="fn7">I also checked how well the same listeners hear emotion in a voice, using acted speech from actors the models never heard in training. The large self-taught models did best (Dasheng 0.74, where chance is 0.17). The ranking flipped between tasks: on kitchen clips the small AudioSet taggers matched BEATs, and on acted emotion they lost. It's in the appendix, since this post is about everything except speech. <a href="#r7">↩</a></li>
   </ol>
 </section>
 
@@ -445,7 +365,7 @@
     <li><b>Fitzgerald, 2010.</b> Harmonic/percussive separation using median filtering. The smooth-and-sharp trick.</li>
     <li><b>Rabiner, 1989.</b> A tutorial on hidden Markov models and selected applications in speech recognition. Still the friendliest introduction to the Viterbi smoothing behind the diary.</li>
     <li><b>Huh et al., 2023.</b> EPIC-SOUNDS: a large-scale dataset of actions that sound. The kitchen recordings behind the short-events results.</li>
-    <li><b>Cao et al., 2014.</b> CREMA-D: crowd-sourced emotional multimodal actors dataset. The acted voices in note 7.</li>
+    <li><b>Cao et al., 2014.</b> CREMA-D: crowd-sourced emotional multimodal actors dataset. The acted voices behind the emotion scores in the appendix.</li>
   </ul>
   <p>On writing things down instead of remembering:</p>
   <ul>
