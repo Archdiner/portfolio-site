@@ -618,7 +618,7 @@ function wireProgress() {
   addEventListener("scroll", on, { passive: true }); on();
 }
 function redrawAll() {
-  [drawBlind, drawKettleViews, drawZoom, syncSwitchers, drawTaps, drawBounce, drawProbe, drawPatches, drawTiny, drawRealMap, drawSelf, drawRepeats, redrawBenches]
+  [drawObjectives, drawBlind, drawKettleViews, drawZoom, syncSwitchers, drawTaps, drawBounce, drawProbe, drawPatches, drawTiny, drawRealMap, drawSelf, drawRepeats, redrawBenches]
     .forEach((f) => { try { f(); } catch (e) { /* that figure isn't on this page */ } });
 }
 
@@ -1117,13 +1117,18 @@ async function buildBenchTable() {
 
 
 /* ------------------------------------------------------------------ how each model learns */
-const OB = { model: "dasheng", tiles: null };
+// One training step, drawn the way papers draw it and played on a slow loop:
+// patches go in, the layers light up in turn, outputs come out, they meet the target at the loss,
+// and the error travels back into the one model that is learning.
+const OB = { model: "dasheng", tiles: null, raf: 0, t0: 0, vis: true, wide: null, nodes: null };
 const OB_TEXT = {
   dasheng: "Most patches are hidden. The model redraws them, the loss measures how far its drawing is from the real patches, and that error flows back to update the model.",
   eat: "The teacher sees the whole clip; the student sees only a few patches and tries to match what the teacher makes of the rest. Only the student learns from the loss. The teacher just takes a slow copy of the student.",
   usad: "Two frozen experts and a smaller student hear the same clip. The student learns to match both experts' outputs at once, so one small model ends up carrying a bit of each.",
 };
-const OB_HIDDEN = [1, 2, 4, 5, 6];
+const OB_HIDDEN = [1, 2, 4, 5, 6], OB_N = 8, OB_CYCLE = 7000;
+const OB_REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
 async function buildObjectives() {
   if (!$("#objectives")) return;
   if (!PT.data) {
@@ -1136,91 +1141,198 @@ async function buildObjectives() {
     else g.drawImage(PT.img, t * d.pt, 2 * d.pf, d.pt, d.pf, 0, 0, 48, 48);
     return c.toDataURL();
   };
-  const ts = Array.from({ length: 8 }, (_, i) => 6 + i);
+  const ts = Array.from({ length: OB_N }, (_, i) => 6 + i);
   OB.tiles = { real: ts.map((t) => tile(t)), blur: ts.map((t) => tile(t, true)) };
-  $$("#objTabs .tab").forEach((b) => b.addEventListener("click", () => { OB.model = b.dataset.obj; drawObjectives(); }));
+  $$("#objTabs .tab").forEach((b) => b.addEventListener("click", () => { OB.model = b.dataset.obj; OB.wide = null; drawObjectives(); }));
+  if ("IntersectionObserver" in window) new IntersectionObserver((es) => { OB.vis = es[0].isIntersecting; obKick(); }).observe($("#objectives"));
+  document.addEventListener("visibilitychange", obKick);
   drawObjectives();
 }
-const OB_T = 22, OB_G = 3, OB_GW = 4 * OB_T + 3 * OB_G, OB_GH = 2 * OB_T + OB_G;
-function obGrid(x, y, kinds) {  // 8 patches as a 4 x 2 grid
-  let s = "";
+
+/* --- drawing pieces ------------------------------------------------------- */
+function obGrid(x, y, kinds, t = 22, cls = "") {  // 8 patches as a 4 x 2 grid
+  const g = 3; let s = `<g class="${cls}">`;
   kinds.forEach((k, i) => {
-    const xx = x + (i % 4) * (OB_T + OB_G), yy = y + Math.floor(i / 4) * (OB_T + OB_G);
-    if (k === "real" || k === "blur") s += `<image href="${OB.tiles[k][i]}" x="${xx}" y="${yy}" width="${OB_T}" height="${OB_T}" preserveAspectRatio="none"/>` + (k === "blur" ? `<rect x="${xx}" y="${yy}" width="${OB_T}" height="${OB_T}" rx="2" class="ob-redraw"/>` : "");
-    else if (k === "hidden") s += `<rect x="${xx}" y="${yy}" width="${OB_T}" height="${OB_T}" rx="2" class="ob-hid"/><text x="${xx + OB_T / 2}" y="${yy + OB_T / 2 + 4}" class="ob-q" text-anchor="middle">?</text>`;
-    else if (k === "faint") s += `<rect x="${xx}" y="${yy}" width="${OB_T}" height="${OB_T}" rx="2" class="ob-faint"/>`;
-    else s += `<rect x="${xx}" y="${yy}" width="${OB_T}" height="${OB_T}" rx="2" class="ob-vec ${k}"/>`;
+    const xx = x + (i % 4) * (t + g), yy = y + Math.floor(i / 4) * (t + g);
+    if (k === "real" || k === "blur") s += `<image href="${OB.tiles[k][i]}" x="${xx}" y="${yy}" width="${t}" height="${t}" preserveAspectRatio="none"/>` + (k === "blur" ? `<rect x="${xx + .5}" y="${yy + .5}" width="${t - 1}" height="${t - 1}" rx="1.5" class="ob-redraw"/>` : "");
+    else if (k === "hidden") s += `<rect x="${xx}" y="${yy}" width="${t}" height="${t}" rx="2" class="ob-hid"/>`;
+    else if (k === "faint") s += `<rect x="${xx + .5}" y="${yy + .5}" width="${t - 1}" height="${t - 1}" rx="2" class="ob-faint"/>`;
+    else s += `<rect x="${xx}" y="${yy}" width="${t}" height="${t}" rx="2" class="ob-vec ${k}"/>`;
   });
-  return s;
-}
-function obSnow(x, y, col) {  // frozen
-  let s = `<g stroke="${col}" stroke-width="1.4" stroke-linecap="round">`;
-  for (let a = 0; a < 3; a++) { const r = (a * Math.PI) / 3; s += `<line x1="${x - 6 * Math.cos(r)}" y1="${y - 6 * Math.sin(r)}" x2="${x + 6 * Math.cos(r)}" y2="${y + 6 * Math.sin(r)}"/>`; }
   return s + "</g>";
 }
-// a transformer drawn as columns of layers, every node wired to every node in the next layer
-function obBlock(x, y, { w = 200, h = 118, layers = 3, tone = "learn", label, badge }) {
-  const col = tone === "frozen" ? C.teal : C.blood, n = 8, top = y + 14, step = (h - 28) / (n - 1);
-  const lx = (k) => x + 26 + k * ((w - 52) / (layers - 1)), ny = (i) => top + i * step;
-  let s = `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="9" class="ob-block ${tone}"/>`;
-  for (let k = 0; k < layers - 1; k++) for (let i = 0; i < n; i++) for (let j = 0; j < n; j++)
-    s += `<line x1="${lx(k)}" y1="${ny(i)}" x2="${lx(k + 1)}" y2="${ny(j)}" class="ob-att" style="animation-delay:${((i + j) % n) * 0.15 + k * 0.5}s"/>`;
-  for (let k = 0; k < layers; k++) for (let i = 0; i < n; i++) s += `<circle cx="${lx(k)}" cy="${ny(i)}" r="2.6" fill="${col}"/>`;
-  s += `<text x="${x}" y="${y - 8}" class="ob-blabel" fill="${col}">${label}</text>`;
-  if (badge) s += tone === "frozen" ? obSnow(x + w - 8, y - 12, col) + `<text x="${x + w - 18}" y="${y - 8}" class="ob-badge" text-anchor="end" fill="${col}">${badge}</text>` : `<text x="${x + w}" y="${y - 8}" class="ob-badge" text-anchor="end" fill="${col}">${badge}</text>`;
-  return { s, l: [x, y + h / 2], r: [x + w, y + h / 2], top: [x + w / 2, y], bot: [x + w / 2, y + h] };
+const obGW = (t = 22) => 4 * t + 9, obGH = (t = 22) => 2 * t + 3;
+function obSnow(x, y) {
+  let s = `<g class="ob-icon frozen" stroke-width="1.3" stroke-linecap="round">`;
+  for (let a = 0; a < 3; a++) { const r = (a * Math.PI) / 3; s += `<line x1="${(x - 5.5 * Math.cos(r)).toFixed(1)}" y1="${(y - 5.5 * Math.sin(r)).toFixed(1)}" x2="${(x + 5.5 * Math.cos(r)).toFixed(1)}" y2="${(y + 5.5 * Math.sin(r)).toFixed(1)}"/>`; }
+  return s + "</g>";
 }
-const obArrow = (x1, y1, x2, y2, cls = "ob-data") => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="${cls}" marker-end="url(#${cls === "ob-data" ? "obA" : cls === "ob-ema" ? "obE" : "obG"})"/>`;
-const obPath = (d, cls) => `<path d="${d}" class="${cls}" fill="none" marker-end="url(#${cls === "ob-ema" ? "obE" : "obG"})"/>`;
-const obLoss = (x, y) => `<circle cx="${x}" cy="${y}" r="19" class="ob-loss"/><text x="${x}" y="${y + 4}" class="ob-losst" text-anchor="middle">loss</text>`;
-const obLab = (x, y, t, a = "middle") => `<text x="${x}" y="${y}" class="ob-label" text-anchor="${a}">${t}</text>`;
-const OB_N = 8;
-function drawObjectives() {
-  const m = OB.model, hid = (i) => OB_HIDDEN.includes(i), all = (k) => Array.from({ length: OB_N }, () => k);
-  const masked = Array.from({ length: OB_N }, (_, i) => (hid(i) ? "hidden" : "real"));
-  $$("#objTabs .tab").forEach((b) => b.classList.toggle("on", b.dataset.obj === m));
-  let W = 760, H, s = "";
-  if (m === "dasheng") {
-    H = 250; const cy = 140;
-    s += obGrid(20, cy - OB_GH / 2, masked) + obLab(20 + OB_GW / 2, cy + 44, "most patches hidden");
-    const B = obBlock(160, cy - 59, { tone: "learn", label: "transformer", badge: "learning" });
-    s += B.s + obArrow(20 + OB_GW + 8, cy, 152, cy);
-    s += obArrow(B.r[0] + 8, cy, 392, cy) + obGrid(400, cy - OB_GH / 2, Array.from({ length: OB_N }, (_, i) => (hid(i) ? "blur" : "faint"))) + obLab(400 + OB_GW / 2, cy + 44, "its redraw");
-    s += obArrow(400 + OB_GW + 8, cy, 578, cy) + obLoss(600, cy);
-    s += obGrid(655, cy - OB_GH / 2, all("real")) + obLab(655 + OB_GW / 2, cy + 44, "real patches") + obArrow(650, cy, 623, cy);
-    s += obPath(`M 600 ${cy - 21} C 600 6, 272 6, 272 ${cy - 80}`, "ob-grad") + obLab(520, 62, "update the model");
-  } else if (m === "eat") {
-    H = 420; const ty = 92, sy = 300, ly = (ty + sy) / 2;
-    const T = obBlock(160, ty - 59, { tone: "frozen", label: "teacher", badge: "no gradients" });
-    const S = obBlock(160, sy - 59, { tone: "learn", label: "student", badge: "learning" });
-    s += T.s + S.s;
-    s += obGrid(20, ty - OB_GH / 2, all("real")) + obLab(20 + OB_GW / 2, ty + 42, "the whole clip") + obArrow(20 + OB_GW + 8, ty, 152, ty);
-    s += obGrid(20, sy - OB_GH / 2, masked) + obLab(20 + OB_GW / 2, sy + 42, "a few patches") + obArrow(20 + OB_GW + 8, sy, 152, sy);
-    const tOut = Array.from({ length: OB_N }, (_, i) => (hid(i) ? "target" : "faint")), sOut = Array.from({ length: OB_N }, (_, i) => (hid(i) ? "guess" : "faint"));
-    s += obArrow(T.r[0] + 8, ty, 392, ty) + obGrid(400, ty - OB_GH / 2, tOut) + obLab(400 + OB_GW / 2, ty + 42, "its view of the hidden ones");
-    s += obArrow(S.r[0] + 8, sy, 392, sy) + obGrid(400, sy - OB_GH / 2, sOut) + obLab(400 + OB_GW / 2, sy + 42, "the student's guess");
-    s += obLoss(600, ly) + obArrow(400 + OB_GW + 8, ty, 584, ly - 12) + obArrow(400 + OB_GW + 8, sy, 584, ly + 12);
-    s += obPath(`M 600 ${ly + 21} C 600 ${sy + 82}, 260 ${sy + 82}, 260 ${sy + 66}`, "ob-grad") + obLab(430, sy + 108, "update the student");
-    s += obPath(`M 110 ${sy - 66 + 8} C 70 ${ly + 20}, 70 ${ly - 20}, 152 ${ty + 50}`, "ob-ema");
-    s += `<text x="58" y="${ly + 4}" class="ob-label ema" text-anchor="middle">slow</text><text x="58" y="${ly + 19}" class="ob-label ema" text-anchor="middle">copy</text>`;
-  } else {
-    H = 490; const y1 = 78, y2 = 222, ys = 386, cx = 20, cyc = (y2 + ys) / 2 - 10;
-    const A = obBlock(200, y1 - 52, { h: 104, tone: "frozen", label: "speech expert", badge: "frozen" });
-    const Bk = obBlock(200, y2 - 52, { h: 104, tone: "frozen", label: "sound expert", badge: "frozen" });
-    const S = obBlock(230, ys - 44, { w: 140, h: 88, layers: 2, tone: "learn", label: "student", badge: "learning" });
-    s += A.s + Bk.s + S.s;
-    s += obGrid(cx, cyc - OB_GH / 2, all("real")) + obLab(cx + OB_GW / 2, cyc + 42, "the same clip");
-    s += obArrow(cx + OB_GW + 8, cyc - 8, 192, y1 + 10) + obArrow(cx + OB_GW + 8, cyc, 192, y2 + 8) + obArrow(cx + OB_GW + 8, cyc + 8, 222, ys);
-    s += obArrow(408, y1, 452, y1) + obGrid(460, y1 - OB_GH / 2, all("target"));
-    s += obArrow(408, y2, 452, y2) + obGrid(460, y2 - OB_GH / 2, all("target"));
-    s += obArrow(378, ys, 452, ys) + obGrid(460, ys - OB_GH / 2, all("guess")) + obLab(460 + OB_GW / 2, ys - 32, "the student's outputs");
-    const lx = 650, lyy = (y2 + ys) / 2 + 12;
-    s += obLoss(lx, lyy) + obArrow(460 + OB_GW + 8, y1, lx - 10, lyy - 18) + obArrow(460 + OB_GW + 8, y2, lx - 16, lyy - 10) + obArrow(460 + OB_GW + 8, ys, lx - 16, lyy + 10);
-    s += obPath(`M ${lx} ${lyy + 21} C ${lx} ${H - 40}, 300 ${H - 40}, 300 ${ys + 52}`, "ob-grad") + obLab(480, H - 8, "update the student");
+const obFlame = (x, y) => `<path class="ob-icon learn" transform="translate(${x} ${y})" d="M0 6.5 C-4.6 6.5 -5.4 1.6 -2.6 -1.4 C-2.2 0.6 -1 1.2 -0.6 0.4 C-1.4 -2.6 0.6 -5 1.6 -6.5 C1.8 -3.8 5 -2 4.4 2.2 C4 5 2.4 6.5 0 6.5 Z"/>`;
+// A transformer as papers draw it: one module, a stack of identical layers inside.
+// `dir` is the way data flows through it: "h" left to right, "v" top to bottom.
+function obBlock(id, x, y, w, h, { tone, title, dir, n = 6 }) {
+  let s = `<g class="ob-mod" data-id="${id}"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8" class="ob-block ${tone}"/>`;
+  s += `<text x="${x + 11}" y="${y + 18}" class="ob-title ${tone}">${title}</text>`;
+  s += tone === "frozen" ? obSnow(x + w - 14, y + 13) : obFlame(x + w - 14, y + 13);
+  const ix = x + 10, iy = y + 28, iw = w - 20, ih = h - 38, gap = 4;
+  for (let k = 0; k < n; k++) {
+    const r = dir === "h" ? [ix + k * ((iw + gap) / n), iy, (iw + gap) / n - gap, ih] : [ix, iy + k * ((ih + gap) / n), iw, (ih + gap) / n - gap];
+    s += `<rect x="${r[0].toFixed(1)}" y="${r[1].toFixed(1)}" width="${r[2].toFixed(1)}" height="${r[3].toFixed(1)}" rx="2.5" class="ob-layer ${tone}" data-k="${k}" data-n="${n}"/>`;
   }
-  const defs = `<defs>${[["obA", C.faint], ["obG", C.blood], ["obE", C.teal]].map(([id, c]) => `<marker id="${id}" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="${c}"/></marker>`).join("")}</defs>`;
-  $("#objSvg").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="How ${m} is trained">${defs}${s}</svg>`;
+  return s + `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="8" class="ob-flash ${tone}" data-flash="${id}"/></g>`;
+}
+const obLine = (d, ph, kind = "data") => `<path d="${d}" class="ob-line ${kind}" data-ph="${ph}" marker-end="url(#ob-${kind})"/>`;
+const obLoss = (x, y) => `<g class="ob-lossg"><circle cx="${x}" cy="${y}" r="20" class="ob-loss" data-r="20"/><text x="${x}" y="${y + 4}" class="ob-losst" text-anchor="middle">loss</text></g>`;
+const obLab = (x, y, t, a = "middle", cls = "") => `<text x="${x}" y="${y}" class="ob-label ${cls}" text-anchor="${a}">${t}</text>`;
+
+/* --- layouts: one wide, one tall, so the whole diagram is always on screen --- */
+function obLayout(m, wide) {
+  const hid = (i) => OB_HIDDEN.includes(i), all = (k) => Array.from({ length: OB_N }, () => k);
+  const masked = all(0).map((_, i) => (hid(i) ? "hidden" : "real"));
+  const only = (k) => all(0).map((_, i) => (hid(i) ? k : "faint"));
+  let W, H, s = "";
+  if (wide) {
+    W = 760; const t = 22, gw = obGW(t), gh = obGH(t);
+    if (m === "dasheng") {
+      H = 236; const cy = 96;
+      s += obGrid(20, cy - gh / 2, masked) + obLab(20 + gw / 2, cy + gh / 2 + 20, "most patches hidden");
+      s += obLine(`M ${26 + gw} ${cy} H 174`, "in") + obBlock("s", 180, cy - 50, 170, 100, { tone: "learn", title: "Transformer", dir: "h" });
+      s += obLine(`M 356 ${cy} H 404`, "out") + obGrid(410, cy - gh / 2, only("blur"), t, "ob-outg") + obLab(410 + gw / 2, cy + gh / 2 + 20, "its redraw");
+      s += obLine(`M ${416 + gw} ${cy} H 563`, "loss") + obLoss(585, cy);
+      s += obGrid(642, cy - gh / 2, all("real")) + obLab(642 + gw / 2, cy + gh / 2 + 20, "real patches") + obLine(`M 636 ${cy} H 609`, "loss");
+      s += obLine(`M 585 ${cy + 22} C 585 ${cy + 120}, 265 ${cy + 120}, 265 ${cy + 56}`, "grad", "grad") + obLab(425, cy + 128, "the error updates the model", "middle", "grad");
+    } else if (m === "eat") {
+      H = 352; const ty = 70, sy = 252, ly = (ty + sy) / 2;
+      s += obGrid(20, ty - gh / 2, all("real")) + obLab(20 + gw / 2, ty + gh / 2 + 20, "the whole clip");
+      s += obGrid(20, sy - gh / 2, masked) + obLab(20 + gw / 2, sy + gh / 2 + 20, "a few patches");
+      s += obLine(`M ${26 + gw} ${ty} H 174`, "in") + obLine(`M ${26 + gw} ${sy} H 174`, "in");
+      s += obBlock("t", 180, ty - 46, 170, 92, { tone: "frozen", title: "Teacher", dir: "h" });
+      s += obBlock("s", 180, sy - 46, 170, 92, { tone: "learn", title: "Student", dir: "h" });
+      s += obLine(`M 356 ${ty} H 404`, "out") + obGrid(410, ty - gh / 2, only("target"), t, "ob-outg") + obLab(410 + gw / 2, ty + gh / 2 + 20, "what it makes of the hidden part");
+      s += obLine(`M 356 ${sy} H 404`, "out") + obGrid(410, sy - gh / 2, only("guess"), t, "ob-outg") + obLab(410 + gw / 2, sy + gh / 2 + 20, "the student's guess");
+      s += obLoss(620, ly) + obLine(`M ${416 + gw} ${ty} C 580 ${ty}, 620 ${ty + 30}, 620 ${ly - 24}`, "loss") + obLine(`M ${416 + gw} ${sy} C 580 ${sy}, 620 ${sy - 30}, 620 ${ly + 24}`, "loss");
+      s += obLine(`M 642 ${ly + 4} C 730 ${ly + 40}, 720 ${H - 22}, 560 ${H - 22} L 300 ${H - 22} C 270 ${H - 22}, 265 ${H - 30}, 265 ${sy + 52}`, "grad", "grad") + obLab(440, H - 33, "the error updates the student", "middle", "grad");
+      s += obLine(`M 265 ${sy - 50} V ${ty + 50}`, "ema", "ema") + obLab(275, ly + 4, "slow copy", "start", "ema");
+    } else {
+      H = 402; const y1 = 62, y2 = 172, ys = 300, cyc = 186;
+      s += obGrid(20, cyc - gh / 2, all("real")) + obLab(20 + gw / 2, cyc + gh / 2 + 20, "one clip");
+      s += obLine(`M ${26 + gw} ${cyc - 6} C 150 ${cyc - 6}, 140 ${y1}, 174 ${y1}`, "in") + obLine(`M ${26 + gw} ${cyc} C 150 ${cyc}, 150 ${y2}, 174 ${y2}`, "in") + obLine(`M ${26 + gw} ${cyc + 6} C 150 ${cyc + 6}, 160 ${ys}, 199 ${ys}`, "in");
+      s += obBlock("t", 180, y1 - 42, 170, 84, { tone: "frozen", title: "Speech expert", dir: "h" });
+      s += obBlock("t", 180, y2 - 42, 170, 84, { tone: "frozen", title: "Sound expert", dir: "h" });
+      s += obBlock("s", 205, ys - 36, 120, 72, { tone: "learn", title: "Student", dir: "h", n: 4 });
+      s += obLine(`M 356 ${y1} H 404`, "out") + obGrid(410, y1 - gh / 2, all("target"), t, "ob-outg");
+      s += obLine(`M 356 ${y2} H 404`, "out") + obGrid(410, y2 - gh / 2, all("target"), t, "ob-outg") + obLab(410 + gw / 2, y2 + gh / 2 + 18, "the experts' outputs");
+      s += obLine(`M 331 ${ys} H 404`, "out") + obGrid(410, ys - gh / 2, all("guess"), t, "ob-outg") + obLab(410 + gw / 2, ys + gh / 2 + 18, "the student's outputs");
+      const lx = 640, lyy = 236;
+      s += obLoss(lx, lyy) + obLine(`M ${416 + gw} ${y1} C 600 ${y1}, ${lx} ${y1 + 40}, ${lx - 6} ${lyy - 23}`, "loss") + obLine(`M ${416 + gw} ${y2} C 590 ${y2}, ${lx - 30} ${lyy - 14}, ${lx - 21} ${lyy - 8}`, "loss") + obLine(`M ${416 + gw} ${ys} C 590 ${ys}, ${lx - 10} ${ys - 10}, ${lx - 6} ${lyy + 23}`, "loss");
+      s += obLine(`M ${lx + 20} ${lyy + 8} C 740 ${lyy + 80}, 700 ${H - 22}, 560 ${H - 22} L 300 ${H - 22} C 270 ${H - 22}, 265 ${H - 30}, 265 ${ys + 42}`, "grad", "grad") + obLab(440, H - 31, "the error updates the student", "middle", "grad");
+    }
+  } else {
+    W = 360; const t = 18, gw = obGW(t), gh = obGH(t);
+    if (m === "dasheng") {
+      H = 384; const cx = 112, gx = cx - gw / 2;
+      s += obGrid(gx, 14, masked, t) + obLab(gx + gw + 14, 14 + gh / 2 + 4, "most patches hidden", "start");
+      s += obLine(`M ${cx} ${20 + gh} V 90`, "in") + obBlock("s", cx - 76, 96, 152, 100, { tone: "learn", title: "Transformer", dir: "v", n: 5 });
+      s += obLine(`M ${cx} 202 V 228`, "out") + obGrid(gx, 234, only("blur"), t, "ob-outg") + obLab(gx + gw + 14, 234 + gh / 2 + 4, "its redraw", "start");
+      s += obLine(`M ${cx} ${240 + gh} V 300`, "loss") + obLoss(cx, 322);
+      s += obGrid(210, 322 - gh / 2, all("real"), t) + obLab(210 + gw / 2, 322 + gh / 2 + 18, "real patches") + obLine(`M 204 322 H 136`, "loss");
+      s += obLine(`M ${cx - 22} 322 C 10 322, 12 146, 30 146`, "grad", "grad");
+    } else if (m === "eat") {
+      H = 420; const tx = 88, sx = 272, off = 44, bw = 136;
+      s += obLab(tx, 14, "the whole clip") + obGrid(tx - gw / 2, 22, all("real"), t);
+      s += obLab(sx, 14 + off, "a few patches") + obGrid(sx - gw / 2, 22 + off, masked, t);
+      s += obLine(`M ${tx} ${28 + gh} V 90`, "in") + obLine(`M ${sx} ${28 + gh + off} V ${90 + off}`, "in");
+      s += obBlock("t", tx - bw / 2, 96, bw, 96, { tone: "frozen", title: "Teacher", dir: "v", n: 5 });
+      s += obBlock("s", sx - bw / 2, 96 + off, bw, 96, { tone: "learn", title: "Student", dir: "v", n: 5 });
+      s += obLine(`M ${tx} 198 V 222`, "out") + obGrid(tx - gw / 2, 228, only("target"), t, "ob-outg");
+      s += obLine(`M ${sx} ${198 + off} V ${222 + off}`, "out") + obGrid(sx - gw / 2, 228 + off, only("guess"), t, "ob-outg");
+      const ly = 352;
+      s += obLoss(180, ly) + obLine(`M ${tx} ${234 + gh} C ${tx} ${ly}, 120 ${ly}, 154 ${ly}`, "loss") + obLine(`M ${sx} ${234 + gh + off} C ${sx} ${ly}, 240 ${ly}, 206 ${ly}`, "loss");
+      s += obLine(`M 180 ${ly + 22} C 180 ${H - 4}, 352 ${H - 4}, 352 ${ly - 10} C 352 ${ly - 120}, 352 ${144 + off}, ${sx + bw / 2 + 6} ${144 + off}`, "grad", "grad");
+      s += obLine(`M ${sx - bw / 2} ${144 + off - 26} C ${180} ${144 + off - 26}, 180 150, ${tx + bw / 2 + 6} 150`, "ema", "ema") + obLab(180, 178, "slow", "middle", "ema") + obLab(180, 192, "copy", "middle", "ema");
+    } else {
+      H = 430; const t1 = 90, t2 = 270, bw = 150;
+      s += obGrid(180 - gw / 2, 12, all("real"), t) + obLab(180 + gw / 2 + 12, 12 + gh / 2 + 4, "one clip", "start");
+      s += obLine(`M ${180 - 10} ${18 + gh} C ${180 - 10} 80, ${t1} 64, ${t1} 86`, "in") + obLine(`M ${180 + 10} ${18 + gh} C ${180 + 10} 80, ${t2} 64, ${t2} 86`, "in") + obLine(`M 180 ${18 + gh} V 216`, "in");
+      s += obBlock("t", t1 - bw / 2 + 6, 92, bw - 12, 78, { tone: "frozen", title: "Speech expert", dir: "v", n: 4 });
+      s += obBlock("t", t2 - bw / 2 - 6, 92, bw - 12, 78, { tone: "frozen", title: "Sound expert", dir: "v", n: 4 });
+      s += obBlock("s", 180 - 55, 222, 110, 70, { tone: "learn", title: "Student", dir: "v", n: 3 });
+      const ot = 12, ogw = obGW(ot), ogh = obGH(ot);
+      s += obLine(`M ${t1} 176 V 196`, "out") + obGrid(t1 - ogw / 2, 202, all("target"), ot, "ob-outg");
+      s += obLine(`M ${t2} 176 V 196`, "out") + obGrid(t2 - ogw / 2, 202, all("target"), ot, "ob-outg");
+      s += obLine(`M 180 298 V 316`, "out") + obGrid(180 - ogw / 2, 322, all("guess"), ot, "ob-outg");
+      const ly = 384;
+      s += obLoss(180, ly) + obLine(`M ${t1} ${208 + ogh} C ${t1} ${ly}, 130 ${ly}, 154 ${ly}`, "loss") + obLine(`M ${t2} ${208 + ogh} C ${t2} ${ly}, 230 ${ly}, 206 ${ly}`, "loss") + obLine(`M 180 ${328 + ogh} V 358`, "loss");
+      s += obLine(`M 166 ${ly + 16} C 120 ${H - 2}, 20 ${H}, 20 340 C 20 270, 60 257, 119 257`, "grad", "grad");
+    }
+  }
+  return { W, H, s };
+}
+
+/* --- draw + animate ------------------------------------------------------- */
+function drawObjectives() {
+  const host = $("#objSvg"); if (!host || !OB.tiles) return;
+  const m = OB.model, wide = host.clientWidth >= 560;
+  $$("#objTabs .tab").forEach((b) => b.classList.toggle("on", b.dataset.obj === m));
   $("#objCaption").textContent = OB_TEXT[m];
+  if (OB.wide === wide && host.dataset.m === m) return;  // nothing changed shape
+  OB.wide = wide; host.dataset.m = m;
+  const { W, H, s } = obLayout(m, wide);
+  const defs = `<defs>${[["data", C.faint], ["grad", C.blood], ["ema", C.teal]].map(([id, c]) => `<marker id="ob-${id}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M1,1.5 L8.5,5 L1,8.5" fill="none" stroke="${c}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker>`).join("")}</defs>`;
+  host.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="How ${m} is trained">${defs}${s}<g class="ob-dots"></g></svg>`;
+  const svg = host.firstChild, dots = svg.querySelector(".ob-dots");
+  const paths = (ph) => [...svg.querySelectorAll(`.ob-line[data-ph="${ph}"]`)].map((p) => {
+    const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    c.setAttribute("r", ph === "grad" || ph === "ema" ? 4.5 : 3.5); c.setAttribute("class", `ob-dot ${ph}`); c.style.opacity = 0; dots.appendChild(c);
+    return { p, c, L: p.getTotalLength() };
+  });
+  OB.nodes = {
+    ph: { in: paths("in"), out: paths("out"), loss: paths("loss"), grad: paths("grad"), ema: paths("ema") },
+    layers: [...svg.querySelectorAll(".ob-layer")], outs: [...svg.querySelectorAll(".ob-outg")],
+    loss: svg.querySelector(".ob-loss"), flashS: [...svg.querySelectorAll('[data-flash="s"]')], flashT: [...svg.querySelectorAll('[data-flash="t"]')],
+  };
+  if (OB.raf) { cancelAnimationFrame(OB.raf); OB.raf = 0; }
+  OB.t0 = performance.now();
+  obFrame(OB.t0);
+  obKick();
+}
+function obKick() {
+  const go = !OB_REDUCED && OB.vis && !document.hidden && OB.nodes;
+  if (go && !OB.raf) OB.raf = requestAnimationFrame(obFrame);
+  if (!go && OB.raf) { cancelAnimationFrame(OB.raf); OB.raf = 0; }
+}
+const obEase = (x) => (x < 0.5 ? 2 * x * x : 1 - (-2 * x + 2) ** 2 / 2);
+const obWin = (p, a, b) => (p < a || p > b ? -1 : (p - a) / (b - a));  // -1 outside the window, else 0..1
+const obBump = (p, c, w) => Math.max(0, 1 - Math.abs(p - c) / w);
+function obFrame(now) {
+  OB.raf = 0;
+  const N = OB.nodes; if (!N) return;
+  const p = OB_REDUCED ? -1 : ((now - OB.t0) % OB_CYCLE) / OB_CYCLE;
+  const travel = (list, a, b) => list.forEach(({ p: path, c, L }) => {
+    const u = obWin(p, a, b);
+    if (u < 0) { c.style.opacity = 0; return; }
+    const pt = path.getPointAtLength(obEase(u) * L);
+    c.setAttribute("cx", pt.x); c.setAttribute("cy", pt.y);
+    c.style.opacity = Math.min(1, u * 6, (1 - u) * 6);
+  });
+  travel(N.ph.in, 0.02, 0.15);
+  N.layers.forEach((r) => {  // each layer lights up in turn as the patches pass through
+    const k = +r.dataset.k, n = +r.dataset.n, c = 0.19 + (k / Math.max(1, n - 1)) * 0.16;
+    r.style.fillOpacity = p < 0 ? "" : (0.1 + 0.62 * obBump(p, c, 0.05)).toFixed(3);
+  });
+  travel(N.ph.out, 0.36, 0.44);
+  const shown = p < 0 ? 1 : p < 0.42 ? 0.18 : p < 0.47 ? 0.18 + 0.82 * ((p - 0.42) / 0.05) : p > 0.96 ? 0.18 + 0.82 * ((1 - p) / 0.04) : 1;
+  N.outs.forEach((g) => (g.style.opacity = shown.toFixed(3)));
+  travel(N.ph.loss, 0.47, 0.58);
+  const pulse = p < 0 ? 0 : obBump(p, 0.62, 0.05);
+  if (N.loss) { N.loss.setAttribute("r", (20 + 4 * pulse).toFixed(2)); N.loss.style.stroke = pulse > 0.05 ? C.blood : ""; N.loss.style.strokeWidth = (1.2 + 1.2 * pulse).toFixed(2); }
+  travel(N.ph.grad, 0.66, 0.84);
+  const fs = p < 0 ? 0 : obBump(p, 0.88, 0.05);
+  N.flashS.forEach((r) => (r.style.opacity = (0.5 * fs).toFixed(3)));
+  travel(N.ph.ema, 0.86, 0.95);
+  const ft = p < 0 || !N.ph.ema.length ? 0 : obBump(p, 0.97, 0.03);
+  N.flashT.forEach((r) => (r.style.opacity = (0.45 * ft).toFixed(3)));
+  obKick();
 }
 
 boot();
