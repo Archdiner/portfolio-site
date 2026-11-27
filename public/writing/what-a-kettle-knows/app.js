@@ -161,10 +161,10 @@ function svg(w, h, body, label) { return `<svg viewBox="0 0 ${w} ${h}" role="img
 
 /* ------------------------------------------------------------------ cold open */
 const GUESS = {
-  vacuum: ["You said: a vacuum cleaner", "Hold that thought. You're not the only listener who heard a vacuum cleaner in this recording, and we'll meet the other one later."],
+  vacuum: ["You said: a vacuum cleaner", "Hold that thought. You're not the only one who heard a vacuum cleaner in this recording, and later we'll meet a model that did too."],
   tea: ["You said: someone making tea", "Very close. This is the first half of making tea: the kettle, from the moment it's switched on to the moment it switches itself off."],
   rain: ["You said: rain on a window", "Fair enough. A rolling boil and rain both hiss, because both are thousands of tiny impacts at once. The clicks at the start and the end give the kettle away."],
-  coffee: ["You said: a coffee machine", "Good instinct: a kitchen machine heating water. You'll meet another listener later that made exactly the same guess."],
+  coffee: ["You said: a coffee machine", "Good instinct: a kitchen machine heating water. Later you'll meet a model that made exactly the same guess."],
 };
 let heardMax = 0;
 function buildBlind() {
@@ -192,8 +192,8 @@ function updateCallback() {
   const el = $("#guessCallback");
   if (!el) return;
   const base = "A light switch, then running water, then a coffee machine, and then, for most of the boil… a vacuum cleaner.";
-  if (S.guess === "vacuum") el.textContent = `If you guessed a vacuum cleaner at the top, you and the Ear agree. ${base}`;
-  else if (S.guess === "coffee") el.textContent = `If you guessed a coffee machine at the top, so did the Ear, for a while. ${base}`;
+  if (S.guess === "vacuum") el.textContent = `If you guessed a vacuum cleaner at the top, you and fine-tuned EAT agree. ${base}`;
+  else if (S.guess === "coffee") el.textContent = `If you guessed a coffee machine at the top, so did fine-tuned EAT, for a while. ${base}`;
   else el.textContent = base;
 }
 
@@ -205,7 +205,7 @@ const SPEC_NOTES = [
   [2.7, 6, "the click: a thin vertical line"], [8, 80, "heating: low rumble builds"], [45, 55, "the boil: every pitch at once"], [99, 28, "click off: the water settles", true],
 ];
 const LOG = [
-  [2.7, "kettle switched on"], [12.7, "kettle boiling"], [99.0, "kettle switched off"],
+  [2.7, "kettle on, heating"], [12.7, "kettle on, boiling"], [99.0, "kettle off"],
 ];
 function buildKettleViews() {
   if ($("#momentPins")) $("#momentPins").innerHTML = MOMENTS.map(([t, l, row, r]) =>
@@ -247,7 +247,7 @@ function syncKettle() {
   $$(".spec-note").forEach((p) => { const pt = Number(p.dataset.t); p.classList.toggle("lit", t >= pt - 1 && t <= pt + (pt === 45 ? 50 : 8)); });
   // ear
   const now = S.k.events.filter((e) => t >= e.start && t <= e.end).map((e) => EAR_WORDS[e.label] || e.text);
-  if ($("#earNow")) $("#earNow").textContent = activeView === "ear" && t > 0 ? (now.length ? `Ear hears: ${[...new Set(now)].join(" + ")}` : "Ear hears: nothing") : "";
+  if ($("#earNow")) $("#earNow").textContent = activeView === "ear" && t > 0 ? (now.length ? `fine-tuned EAT hears: ${[...new Set(now)].join(" + ")}` : "fine-tuned EAT hears: nothing") : "";
   // log
   if (Math.abs(t - lastLogT) > 0.05) { lastLogT = t; drawLog(t); }
 }
@@ -511,19 +511,22 @@ function buildDiary() {
     const r = e.currentTarget.getBoundingClientRect();
     activeView = "diary"; kettle.currentTime = ((e.clientX - r.left) / r.width) * kDur(); syncKettle();
   });
-  const HOW = [
-    ["boiling ended − boiling started = 1:39.0 − 0:12.7", 12.7, 99],
-    ["the first “switched on” entry", 2.7, 12.7],
-    ["the last “switched off” entry", 99, 110],
-    ["count the “switched on” entries", 2.7, 12.7],
-    ["look up which entry covers 0:30", 12.7, 99],
-    ["look up which entry covers 1:45", 99, 110],
-    ["switched off − switched on = 1:39.0 − 0:02.7", 2.7, 99],
+  const ENTRIES = [[2.7, 12.7, "kettle on, heating"], [12.7, 99.0, "kettle on, boiling"], [99.0, D, "kettle off"]];
+  $("#diaryList").innerHTML = ENTRIES.map(([a, z, l], i) => `<li data-e="${i}"><time>${clockT(a)} to ${clockT(z)}</time><span>${l}</span></li>`).join("");
+  const HOW = [  // how each answer is read off the diary: [working, entries used]
+    ["end of the boiling entry minus its start: 1:39.0 − 0:12.7", [1]],
+    ["the start of the first “on” entry", [0]],
+    ["the start of the “off” entry", [2]],
+    ["count the times an “on” entry follows an “off” stretch", [0]],
+    ["0:30 falls inside the boiling entry", [1]],
+    ["1:45 falls inside the “off” entry", [2]],
+    ["end of the last “on” entry minus the start of the first: 1:39.0 − 0:02.7", [0, 1]],
   ];
   $("#questions").innerHTML = S.k.questions.map((q, i) => `<button class="q" data-q="${i}">${esc(q.q)}<span class="a">${esc(q.answer)}</span><span class="how"></span></button>`).join("");
   $$("#questions .q").forEach((b) => b.addEventListener("click", () => {
-    const [how, a, z] = HOW[b.dataset.q];
+    const [how, rows] = HOW[b.dataset.q], a = ENTRIES[rows[0]][0], z = ENTRIES[rows[rows.length - 1]][1];
     b.classList.add("open"); $(".how", b).textContent = how;
+    $$("#diaryList li").forEach((li) => li.classList.toggle("on", rows.includes(+li.dataset.e)));
     const hl = $("#diaryHl");
     hl.style.left = `${(a / D) * 100}%`; hl.style.width = `${((z - a) / D) * 100}%`; hl.classList.add("on");
   }));
@@ -567,7 +570,7 @@ function buildCost() {
   const E = Object.fromEntries(S.results.encoders.map((e) => [e.id, e]));
   const rows = [
     ["Small AudioSet tagger", E.mn10_as.rtf_1c, C.blood],
-    ["EAT (what the Ear is built on)", E.eat_pretrain.rtf_1c, C.teal],
+    ["EAT (before fine-tuning)", E.eat_pretrain.rtf_1c, C.teal],
     ["BEATs on its own", E.beats_iter3.rtf_1c, C.teal],
     ["Full diary system", S.results.t4.rtf_1c, C.ink],
   ];
@@ -593,7 +596,7 @@ const FAILURES = [
   ["Heads for short kitchen events", "fail", "0.179–0.213 vs linear 0.228", "Limited by data from five kitchens."],
   ["Dasheng on short kitchen events", "fail", "0.388 vs BEATs 0.438", "Self-supervision didn't rescue a small label set."],
   ["Adding AudioSet-Strong labels", "fail", "−0.033 on the target", "The extra labels hurt."],
-  ["Re-listen when unsure", "fail", "AUC 0.685 vs Ear 0.869", "No gain from a second look."],
+  ["Re-listen when unsure", "fail", "AUC 0.685 vs fine-tuned EAT 0.869", "No gain from a second look."],
   ["Fine-tune to convergence", "inconclusive", "0.466 [0.423, 0.500] vs frozen 0.438", "Fold-2 validation loss was still falling at epoch 4."],
   ["Counting with embeddings", "fail", "0.00–0.14 vs waveform 0.940", "Kept waveform cross-correlation."],
   ["Novelty alarm", "fail", "40.9 false alarms a day; hit rate 0.51 at 10 dB", "Not usable as an always-on alert."],
@@ -793,7 +796,7 @@ function drawCurve() {
   };
   let b = panel(0, "Training loss", "loss", 0.08, 0.26, (v) => v.toFixed(2)) + panel(pw + gapX, "F1 on validation clips", "f1", 0.78, 0.92, (v) => v.toFixed(2));
   b += Object.entries(CURVE).map(([lr, d], i) => `<rect x="${34 + i * 110}" y="${H - 12}" width="10" height="10" rx="2" fill="${d.c}"/><text x="${50 + i * 110}" y="${H - 3}" font-size="11" fill="${C.muted}">rate ${lr}</text>`).join("");
-  $("#curveSvg").innerHTML = svg(W, H, b, "Training curves of the Ear");
+  $("#curveSvg").innerHTML = svg(W, H, b, "Training curves of fine-tuned EAT");
   $("#curveEpoch").textContent = `epoch ${curveE} of 9`;
 }
 
@@ -860,7 +863,7 @@ async function buildReal() {
   RM.d = await json("real_models");
   if ($("#realLegend")) $("#realLegend").innerHTML = RM.d.maps.classes.map((c, i) => `<span><i style="background:${TINY_COLORS[i]}"></i>${esc(c)}</span>`).join("");
   if ($("#realTabs")) $$("#realTabs .tab").forEach((b) => b.addEventListener("click", () => { RM.map = b.dataset.m; $$("#realTabs .tab").forEach((x) => x.classList.toggle("on", x === b)); drawRealMap(); }));
-  if ($("#simModelTabs")) $$("#simModelTabs .tab").forEach((b) => b.addEventListener("click", () => { RM.self = b.dataset.m; $$("#simModelTabs .tab").forEach((x) => x.classList.toggle("on", x === b)); playSelf(); }));
+  if ($("#simModelTabs")) $$("#simModelTabs .tab").forEach((b) => b.addEventListener("click", () => { RM.self = b.dataset.m; $$("#simModelTabs .tab").forEach((x) => x.classList.toggle("on", x === b)); drawSelf(); }));
   $$("#repMode .tab").forEach((b) => b.addEventListener("click", () => { RM.mode = b.dataset.mode; $$("#repMode .tab").forEach((x) => x.classList.toggle("on", x === b)); drawRepeats(); }));
   if ($("#repeats")) {
   RM.audio = makeAudio("assets/audio/repeats.mp3");
@@ -1061,13 +1064,9 @@ function buildReport() {
 
 
 /* ------------------------------------------------------------------ every-moment map: hover readout */
-// The self-similarity map, and an animation of how it's made: pick one moment, compare it with
-// every other moment, colour that column by how alike they are, then do the same for every moment.
-const SS_GAP = 6, SS_STRIP = 30, SS_FOCUS = 45, SS_T1 = 2600, SS_T2 = 2600;
-const SS_HOW = {
-  spectrogram: "Pick one moment and compare it with every other moment of the recording. Alike pairs are bright, different ones dark. Then do the same for every moment.",
-  model: (m) => `The same idea, but each moment is first passed through ${m}, and its outputs are compared instead of the raw picture.`,
-};
+// The self-similarity map, with the recording drawn along both axes so it's clear where it comes from.
+// One pair of moments is marked; hovering or tapping moves the mark.
+const SS_GAP = 6, SS_STRIP = 30;
 function ssMap(key) {
   RM.ssImg = RM.ssImg || {};
   if (RM.ssImg[key]) return RM.ssImg[key];
@@ -1078,80 +1077,41 @@ function ssMap(key) {
   x.putImageData(img, 0, 0);
   return (RM.ssImg[key] = { o, raw, n });
 }
-function ssGeom(cv) {
-  const tot = Math.min(cv.parentElement.clientWidth || 380, 400);
-  cv.style.width = tot + "px"; cv.dataset.h = tot;
-  const off = SS_STRIP + SS_GAP;
-  return { tot, off, side: tot - off };
-}
-// u: animation time in ms, or null for the finished map
-function drawSelf(u = RM.ssU ?? null) {
+const ssWord = (v) => (v > 0.8 ? "very alike" : v > 0.55 ? "fairly alike" : v > 0.3 ? "somewhat different" : "very different");
+function drawSelf() {
   if (!RM.d || !$("#selfCanvas")) return;
-  const cv = $("#selfCanvas"), G = ssGeom(cv), { g } = sizeCanvas(cv), { off, side } = G;
-  const M = ssMap(RM.self), n = M.n, dur = RM.d.selfsim.duration, cell = side / n;
-  const spec = specImage(S.k.spec);
-  g.fillStyle = C.card; g.fillRect(0, 0, G.tot, G.tot);
-  // the recording along the top (time runs right) and down the side (time runs down)
+  const cv = $("#selfCanvas"), tot = Math.min(cv.parentElement.clientWidth || 380, 400);
+  cv.style.width = tot + "px"; cv.dataset.h = tot;
+  const { g } = sizeCanvas(cv), off = SS_STRIP + SS_GAP, side = tot - off;
+  const M = ssMap(RM.self), n = M.n, dur = RM.d.selfsim.duration, spec = specImage(S.k.spec);
+  const pick = RM.ssPick || [45, 105];  // [across, down] in seconds
+  g.fillStyle = C.card; g.fillRect(0, 0, tot, tot);
   g.imageSmoothingEnabled = true;
   g.drawImage(spec, off, 0, side, SS_STRIP);
   g.save(); g.translate(SS_STRIP, off); g.rotate(Math.PI / 2); g.drawImage(spec, 0, 0, side, SS_STRIP); g.restore();
   g.imageSmoothingEnabled = false;
-  const c0 = Math.round((SS_FOCUS / dur) * n);
-  let colsDone = n, row = -1, focus = -1;
-  if (u != null) {
-    if (u < SS_T1) { colsDone = 0; focus = c0; row = Math.floor(easeIO(u / SS_T1) * n); }
-    else { colsDone = Math.floor(easeIO(Math.min(1, (u - SS_T1) / SS_T2)) * n); focus = colsDone < n ? colsDone : -1; }
-  }
-  g.fillStyle = "#efe7d8"; g.fillRect(off, off, side, side);
-  if (colsDone > 0) g.drawImage(M.o, 0, 0, colsDone, n, off, off, colsDone * cell, side);
-  if (u != null && u < SS_T1) g.drawImage(M.o, c0, 0, 1, row + 1, off + c0 * cell + cell / 2 - Math.max(cell, 4) / 2, off, Math.max(cell, 4), (row + 1) * cell);
-  else if (u != null && colsDone < n) g.drawImage(M.o, c0, 0, 1, n, off + c0 * cell + cell / 2 - Math.max(cell, 4) / 2, off, Math.max(cell, 4), side);
-  if (focus >= 0) {  // the moment being compared, marked on the strip and on the map
-    const x = off + focus * cell + cell / 2;
-    g.strokeStyle = C.peach; g.lineWidth = 2;
-    g.strokeRect(x - 3, 1, 6, SS_STRIP - 2);
-    if (row >= 0) {
-      const y = off + row * cell + cell / 2;
-      g.strokeRect(1, y - 3, SS_STRIP - 2, 6);
-      g.globalAlpha = 0.55; g.lineWidth = 1; g.setLineDash([]);
-      g.beginPath(); g.moveTo(x, SS_STRIP); g.lineTo(x, off); g.moveTo(SS_STRIP, y); g.lineTo(x - 4, y); g.stroke(); g.globalAlpha = 1;
-      g.fillStyle = C.peach; g.beginPath(); g.arc(x, y, 3.5, 0, 7); g.fill();
-      const v = M.raw[row * n + focus] / 255;
-      $("#selfNote").textContent = `${clock((focus / n) * dur)} against ${clock((row / n) * dur)}: ${ssWord(v)}. ${RM.self === "spectrogram" ? SS_HOW.spectrogram : SS_HOW.model(RM.self)}`;
-    }
-  }
-  if (u == null) $("#selfNote").textContent = SELF_NOTES[RM.self];
-  else if (row < 0) $("#selfNote").textContent = RM.self === "spectrogram" ? SS_HOW.spectrogram : SS_HOW.model(RM.self);
-}
-const easeIO = (x) => (x < 0.5 ? 2 * x * x : 1 - (-2 * x + 2) ** 2 / 2);
-const ssWord = (v) => (v > 0.8 ? "very alike" : v > 0.55 ? "fairly alike" : v > 0.3 ? "somewhat different" : "very different");
-function playSelf() {
-  cancelAnimationFrame(RM.ssRaf);
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) { RM.ssU = null; drawSelf(); return; }
-  const t0 = performance.now();
-  const step = (now) => {
-    const u = now - t0;
-    if (u >= SS_T1 + SS_T2) { RM.ssU = null; drawSelf(); return; }
-    RM.ssU = u; drawSelf(u); RM.ssRaf = requestAnimationFrame(step);
-  };
-  RM.ssRaf = requestAnimationFrame(step);
+  g.drawImage(M.o, off, off, side, side);
+  const x = off + (pick[0] / dur) * side, y = off + (pick[1] / dur) * side;
+  g.strokeStyle = C.peach; g.lineWidth = 2;
+  g.strokeRect(x - 3, 1, 6, SS_STRIP - 2); g.strokeRect(1, y - 3, SS_STRIP - 2, 6);
+  g.globalAlpha = 0.7; g.lineWidth = 1;
+  g.beginPath(); g.moveTo(x, SS_STRIP); g.lineTo(x, y - 6); g.moveTo(SS_STRIP, y); g.lineTo(x - 6, y); g.stroke(); g.globalAlpha = 1;
+  g.beginPath(); g.arc(x, y, 5, 0, 7); g.stroke();
+  const j = Math.min(n - 1, Math.floor((pick[0] / dur) * n)), i = Math.min(n - 1, Math.floor((pick[1] / dur) * n));
+  const who = RM.self === "spectrogram" ? "In the raw spectrogram" : `To ${RM.self}`;
+  $("#selfNote").innerHTML = `<b>${who}, ${clock(pick[0])} and ${clock(pick[1])} are ${ssWord(M.raw[i * n + j] / 255)}.</b> ${esc(SELF_NOTES[RM.self])}`;
 }
 function wireSelfHover() {
   const cv = $("#selfCanvas"); if (!cv || cv.dataset.hover) return; cv.dataset.hover = 1;
-  if ("IntersectionObserver" in window) {
-    const io = new IntersectionObserver((es) => { if (es[0].isIntersecting) { io.disconnect(); playSelf(); } }, { threshold: 0.5 });
-    io.observe(cv);
-  }
-  cv.addEventListener("mousemove", (e) => {
-    if (!RM.d || RM.ssU != null) return;
-    const r = cv.getBoundingClientRect(), G = { off: SS_STRIP + SS_GAP, side: r.width - SS_STRIP - SS_GAP };
-    const px = e.clientX - r.left - G.off, py = e.clientY - r.top - G.off;
-    if (px < 0 || py < 0) { $("#selfNote").textContent = SELF_NOTES[RM.self]; return; }
-    const M = ssMap(RM.self), n = M.n, dur = RM.d.selfsim.duration;
-    const j = Math.min(n - 1, Math.floor((px / G.side) * n)), i = Math.min(n - 1, Math.floor((py / G.side) * n));
-    $("#selfNote").textContent = `${clock((j / n) * dur)} and ${clock((i / n) * dur)}: ${ssWord(M.raw[i * n + j] / 255)} to ${RM.self === "spectrogram" ? "the raw spectrogram" : RM.self}.`;
-  });
-  cv.addEventListener("mouseleave", () => { if (RM.ssU == null) $("#selfNote").textContent = SELF_NOTES[RM.self]; });
+  const move = (e) => {
+    if (!RM.d) return;
+    const r = cv.getBoundingClientRect(), off = SS_STRIP + SS_GAP, side = r.width - off, dur = RM.d.selfsim.duration;
+    const px = e.clientX - r.left - off, py = e.clientY - r.top - off;
+    if (px < 0 || py < 0 || px > side || py > side) return;
+    RM.ssPick = [(px / side) * dur, (py / side) * dur]; drawSelf();
+  };
+  cv.addEventListener("pointermove", move);
+  cv.addEventListener("pointerdown", move);
 }
 
 /* ------------------------------------------------------------------ rebuilt counting test */
