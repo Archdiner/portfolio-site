@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%237c2b26'/%3E%3Cpath d='M10 13h12v7a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4z' fill='none' stroke='%23f4efe4' stroke-width='2'/%3E%3Cpath d='M22 15l4 2-4 2' fill='none' stroke='%23f4efe4' stroke-width='2'/%3E%3C/svg%3E">
 <title>What a Kettle Knows</title>
-<meta name="description" content="I tried to teach a computer to listen to a kitchen. Hearing turned out to be the easy part. The hard part was remembering.">
+<meta name="description" content="I tried to teach a computer to listen to a kitchen the way we do.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -22,14 +22,14 @@
 <main>
 
 <header class="title">
-  <p class="eyebrow">November 2026 · about 20 minutes · best with sound on</p>
+  <p class="eyebrow">November 2026 · best with sound on</p>
   <h1>What a Kettle Knows</h1>
-  <p class="dek">I tried to teach a computer to listen to a kitchen. Hearing turned out to be the easy part. The hard part was remembering.</p>
+  <p class="dek">I tried to teach a computer to listen to a kitchen the way we do.</p>
 </header>
 
 <!-- ======================================================= COLD OPEN -->
 <section class="col">
-  <p>Before you read anything else, put on headphones if you have them and press play. Don't look for clues, just listen and make a guess. (Fair warning: it gets fairly loud around the ten-second mark.)</p>
+  <p>Before you read on, put on headphones if you have them and press play. Just listen and make a guess, it'll be fun. (Fair warning: it gets fairly loud around the ten-second mark.)</p>
 </section>
 
 <figure class="wide">
@@ -41,7 +41,7 @@
         <div class="blind-time mono" id="blindTime">0:00 / 1:50</div>
       </div>
     </div>
-    <canvas id="blindWave" height="120" aria-label="Waveform, drawn as the recording plays"></canvas>
+    <div class="wave-box blind-box"><canvas id="blindWave" height="120" aria-label="Waveform, drawn as the recording plays"></canvas><div class="pins" id="blindPins" hidden></div></div>
     <div class="guess" id="guess">
       <p class="guess-q">What do you think it is?</p>
       <div class="guess-opts">
@@ -61,29 +61,10 @@
 
 <section class="col">
   <h2>How did you know?</h2>
-  <p>Someone flicks the kettle on about three seconds in. It rumbles, builds to a roar, boils for a minute and a half and clicks itself off at 1:39. Most people get it, or get close, within a few seconds, which is a little strange when you think about it. Nobody said the word "kettle" and there was no picture. All that reached you was air pushing on your eardrums for a couple of minutes.</p>
-  <p>You also picked up a lot more than a name. Without really trying, you probably noticed that it started with a click, that the noise grew for a while before settling into a steady roar, and that it stopped by itself with another click. If I asked you how long it boiled, you could give me a rough answer, and if I asked whether anyone poured the water afterwards you'd say no.</p>
-  <p>Play it again and watch those moments go by:</p>
-</section>
-
-<figure class="wide">
-  <div class="player card" data-view="moments">
-    <div class="player-top">
-      <button class="play" data-kettle="moments" aria-label="Play the kettle"><span class="play-icon"></span></button>
-      <span class="mono dim" data-time></span>
-    </div>
-    <div class="wave-box">
-      <canvas class="kwave" height="120"></canvas>
-      <div class="pins" id="momentPins"></div>
-      <div class="ph"></div>
-    </div>
-  </div>
-  <figcaption>The whole recording. Click anywhere to jump there. The labels pop up as the playhead reaches each moment.</figcaption>
-</figure>
-
-<section class="col">
-  <p>Those are two different skills: hearing what a sound is, and keeping track of what happened and for how long. People do both without noticing they're separate. A computer gets neither for free.</p>
-  <p>This is my first real dive into audio research. This post follows the kettle: how a model hears it, and why knowing what a sound is turns out to be very different from keeping track of it over time. A second post goes deeper into how these models learn to hear in the first place. Every model here follows roughly the same path:</p>
+  <p>Someone flicks the kettle on about three seconds in. It rumbles, builds gradually to a roar, boils for roughly a minute and a half and clicks itself off at 1:39. Most people work out approximately what it is within a few seconds, which is pretty awesome when you think about it. Nothing in the sound tells you the word "kettle", and there was no picture. All that reached you was air pushing on your eardrums for a couple of minutes, and you turned that into a household appliance boiling water.</p>
+  <p>You also picked up a lot more than the name of said appliance. Without much effort, you probably noticed that it started with a click, that the noise grew for a while before settling into a steady roar, and that it stopped by itself with another click. If I asked you how long it boiled, you could give me a rough answer, and if I asked whether anyone poured the water afterwards, you'd say no.</p>
+  <p>Those are two different skills: recognising what a sound is, and keeping track of what happened and for how long. People do both without thinking. Computers, meanwhile, struggle a good bit more.</p>
+  <p>This is my first proper dive into audio, driven mostly by curiosity. This post follows a kettle and a kitchen: how a model recognises things in sound, and why knowing what a sound is turns out to be very different from keeping track of it, and understanding it, over time. Every model I explore here follows roughly the same path:</p>
 </section>
 
 <figure class="wide">
@@ -113,7 +94,7 @@
 
 <section class="col">
   <h2>1.76 million numbers</h2>
-  <p>A microphone measures how hard the air is pushing on it, over and over again. This recording took that measurement 16,000 times every second, and each measurement is just a single number, so the whole 1:50 clip is a list of about 1.76 million of them. Drag the slider to zoom in:</p>
+  <p>Let's step back a bit. A microphone measures how hard the air is pushing on it, over and over again. This recording took that measurement 16,000 times every second (we say it was recorded at a <em>sample rate</em> of 16 kHz), so the whole 1:50 clip is a list of about 1.76 million individual measurements. Drag the slider to zoom in:</p>
 </section>
 
 <figure class="wide">
@@ -131,10 +112,9 @@
 </figure>
 
 <section class="col">
-  <p>From far away you can see the shape of the event. Zoom into the boil and it turns to fuzz, and if you keep going you reach the individual numbers, each one a dot swinging up and down around zero. Nothing in this list says "kettle". There isn't even a number that means "loud". Loudness is how far the dots swing across hundreds of them.</p>
-
+  <p>From far away you can see the rough shape of the event. Zoom into the boil and it turns quite fuzzy, and if you keep going you reach the individual measurements themselves, each one a dot swinging up and down around zero. Nothing here explicitly says "kettle". There isn't even a number that means "loud": loudness is how far the dots swing, measured across hundreds of them. The same goes for most of what we take for granted when we listen.</p>
   <h2>A picture of sound</h2>
-  <p>Almost every model in this post reads sound as a picture instead. Any sound can be treated as a mix of pitches playing at once, from low rumble to high hiss. A <a href="https://en.wikipedia.org/wiki/Spectrogram"><em>spectrogram</em></a> splits the sound into those pitches and shows how strong each one is over time. Time runs left to right, pitch runs from low at the bottom to high at the top, and brighter means louder. Here's the kettle drawn both ways:</p>
+  <p>Working with the raw numbers has its limits, though. There are an awful lot of them, and the things we actually hear, like pitch, aren't written down anywhere in the list. So almost every model I use here looks at sound as a picture instead. Any sound can be treated as a mix of pitches playing at once, and a <a href="https://en.wikipedia.org/wiki/Spectrogram">spectrogram</a> splits the sound into those pitches and shows how strong each one is over time. Time runs along the bottom, pitch runs up the side from low to high, and brighter colours mean louder. Here's the kettle drawn both ways:</p>
 </section>
 
 <figure class="wide">
@@ -157,10 +137,9 @@
 </figure>
 
 <section class="col">
-  <p>The switch shows up as a thin vertical line. A click is so short that it contains a bit of every pitch at once, so it lights up a whole column. The boil is a broad smear, because thousands of bursting bubbles make noise at every pitch all the time. Over the boil the top of the picture slowly dims as the roar gets duller.<sup><a href="#fn1" id="r1">1</a></sup></p>
-
+  <p>Notice the thin vertical lines that appear now. The observant among you will recognise them as the kettle's switch. A click is so short that it contains a bit of every pitch at once, so it lights up a whole column. The boil, on the other hand, is a broad smear, because thousands of bursting bubbles make noise at every pitch all the time. Over the course of the boil, the top of the picture slowly dims as the roar gets duller.<sup><a href="#fn1" id="r1">1</a></sup></p>
   <h2>Cutting the picture into patches</h2>
-  <p>Most modern audio models are <a href="https://en.wikipedia.org/wiki/Transformer_(deep_learning_architecture)">transformers</a>, the same kind of network behind chatbots like ChatGPT. A transformer reads a sequence of tokens, so the picture has to become one. The standard trick, borrowed from <a href="https://en.wikipedia.org/wiki/Vision_transformer">image models</a>, is to cut the spectrogram into small squares called <em>patches</em>, flatten each one into a list of numbers, and treat each list as one token:</p>
+  <p>Most modern audio models are <a href="https://en.wikipedia.org/wiki/Transformer_(deep_learning_architecture)">transformers</a>, the same family of network behind today's chatbots. A transformer reads a sequence of <em>tokens</em> (for a chatbot, each token is roughly a word or part of one), so the spectrogram has to be turned into a sequence too. The standard trick, borrowed from <a href="https://en.wikipedia.org/wiki/Vision_transformer">image models</a>, is to cut it into small squares called <em>patches</em>, flatten each one into a list of numbers, and treat each list as one token:</p>
 </section>
 
 <figure class="wide">
@@ -177,17 +156,17 @@
 </figure>
 
 <section class="col">
-  <p>Hold on to that last step, hiding most of the patches. It's how most modern audio models learn.</p>
-
+  <p>Once the sound is a row of tokens, the transformer does two things with it that are worth knowing about, because both come back later. First, every token gets to look at every other token (this is called <a href="https://en.wikipedia.org/wiki/Attention_(machine_learning)">attention</a>), so a patch of boil can work out that it's part of a long, steady roar rather than a one-off crackle. Second, attention on its own has no sense of order, so each token is also stamped with its position, a bit like page numbers in a book. Keep that stamp in mind, because it causes trouble when we try to count.</p>
+  <p>The last step in the figure, hiding most of the patches, matters too. It's how most modern audio models learn in the first place, which is where we're headed next.</p>
   <h2>Where the listeners come from</h2>
-  <p>You could train a model from scratch to recognise a kettle, but you'd need thousands of recordings with every sound labelled, start to finish, which is slow work and rarely done. So audio has gone the way text and images went before it, and splits the job in two. First, one big general model learns from millions of unlabelled clips using <a href="https://en.wikipedia.org/wiki/Self-supervised_learning">self-supervised learning</a>: it sets itself a puzzle, usually hiding most of the patches and predicting what was there. Then a small labelled set adapts it to a specific task. Unlabelled audio is everywhere and labels are expensive, so this is now the standard way to build a listener, and everything in this post works that way.</p>
-  <p>I used three of these general models. They're openly available, they're small enough to run on a laptop processor (25 to 90 million parameters), and each one learned from a different puzzle:</p>
+  <p>So how does a model learn to make sense of those tokens? You could train one from scratch to recognise a kettle, but you'd need thousands of recordings with every sound labelled, start to finish, which is slow, expensive work that rarely gets done. Instead, audio has followed the path text and images took before it, and split the job in two. First, one big general model learns from millions of unlabelled clips using <a href="https://en.wikipedia.org/wiki/Self-supervised_learning">self-supervised learning</a> (the model sets itself a puzzle, usually hiding most of the patches and trying to predict what was there). Then a much smaller labelled set adapts it to a specific task. Unlabelled audio is everywhere and labels are expensive, so this has become the standard way to build a listener, and everything in this post works that way.</p>
+  <p>I picked three of these general models to explore. They're openly available, small enough to run on a laptop (between 25 and 90 million <em>parameters</em>, the numbers a model learns), and, most interestingly, each one learned from a different puzzle:</p>
   <ul class="tidy">
-    <li><b><a href="https://huggingface.co/mispeech/dasheng-base">Dasheng</a></b> hides most of the patches and redraws them.</li>
-    <li><b><a href="https://huggingface.co/worstchan/EAT-base_epoch30_pretrain">EAT</a></b> hides most of the patches and predicts what a "teacher" thinks they contain. The teacher is a slowly updated copy of EAT itself that sees the whole clip, so the targets get better as EAT does.</li>
+    <li><b><a href="https://huggingface.co/mispeech/dasheng-base">Dasheng</a></b> hides most of the patches and redraws them, pixel by pixel.</li>
+    <li><b><a href="https://huggingface.co/worstchan/EAT-base_epoch30_pretrain">EAT</a></b> hides most of the patches and predicts what a "teacher" thinks they contain. The teacher is a slowly updated copy of EAT itself that gets to see the whole clip, so the targets improve as EAT does.</li>
     <li><b><a href="https://huggingface.co/MIT-SLS/USAD2-Small">USAD</a></b> learns by copying two expert models at once, one trained on speech and one on general sound.</li>
   </ul>
-  <p>For comparison, I also tested a few simpler listeners: a hand-written recipe of acoustic measurements with no learning at all, and small models trained directly on human labels. Here's the whole cast:</p>
+  <p>For comparison, I also tested a few simpler listeners: a hand-written recipe of acoustic measurements with no learning at all, and some small models trained directly on human labels. Here's the whole cast:</p>
 </section>
 
 <figure class="wide">
@@ -209,8 +188,8 @@
 
 <section class="col">
   <h2>Teaching EAT fifteen words</h2>
-  <p>A general model like EAT doesn't output names, and a name is the first thing a home listener needs. That's the second half of the recipe, called <a href="https://en.wikipedia.org/wiki/Fine-tuning_(deep_learning)"><em>fine-tuning</em></a>: add a small layer on top that turns the model's view of each moment into labels, then keep training on labelled examples. I used EAT as the base because, in my tests, it was the best of these listeners at noticing when something in a scene changes. I trained it on RealDESED, a set of real home recordings labelled with fifteen everyday sounds: footsteps, dishes, doors, a light switch, a vacuum, a coffee machine and the rest. It took under an hour on one rented GPU.</p>
-  <p>On recordings it hadn't trained on, it gets about nine in ten right. That score is per ten-second window, asking only whether each sound happened at all, not exactly when, which will matter in a moment. I'll call the result the Ear. Here's everything it reported while listening to our kettle:</p>
+  <p>Out of the box, a general model like EAT doesn't actually output names. It outputs lists of numbers describing what it heard. But a name is the first thing a home listener needs, which brings us to the second half of the recipe, <a href="https://en.wikipedia.org/wiki/Fine-tuning_(deep_learning)">fine-tuning</a> (adding a small layer on top that turns the model's view of each moment into labels, then training a little longer on labelled examples). I chose EAT as the base because, in my tests, it was the best of these listeners at noticing when something in a scene changes. I trained it on RealDESED, a collection of real home recordings labelled with fifteen everyday sounds: footsteps, dishes, doors, a light switch, a vacuum, a coffee machine and so on. The whole thing took under an hour on one rented GPU.</p>
+  <p>On recordings it hadn't seen before, it gets roughly nine in ten right. It's worth knowing what that score measures, though. It's per ten-second window, and only asks whether each sound happened at all, not exactly when. That distinction will matter in a moment. I'll call the result the Ear. Here's everything it reported while listening to our kettle:</p>
 </section>
 
 <figure class="wide">
@@ -226,13 +205,12 @@
 </figure>
 
 <section class="col">
-  <p id="guessCallback">A light switch, then running water, then a coffee machine, and then, for most of the boil, a vacuum cleaner.</p>
-  <p>It's easy to laugh, but look at the timing. "Light switch" lands at 2.7 seconds, exactly when the kettle clicks on. "Running water" and "coffee machine" cover the heating, when a kettle really does sound like water being churned around. "Kettle" isn't one of the Ear's fifteen words, so it reached for the nearest ones it had. That's fine-tuning's trade: you get names, but only the ones you taught.</p>
-  <p>The more interesting part is what it <em>didn't</em> say. After about 53 seconds it goes quiet, even though the kettle keeps boiling for another 45. And nothing in its output connects the click at the start to the quiet at the end, or says that one object was on the whole time.</p>
-
+  <p id="guessCallback">A light switch, then running water, then a coffee machine, and then, for most of the boil… a vacuum cleaner.</p>
+  <p>It's easy to laugh, but look closely at the timing. "Light switch" lands at 2.7 seconds, exactly when the kettle clicks on. "Running water" and "coffee machine" cover the heating, when a kettle genuinely does sound like water being churned around. "Kettle" simply isn't one of the Ear's fifteen words, so it reached for the closest ones it had. That's the trade-off with fine-tuning: you get names, but only the ones you taught it.</p>
+  <p>The more interesting part, to me at least, is what it <em>didn't</em> say. After about 53 seconds it goes quiet, even though the kettle keeps boiling for another 45. And nothing in its output connects the click at the start to the quiet at the end, or recognises that one object was on the whole time.</p>
   <h2>Counting</h2>
-  <p>Some of the questions from the start are really about counting. How many times did the kettle boil today? How many times did someone open the fridge? So I tested whether the models could count a sound that repeats.</p>
-  <p>The test works like this. Take a two-second example of the sound, turn it into a single summary by averaging the model's view of it, then slide that summary along the recording and count the moments where the two match.<sup><a href="#fn3" id="r3">3</a></sup> You can try the same idea on the raw waveform of a bouncing ball:</p>
+  <p>A lot of the questions we'd actually want to ask about a home are really about counting. How many times did the kettle boil today? How many times did someone open the fridge? So I tested whether the models could count a sound that repeats.</p>
+  <p>The test works like this. Take a two-second example of the sound, squash it into a single summary by averaging the model's view of it, then slide that summary along the recording and count the moments where the two match.<sup><a href="#fn3" id="r3">3</a></sup> You can try the same idea yourself on the raw waveform of a bouncing ball:</p>
 </section>
 
 <figure class="wide">
@@ -257,7 +235,7 @@
 </figure>
 
 <section class="col">
-  <p>On a clean recording, matching the raw waveform works almost perfectly. Each bounce lines up with the first one and makes a sharp peak. I ran this over 100 counting clips, tuning on the first 50 and scoring on the last 50. On another 125 clips I checked something easier: whether each model noticed that the scene changed at all.</p>
+  <p>On a clean recording like this, matching the raw waveform works almost perfectly: each bounce lines up with the first one and makes a sharp peak. I ran the test over 100 counting clips, tuning on the first 50 and scoring on the last 50. On another 125 clips I also checked something easier: whether each model noticed that the scene had changed at all.</p>
 </section>
 
 <figure class="wide">
@@ -266,8 +244,8 @@
 </figure>
 
 <section class="col">
-  <p>Noticing a change is fine. Counting was a wipeout: waveform matching got 0.94, and no model got above 0.14, barely better than luck. Bigger didn't help either: the 90-million-parameter models did no better than the one with a million. For a while I took this to mean the models couldn't count. It turns out the counting rule was a big part of the problem.</p>
-  <p>Here's a small re-creation, a mug tapped six times over our kettle boiling:</p>
+  <p>Noticing a change went fine. Counting, on the other hand, was a wipeout: waveform matching scored 0.94 (where 1 is perfect), and no model got above 0.14, barely better than guessing. Bigger models didn't help either; the 90-million-parameter ones did no better than the one with a million. For a while I took this to mean the models simply couldn't count. It turns out the way I was counting was a big part of the problem.</p>
+  <p>To see why, here's a small re-creation: a mug tapped six times over our kettle boiling.</p>
 </section>
 
 <figure class="wide">
@@ -286,8 +264,8 @@
 </figure>
 
 <section class="col">
-  <p>Look at where the taps are. In every model's curve they're <em>dips</em>, not peaks. The two-second example is mostly boil with a fraction of a second of tap in it, so its summary looks like boil, and the moments that match it least are the taps. Count peaks, as my test did, and every model finds nothing. Count dips, and USAD finds all six taps and Dasheng all six plus two false alarms. The waveform has the opposite problem: with a kettle boiling underneath, the noise on top of each tap is different, and the later taps barely match the first.</p>
-  <p>EAT finds no taps at all. Its dips sit at the start of each ten-second stretch of audio I fed it, and comparing every moment of the kettle with every other moment shows why:</p>
+  <p>Look at where the taps are. In every model's curve they show up as <em>dips</em>, not peaks. That's because the two-second example is mostly boil, with only a fraction of a second of tap in it, so its summary ends up looking like boil, and the moments that match it <em>least</em> are the taps. Count peaks, as my test did, and every model finds nothing. Count dips instead, and USAD finds all six taps, while Dasheng finds all six plus two false alarms. The waveform has the opposite problem: with a kettle boiling underneath, the noise layered over each tap is different, so the later taps barely match the first.</p>
+  <p>EAT finds no taps at all. Its dips sit at the start of each ten-second chunk of audio I fed it, and comparing every moment of the kettle with every other moment shows why:</p>
 </section>
 
 <figure class="wide">
@@ -305,8 +283,8 @@
 </figure>
 
 <section class="col">
-  <p>The spectrogram's map follows the sound: one big block while the boil is loudest, then another once the roar dulls and the kettle switches off. EAT and Dasheng show a grid instead. Their outputs remember where each moment sat inside its ten-second stretch: during the steady boil, two EAT outputs from the same spot in different stretches are 0.98 alike, against 0.89 for outputs half a stretch apart. Transformers are told each patch's position so they can keep track of order, and some of that survives all the way to the output. For naming a sound it barely matters. For matching moments against each other, it's noise.</p>
-  <p>Reading from a middle layer instead doesn't fix it. In EAT's middle layer the effect is even stronger (0.94 against 0.55). What does fix it is simple: work out each position's average and subtract it, which flattens the grid completely.</p>
+  <p>The spectrogram's map follows the sound itself: one big block while the boil is loudest, then another once the roar dulls and the kettle switches off. EAT and Dasheng show a grid instead. Remember the position stamps from earlier? Their outputs still remember where each moment sat inside its ten-second chunk. During the steady boil, two EAT outputs from the same spot in different chunks are 0.98 alike, compared with 0.89 for outputs half a chunk apart, even though the sound barely changes. For naming a sound this hardly matters. For matching moments against each other, it's noise.</p>
+  <p>Reading from a middle layer of the model instead doesn't help; in EAT's middle layer the effect is even stronger (0.94 against 0.55). What does fix it is surprisingly simple: work out the average output at each position and subtract it, which flattens the grid completely.</p>
   <p>One re-creation isn't proof, so I rebuilt the counting test at a bigger scale: 120 clips of the boil with a short sound repeated two to eight times. I tuned each counting rule on half of them and scored it on the other half:</p>
 </section>
 
@@ -316,11 +294,10 @@
 </figure>
 
 <section class="col">
-  <p>The original rule fails here too, just as it did in my test. Change only the rule and Dasheng's score roughly triples, to 0.57 by counting dips and 0.60 by matching the start of the sound with the position effect removed, ahead of raw waveform matching in the same noise. USAD improves as well. EAT stays weak, partly because it produces only about six moments per second, which is coarse for a tap.</p>
-  <p>So the models mostly <em>heard</em> the repeats. What failed was how I asked them to keep count. That's the theme for the rest of this post: hearing is the easy part, and keeping track is where things go wrong. (This is a rebuilt version of my test, on one kind of background. I haven't yet rescored the original 100 counting clips with the fixed rules.)</p>
-
+  <p>The original rule fails here too, just as it did in my test. But change only the rule and Dasheng's score roughly triples, to 0.57 by counting dips and 0.60 by matching the start of the sound with the position stamps removed, ahead of raw waveform matching in the same noise. USAD improves as well. EAT stays weak, partly because it only produces about six outputs per second, which is coarse for something as short as a tap.</p>
+  <p>So the models mostly <em>heard</em> the repeats; what failed was how I asked them to keep count. That idea, that hearing is the easier part and keeping track is where things go wrong, runs through the rest of this post. (This is a rebuilt version of my test, on one kind of background, and I haven't yet rescored the original 100 counting clips with the fixed rules.)</p>
   <h2>What about a bigger model?</h2>
-  <p>At this point you might reasonably ask why I'm fiddling with listeners like these at all. There are now large audio-language models that you can hand a recording and question in plain English. They're built like this:</p>
+  <p>At this point you might reasonably be wondering why I'm fiddling with small listeners at all. There are now large audio-language models you can hand a recording and question in plain English. They're built roughly like this:</p>
 </section>
 
 <figure class="wide">
@@ -335,19 +312,17 @@
 
 <section class="col">
   <p>So I tried one, Audio Flamingo 3, on a much harder version of the kettle question: a week of audio recorded continuously in one person's home,<sup><a href="#fn6" id="r6">6</a></sup> with 298 questions like whether the vacuum was on at a given moment, since when, for how long, and how many times. Each question came with ten minutes of audio.</p>
-  <p>It mostly answered "none". Overall it scored 0.19, below the 0.26 you get from a baseline that ignores the audio and always gives the most common answer. Some of that was my prompt and my scoring, so I wouldn't read much into the exact number. I didn't test the biggest commercial models, some of which now take hours of audio at once, but a recent long-audio benchmark, <a href="https://arxiv.org/abs/2609.01542">TAG-Bench</a>, finds the same weakness: when a sound repeats, even the best model it tested gets the count right only 13.2% of the time.</p>
-  <p>I spent even longer with <a href="https://huggingface.co/blog/thinkingmachines-inkling">Inkling</a>, Thinking Machines Lab's open model from July, mostly its smaller sibling, Inkling-Small. It does well on the usual audio benchmarks, and on voices it was genuinely impressive: asked which of six emotions an actor was using, it got 61% right, better than human raters listening to the same clips (about 41%). On home sounds it struggled. Asked which of fifteen everyday sounds were in real home recordings, it scored 0.43, well behind a small model trained on AudioSet labels (0.62). It beat that model on footsteps but missed keys, typing, the microwave, the toilet and the vacuum. Asked to speak up only when a phone or doorbell rang, it spoke up for everything. And when I asked how many times a sound happened, or which came first, it was at chance, even on items where it had clearly heard both sounds. Where I tried the full-size Inkling, it did no better, and on voices it did worse.</p>
-  <p>That's odd at first, because models like these are excellent with speech. Ask one what someone said and it'll usually get it right. The difference is mostly what they're trained and rewarded on. Speech comes with enormous amounts of matching text, in transcripts and subtitles, so a model can be trained to turn talking into words, and graded on it, at huge scale. Everyday sounds rarely come with more than a one-line caption ("a kettle boiling"), and almost never with when each sound started and stopped. So the models get very good at speech and at captions, and almost nothing in their training asks them to keep time.</p>
-  <p>That doesn't mean the sound is lost. Whisper, trained only on speech, turns out to <a href="https://arxiv.org/abs/2307.03183">carry plenty of information about background sounds</a> inside it. And a recent study, <a href="https://arxiv.org/abs/2609.05871">Where Does the Sound Go?</a>, traced sound through audio-language models layer by layer and found that details about non-speech sounds are still there near the very end, even when the model's answers about them are close to chance. The models heard it. They were just never taught to say so, which is the same pattern as the counting results above.</p>
-
+  <p>It mostly answered "none". Overall it scored 0.19, which is actually below the 0.26 you'd get from a baseline that ignores the audio entirely and always gives the most common answer. Some of that was down to my prompt and my scoring, so I wouldn't read too much into the exact number. I didn't test the biggest commercial models, some of which can now take hours of audio at once, but a recent long-audio benchmark, <a href="https://arxiv.org/abs/2609.01542">TAG-Bench</a>, found the same weakness: when a sound repeats, even the best model it tested got the count right only 13.2% of the time.</p>
+  <p>I spent even longer with <a href="https://huggingface.co/blog/thinkingmachines-inkling">Inkling</a>, Thinking Machines Lab's open model released in July, mostly with its smaller sibling, Inkling-Small. It does well on the usual audio benchmarks, and with voices it was genuinely impressive: asked which of six emotions an actor was using, it got 61% right, better than human raters listening to the same clips (about 41%). Home sounds were a different story. Asked which of fifteen everyday sounds were in real home recordings, it scored 0.43, well behind a small model trained on AudioSet labels (0.62). It beat that model on footsteps, but missed keys, typing, the microwave, the toilet and the vacuum. When I asked it to speak up only if a phone or doorbell rang, it spoke up for everything. And whenever I asked how many times a sound happened, or which came first, it was at chance, even on items where it had clearly heard both sounds. Where I tried the full-size Inkling, it did no better, and on voices it actually did worse.</p>
+  <p>This seems odd at first, because models like these are excellent with speech. Ask one what someone said and it'll usually get it right. The difference mostly comes down to what they're trained, and rewarded, on. Speech comes with enormous amounts of matching text (transcripts, subtitles), so a model can be trained to turn talking into words, and graded on it, at huge scale. Everyday sounds rarely come with more than a one-line caption ("a kettle boiling"), and almost never with when each sound started and stopped. So the models get very good at speech and at captions, and almost nothing in their training ever asks them to keep time.</p>
+  <p>That doesn't mean the sound is lost, though. Whisper, trained only on speech, turns out to <a href="https://arxiv.org/abs/2307.03183">carry plenty of information about background sounds</a> inside it. And a recent study, <a href="https://arxiv.org/abs/2609.05871">Where Does the Sound Go?</a>, traced sound through audio-language models layer by layer and found that details about non-speech sounds are still there near the very end, even when the model's answers about them are close to chance. The models heard it; they were just never taught to say so, which is the same pattern we saw with counting.</p>
   <h2>Knowing when to listen</h2>
-  <p>Training data leaves fingerprints in other ways, too. <a href="https://github.com/openai/whisper">Whisper</a>, a popular speech-to-text model, learned from hundreds of thousands of hours of internet audio paired with whatever text came with it, much of it subtitles. I ran the small version over an hour of that same home with nobody in it, and in 49 of those 60 minutes it produced text. It kept writing the same sentence:</p>
+  <p>Training data leaves fingerprints in other ways too. <a href="https://github.com/openai/whisper">Whisper</a>, a popular speech-to-text model, learned from hundreds of thousands of hours of internet audio paired with whatever text came with it, much of it subtitles. Out of curiosity, I ran the small version over an hour of that same home with nobody in it. In 49 of those 60 minutes it produced text, and it kept writing the same sentence:</p>
   <blockquote>Thank you very much for watching this video and I will see you in much for watching.</blockquote>
-  <p>This is a well-documented problem. A common explanation is that the end of an online video is often quiet, and the subtitles over that quiet often say exactly this, so to Whisper an empty room sounds like the end of a video. Putting a small voice-activity detector in front of it, so that Whisper only hears the parts where someone is actually talking, made the invented words disappear. That's the standard fix, and tools like <a href="https://github.com/m-bain/whisperX">WhisperX</a> do the same. With speech mixed into the home's background noise, the word error rate fell from 25% to 4%.</p>
-
+  <p>This is a well-documented problem. A common explanation is that the end of an online video is often quiet, and the subtitles over that quiet often say exactly this, so to Whisper an empty room sounds like the end of a video. Putting a small voice-activity detector in front of it (a tiny model whose only job is to spot when someone is talking) made the invented words disappear. That's the standard fix, and tools like <a href="https://github.com/m-bain/whisperX">WhisperX</a> do the same. With speech mixed into the home's background noise, the word error rate fell from 25% to 4%.</p>
   <h2>Keeping a diary</h2>
-  <p>Which brings us back to the questions about time. The approach I ended up with doesn't ask a model to remember audio at all. A listener writes a diary instead: every time something changes, it notes what turned on or off, and when, and it smooths over the flicker so that one long boil becomes one entry rather than thirty.<sup><a href="#fn7" id="r7">7</a></sup></p>
-  <p>This isn't a new idea, and I didn't come up with it. In audio, it's close to what researchers call sound event detection, which has had its own yearly challenge, <a href="https://dcase.community/">DCASE</a>, for a decade: detect each sound, with a start and an end. The diary adds the smoothing and a way to ask it questions. In video, <a href="https://arxiv.org/abs/2204.00598">Socratic Models</a> (2022) turned first-person footage into a running text log and answered questions by reading it, and <a href="https://arxiv.org/abs/2602.14612">a 2026 paper</a> does the same with long audio recordings. Once the diary exists, questions about time become arithmetic on a list. Ask the kettle's diary something:</p>
+  <p>Which brings us back to those questions about time. The approach I ended up with doesn't ask a model to remember audio at all. Instead, a listener keeps a diary: every time something changes, it notes what turned on or off, and when, and it smooths over the flicker so that one long boil becomes one entry rather than thirty.<sup><a href="#fn7" id="r7">7</a></sup></p>
+  <p>I should say this isn't a new idea, and I didn't come up with it. In audio, it's close to what researchers call sound event detection, which has had its own yearly challenge, <a href="https://dcase.community/">DCASE</a>, for about a decade: detect each sound, with a start and an end. The diary adds the smoothing and a way to ask it questions. In video, <a href="https://arxiv.org/abs/2204.00598">Socratic Models</a> (2022) turned first-person footage into a running text log and answered questions by reading it, and <a href="https://arxiv.org/abs/2602.14612">a 2026 paper</a> does the same with long audio recordings. Once the diary exists, questions about time become simple arithmetic on a list. Try asking the kettle's diary something:</p>
 </section>
 
 <figure class="wide">
@@ -363,7 +338,7 @@
 </figure>
 
 <section class="col">
-  <p>Back in the week-long home recording, a listener built on <a href="https://github.com/microsoft/unilm/tree/master/beats">BEATs</a>, another self-taught model and one of the best in my tests at picking out everyday events in kitchen recordings, wrote the diary itself, with a small layer on top for household activities. The same 298 questions were then answered from that diary:</p>
+  <p>Back in the week-long home recording, a listener built on <a href="https://github.com/microsoft/unilm/tree/master/beats">BEATs</a>, another self-taught model and one of the best in my tests at picking out everyday kitchen events, wrote the diary itself, with a small layer on top for household activities. The same 298 questions were then answered from that diary:</p>
 </section>
 
 <figure class="wide">
@@ -372,15 +347,14 @@
 </figure>
 
 <section class="col">
-  <p>The diary gets 0.87 overall, against Audio Flamingo's 0.19 on the same questions. That's a gap of 0.68, and resampling the questions puts it between 0.63 and 0.74. The diary is weakest on "how many times?", which is the counting problem again. The surprising part was which half did the work. Handing the same diary to a general language model (Qwen) and asking in plain English only moved its score from 0.25 to 0.34. What got 0.87 was answering with small exact queries that look things up and subtract, like this one:</p>
+  <p>The diary scores 0.87 overall, against Audio Flamingo's 0.19 on the same questions. That's a gap of 0.68, and resampling the questions puts it somewhere between 0.63 and 0.74. The diary is weakest on "how many times?", which is our counting problem again. The surprising part was which half did the work. Handing the same diary to a general language model (Qwen) and asking in plain English only moved its score from 0.25 to 0.34. What got to 0.87 was answering with small, exact queries that look things up and subtract, like this one:</p>
   <pre class="snippet">def how_long(diary, thing):
     stretches = [e for e in diary if e.thing == thing]
     return sum(e.end - e.start for e in stretches)
 
 how_long(kettle_diary, "boiling")   # 86.3 seconds</pre>
-  <p> Writing things down turned out to be only half of it. The other half was doing the arithmetic properly.</p>
-  <p>Treat this as a demonstration rather than a benchmark. It's one home, and the diary's vocabulary was set up for that home's activities, which Audio Flamingo didn't get. The whole system runs on an ordinary laptop processor, using about 7% of one core to keep up with a home around the clock. Plenty didn't work along the way, including a test where I'd swapped "added" and "removed", and a result that turned out to be a home memorising itself. The full list is in the appendix.</p>
-
+  <p>So writing things down turned out to be only half of it. The other half was doing the arithmetic properly.</p>
+  <p>I'd treat this as a demonstration rather than a benchmark. It's one home, and the diary's vocabulary was set up for that home's activities, which Audio Flamingo didn't get. The whole system runs on an ordinary laptop processor, using about 7% of one core to keep up with a home around the clock. Plenty didn't work along the way, either, including a test where I'd swapped "added" and "removed", and a result that turned out to be a home memorising itself. The full list is in the appendix.</p>
   <h2>Back to the kettle</h2>
   <p>Let's play it one last time, and this time watch the diary:</p>
 </section>
@@ -400,8 +374,8 @@ how_long(kettle_diary, "boiling")   # 86.3 seconds</pre>
 </figure>
 
 <section class="col">
-  <p>So what does a kettle know? It depends who's listening. To the list of numbers it's 1.76 million values. The self-taught models know what a boil sounds like, but on their own they don't keep track of when this one started. The Ear, taught fifteen words, calls it a vacuum cleaner for fifty seconds. And the diary knows it switched on at 0:02.7, boiled for 86 seconds and switched itself off, which is all anyone was going to ask it.</p>
-  <p>The diary's format is a choice I made by hand: what to write down, and how. Rich Sutton's <a href="http://www.incompleteideas.net/IncIdeas/BitterLesson.html">bitter lesson</a> says hand-made choices like that tend to lose, eventually, to models that learn for themselves what's worth keeping. Which raises the question my next post is about: how do these models learn to hear in the first place, and why do different ways of teaching them produce such different ears? After that, I want to go the other way, to diffusion models that generate sound instead of describing it.</p>
+  <p>So what does a kettle know? It really depends on who's listening. To the list of numbers, it's 1.76 million values. The self-taught models know what a boil sounds like, but on their own they don't keep track of when this one started. The Ear, taught fifteen words, calls it a vacuum cleaner for fifty seconds. And the diary knows it switched on at 0:02.7, boiled for 86 seconds and switched itself off, which is all anyone was ever going to ask it.</p>
+  <p>The diary's format is a choice I made by hand: what to write down, and how. Rich Sutton's <a href="http://www.incompleteideas.net/IncIdeas/BitterLesson.html">bitter lesson</a> says hand-made choices like that tend to lose out, eventually, to models that learn for themselves what's worth keeping. Which raises the question my next post will explore: how do these models learn to hear in the first place, and why do different ways of teaching them produce such different ears? After that, I'd like to go the other way, to diffusion models that generate sound instead of describing it.</p>
   <p>Thanks for reading!</p>
   <p class="sign">Asad</p>
 </section>
@@ -413,7 +387,7 @@ how_long(kettle_diary, "boiling")   # 86.3 seconds</pre>
     <li id="fn1">Your inner ear does something similar. The cochlea is a coiled tube that vibrates at different places for different pitches, so your brain receives sound already split up roughly the way a spectrogram is. The spectrograms here use 64 bands spaced the way hearing is, closer together at low pitches.</li>
     <li id="fn2">Real audio transformers typically use 16 × 16 patches on spectrograms with 128 pitch bands and 10 ms time steps, so each patch covers about a sixth of a second.</li>
     <li id="fn3">My original test kept each recording's full sequence of moments; only the two-second example was averaged into one summary. Peaks had to be at least 1.5 seconds apart, and the threshold was chosen on the first 50 items and scored on the last 50.</li>
-    <li id="fn4">The re-creation uses 22 seconds of the kettle's boil with a hard mug tap added six times, about twice as loud as the boil's peaks. The example is the two seconds from 1.0 to 3.0, around the first tap. "Stands well clear" means more than 2.5 robust standard deviations from the curve's median. The models are EAT, Dasheng and USAD2-Small run on CPU, and the script is build/real_models.py.</li>
+    <li id="fn4">The re-creation uses 22 seconds of the kettle's boil with a hard mug tap added six times, about twice as loud as the boil's peaks. The example is the two seconds from 1.0 to 3.0, around the first tap. The models are EAT, Dasheng and USAD2-Small run on CPU, and the script is build/real_models.py.</li>
     <li id="fn5">The rebuilt test has 120 items, each 20 seconds of the kettle's boil with one short sound (a mug, glass or metal tap, a ball bounce, or a spoon clink) repeated 2 to 8 times, at least 1.5 seconds apart and at varying loudness. As in the original, the example is two seconds around the first event and repeats must be 1.5 seconds apart. Each rule's threshold is tuned on the first 60 items and scored on the other 60. "Position removed" subtracts the average output at each of the 64 (EAT) or 250 (Dasheng) positions in a stretch. The script is build/repeats_bench.py.</li>
     <li id="fn6">SINS, a public dataset recorded continuously in one home for a week, with daily activities like cooking, washing up and vacuuming labelled. The questions cover days four to seven.</li>
     <li id="fn7">The smoothing is a <a href="https://en.wikipedia.org/wiki/Viterbi_algorithm">Viterbi</a> pass. Given second-by-second guesses about whether something is on, it finds the most likely sequence of on and off stretches, so a single noisy second can't split one boil into two.</li>

@@ -176,6 +176,11 @@ function buildBlind() {
     $("#guess").hidden = true;
     $("#reveal").hidden = false;
     heardMax = 1; drawBlind();
+    const bp = $("#blindPins");
+    if (bp) {
+      bp.innerHTML = MOMENTS.map(([t, l, row, r]) => `<div class="pin lit ${r ? "right" : ""}" style="left:${(t / S.k.duration) * 100}%"><span style="top:${row * 28 - 4}px">${l}</span></div>`).join("");
+      bp.hidden = false;
+    }
     updateCallback();
   }));
 }
@@ -185,7 +190,7 @@ function drawBlind() {
 function updateCallback() {
   const el = $("#guessCallback");
   if (!el) return;
-  const base = "A light switch. Running water. A coffee machine. And then, for most of the boil, a vacuum cleaner.";
+  const base = "A light switch, then running water, then a coffee machine, and then, for most of the boil… a vacuum cleaner.";
   if (S.guess === "vacuum") el.textContent = `If you guessed a vacuum cleaner at the top, you and the Ear agree. ${base}`;
   else if (S.guess === "coffee") el.textContent = `If you guessed a coffee machine at the top, so did the Ear, for a while. ${base}`;
   else el.textContent = base;
@@ -202,7 +207,7 @@ const LOG = [
   [2.7, "kettle switched on"], [12.7, "kettle boiling"], [99.0, "kettle switched off"],
 ];
 function buildKettleViews() {
-  $("#momentPins").innerHTML = MOMENTS.map(([t, l, row, r]) =>
+  if ($("#momentPins")) $("#momentPins").innerHTML = MOMENTS.map(([t, l, row, r]) =>
     `<div class="pin ${r ? "right" : ""}" data-t="${t}" style="left:${(t / S.k.duration) * 100}%"><span style="top:${row * 28 - 4}px">${l}</span></div>`).join("");
   $("#specNotes").innerHTML = SPEC_NOTES.map(([t, y, l, r]) =>
     `<div class="spec-note" data-t="${t}" style="${r ? `right:${100 - (t / S.k.duration) * 100 + 0.6}%` : `left:${(t / S.k.duration) * 100 + 0.6}%`};top:${y}%">${l}</div>`).join("");
@@ -237,7 +242,7 @@ function syncKettle() {
     $$(".ph", v).forEach((p) => (p.style.left = `calc(${f * 100}% - 1px)`));
     const tm = $("[data-time]", v); if (tm) tm.textContent = `${clock(t)} / ${clock(d)}`;
   });
-  $$(".pin").forEach((p) => p.classList.toggle("lit", activeView === "moments" && t >= Number(p.dataset.t)));
+  $$("#momentPins .pin").forEach((p) => p.classList.toggle("lit", activeView === "moments" && t >= Number(p.dataset.t)));
   $$(".spec-note").forEach((p) => { const pt = Number(p.dataset.t); p.classList.toggle("lit", t >= pt - 1 && t <= pt + (pt === 45 ? 50 : 8)); });
   // ear
   const now = S.k.events.filter((e) => t >= e.start && t <= e.end).map((e) => EAR_WORDS[e.label] || e.text);

@@ -322,3 +322,10 @@ table.rc td.rc-how{color:var(--muted)}
 
 .snippet{margin:0 0 1.05em;background:#1b1916;color:#e9e1d2;border-radius:8px;padding:12px 16px;font:400 13px/1.6 var(--mono);overflow-x:auto;white-space:pre}
 #selfCanvas{cursor:crosshair}
+
+.masthead-link{color:var(--blood);text-decoration:none}
+.masthead-link:hover{text-decoration:underline;text-underline-offset:3px}
+
+.blind-box{margin-top:6px}
+.blind .pin{border-left-color:rgba(241,234,220,.45)}
+.blind .pin span{background:#2a2622;color:#f1eadc;border-color:#4a443b}
