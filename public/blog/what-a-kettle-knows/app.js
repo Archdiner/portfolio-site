@@ -860,7 +860,7 @@ async function buildReal() {
   RM.d = await json("real_models");
   if ($("#realLegend")) $("#realLegend").innerHTML = RM.d.maps.classes.map((c, i) => `<span><i style="background:${TINY_COLORS[i]}"></i>${esc(c)}</span>`).join("");
   if ($("#realTabs")) $$("#realTabs .tab").forEach((b) => b.addEventListener("click", () => { RM.map = b.dataset.m; $$("#realTabs .tab").forEach((x) => x.classList.toggle("on", x === b)); drawRealMap(); }));
-  if ($("#simModelTabs")) $$("#simModelTabs .tab").forEach((b) => b.addEventListener("click", () => { RM.self = b.dataset.m; $$("#simModelTabs .tab").forEach((x) => x.classList.toggle("on", x === b)); drawSelf(); }));
+  if ($("#simModelTabs")) $$("#simModelTabs .tab").forEach((b) => b.addEventListener("click", () => { RM.self = b.dataset.m; $$("#simModelTabs .tab").forEach((x) => x.classList.toggle("on", x === b)); playSelf(); }));
   $$("#repMode .tab").forEach((b) => b.addEventListener("click", () => { RM.mode = b.dataset.mode; $$("#repMode .tab").forEach((x) => x.classList.toggle("on", x === b)); drawRepeats(); }));
   if ($("#repeats")) {
   RM.audio = makeAudio("assets/audio/repeats.mp3");
@@ -882,19 +882,6 @@ function drawRealMap() {
   m.z.forEach(([a, b], i) => { g.fillStyle = TINY_COLORS[y[i]]; g.globalAlpha = 0.85; g.beginPath(); g.arc(sx(a), sy(b), 4, 0, 7); g.fill(); });
   g.globalAlpha = 1;
   $("#realNote").innerHTML = `<b>${Math.round(m.acc * 100)}% of windows sit closest to their own kind.</b> ${esc(REAL_NOTES[RM.map])}`;
-}
-function drawSelf() {
-  if (!RM.d || !$("#selfCanvas")) return;
-  const s = RM.d.selfsim.maps[RM.self], cv = $("#selfCanvas");
-  const side = Math.min(cv.parentElement.clientWidth || 340, 340);
-  cv.style.width = side + "px"; cv.dataset.h = side;
-  const { g, w, h } = sizeCanvas(cv);
-  const raw = Uint8Array.from(atob(s.b64), (c) => c.charCodeAt(0)), n = s.n, o = document.createElement("canvas");
-  o.width = n; o.height = n;
-  const x = o.getContext("2d"), img = x.createImageData(n, n), L = lut();
-  for (let i = 0; i < n * n; i++) { const c = L[raw[i]]; img.data[i * 4] = c[0]; img.data[i * 4 + 1] = c[1]; img.data[i * 4 + 2] = c[2]; img.data[i * 4 + 3] = 255; }
-  x.putImageData(img, 0, 0); g.imageSmoothingEnabled = false; g.drawImage(o, 0, 0, w, h);
-  $("#selfNote").textContent = SELF_NOTES[RM.self];
 }
 function countMarks(c, mode, rate = 25) {
   const med = (a) => { const b = [...a].sort((p, q) => p - q); return b[b.length >> 1]; };
@@ -1074,19 +1061,97 @@ function buildReport() {
 
 
 /* ------------------------------------------------------------------ every-moment map: hover readout */
+// The self-similarity map, and an animation of how it's made: pick one moment, compare it with
+// every other moment, colour that column by how alike they are, then do the same for every moment.
+const SS_GAP = 6, SS_STRIP = 30, SS_FOCUS = 45, SS_T1 = 2600, SS_T2 = 2600;
+const SS_HOW = {
+  spectrogram: "Pick one moment and compare it with every other moment of the recording. Alike pairs are bright, different ones dark. Then do the same for every moment.",
+  model: (m) => `The same idea, but each moment is first passed through ${m}, and its outputs are compared instead of the raw picture.`,
+};
+function ssMap(key) {
+  RM.ssImg = RM.ssImg || {};
+  if (RM.ssImg[key]) return RM.ssImg[key];
+  const s = RM.d.selfsim.maps[key], raw = Uint8Array.from(atob(s.b64), (c) => c.charCodeAt(0)), n = s.n, o = document.createElement("canvas");
+  o.width = n; o.height = n;
+  const x = o.getContext("2d"), img = x.createImageData(n, n), L = lut();
+  for (let i = 0; i < n * n; i++) { const c = L[raw[i]]; img.data[i * 4] = c[0]; img.data[i * 4 + 1] = c[1]; img.data[i * 4 + 2] = c[2]; img.data[i * 4 + 3] = 255; }
+  x.putImageData(img, 0, 0);
+  return (RM.ssImg[key] = { o, raw, n });
+}
+function ssGeom(cv) {
+  const tot = Math.min(cv.parentElement.clientWidth || 380, 400);
+  cv.style.width = tot + "px"; cv.dataset.h = tot;
+  const off = SS_STRIP + SS_GAP;
+  return { tot, off, side: tot - off };
+}
+// u: animation time in ms, or null for the finished map
+function drawSelf(u = RM.ssU ?? null) {
+  if (!RM.d || !$("#selfCanvas")) return;
+  const cv = $("#selfCanvas"), G = ssGeom(cv), { g } = sizeCanvas(cv), { off, side } = G;
+  const M = ssMap(RM.self), n = M.n, dur = RM.d.selfsim.duration, cell = side / n;
+  const spec = specImage(S.k.spec);
+  g.fillStyle = C.card; g.fillRect(0, 0, G.tot, G.tot);
+  // the recording along the top (time runs right) and down the side (time runs down)
+  g.imageSmoothingEnabled = true;
+  g.drawImage(spec, off, 0, side, SS_STRIP);
+  g.save(); g.translate(SS_STRIP, off); g.rotate(Math.PI / 2); g.drawImage(spec, 0, 0, side, SS_STRIP); g.restore();
+  g.imageSmoothingEnabled = false;
+  const c0 = Math.round((SS_FOCUS / dur) * n);
+  let colsDone = n, row = -1, focus = -1;
+  if (u != null) {
+    if (u < SS_T1) { colsDone = 0; focus = c0; row = Math.floor(easeIO(u / SS_T1) * n); }
+    else { colsDone = Math.floor(easeIO(Math.min(1, (u - SS_T1) / SS_T2)) * n); focus = colsDone < n ? colsDone : -1; }
+  }
+  g.fillStyle = "#efe7d8"; g.fillRect(off, off, side, side);
+  if (colsDone > 0) g.drawImage(M.o, 0, 0, colsDone, n, off, off, colsDone * cell, side);
+  if (u != null && u < SS_T1) g.drawImage(M.o, c0, 0, 1, row + 1, off + c0 * cell + cell / 2 - Math.max(cell, 4) / 2, off, Math.max(cell, 4), (row + 1) * cell);
+  else if (u != null && colsDone < n) g.drawImage(M.o, c0, 0, 1, n, off + c0 * cell + cell / 2 - Math.max(cell, 4) / 2, off, Math.max(cell, 4), side);
+  if (focus >= 0) {  // the moment being compared, marked on the strip and on the map
+    const x = off + focus * cell + cell / 2;
+    g.strokeStyle = C.peach; g.lineWidth = 2;
+    g.strokeRect(x - 3, 1, 6, SS_STRIP - 2);
+    if (row >= 0) {
+      const y = off + row * cell + cell / 2;
+      g.strokeRect(1, y - 3, SS_STRIP - 2, 6);
+      g.globalAlpha = 0.55; g.lineWidth = 1; g.setLineDash([]);
+      g.beginPath(); g.moveTo(x, SS_STRIP); g.lineTo(x, off); g.moveTo(SS_STRIP, y); g.lineTo(x - 4, y); g.stroke(); g.globalAlpha = 1;
+      g.fillStyle = C.peach; g.beginPath(); g.arc(x, y, 3.5, 0, 7); g.fill();
+      const v = M.raw[row * n + focus] / 255;
+      $("#selfNote").textContent = `${clock((focus / n) * dur)} against ${clock((row / n) * dur)}: ${ssWord(v)}. ${RM.self === "spectrogram" ? SS_HOW.spectrogram : SS_HOW.model(RM.self)}`;
+    }
+  }
+  if (u == null) $("#selfNote").textContent = SELF_NOTES[RM.self];
+  else if (row < 0) $("#selfNote").textContent = RM.self === "spectrogram" ? SS_HOW.spectrogram : SS_HOW.model(RM.self);
+}
+const easeIO = (x) => (x < 0.5 ? 2 * x * x : 1 - (-2 * x + 2) ** 2 / 2);
+const ssWord = (v) => (v > 0.8 ? "very alike" : v > 0.55 ? "fairly alike" : v > 0.3 ? "somewhat different" : "very different");
+function playSelf() {
+  cancelAnimationFrame(RM.ssRaf);
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) { RM.ssU = null; drawSelf(); return; }
+  const t0 = performance.now();
+  const step = (now) => {
+    const u = now - t0;
+    if (u >= SS_T1 + SS_T2) { RM.ssU = null; drawSelf(); return; }
+    RM.ssU = u; drawSelf(u); RM.ssRaf = requestAnimationFrame(step);
+  };
+  RM.ssRaf = requestAnimationFrame(step);
+}
 function wireSelfHover() {
   const cv = $("#selfCanvas"); if (!cv || cv.dataset.hover) return; cv.dataset.hover = 1;
+  if ("IntersectionObserver" in window) {
+    const io = new IntersectionObserver((es) => { if (es[0].isIntersecting) { io.disconnect(); playSelf(); } }, { threshold: 0.5 });
+    io.observe(cv);
+  }
   cv.addEventListener("mousemove", (e) => {
-    if (!RM.d) return;
-    const s = RM.d.selfsim.maps[RM.self], r = cv.getBoundingClientRect(), n = s.n;
-    const i = Math.min(n - 1, Math.floor(((e.clientY - r.top) / r.height) * n)), j = Math.min(n - 1, Math.floor(((e.clientX - r.left) / r.width) * n));
-    const raw = (RM.raw = RM.raw || {}), key = RM.self;
-    if (!raw[key]) raw[key] = Uint8Array.from(atob(s.b64), (c) => c.charCodeAt(0));
-    const v = raw[key][i * n + j] / 255, dur = RM.d.selfsim.duration;
-    const word = v > 0.8 ? "very alike" : v > 0.55 ? "fairly alike" : v > 0.3 ? "somewhat different" : "very different";
-    $("#selfNote").textContent = `${clock((i / n) * dur)} and ${clock((j / n) * dur)}: ${word} to ${RM.self === "spectrogram" ? "the raw spectrogram" : RM.self}.`;
+    if (!RM.d || RM.ssU != null) return;
+    const r = cv.getBoundingClientRect(), G = { off: SS_STRIP + SS_GAP, side: r.width - SS_STRIP - SS_GAP };
+    const px = e.clientX - r.left - G.off, py = e.clientY - r.top - G.off;
+    if (px < 0 || py < 0) { $("#selfNote").textContent = SELF_NOTES[RM.self]; return; }
+    const M = ssMap(RM.self), n = M.n, dur = RM.d.selfsim.duration;
+    const j = Math.min(n - 1, Math.floor((px / G.side) * n)), i = Math.min(n - 1, Math.floor((py / G.side) * n));
+    $("#selfNote").textContent = `${clock((j / n) * dur)} and ${clock((i / n) * dur)}: ${ssWord(M.raw[i * n + j] / 255)} to ${RM.self === "spectrogram" ? "the raw spectrogram" : RM.self}.`;
   });
-  cv.addEventListener("mouseleave", () => { $("#selfNote").textContent = SELF_NOTES[RM.self]; });
+  cv.addEventListener("mouseleave", () => { if (RM.ssU == null) $("#selfNote").textContent = SELF_NOTES[RM.self]; });
 }
 
 /* ------------------------------------------------------------------ rebuilt counting test */
