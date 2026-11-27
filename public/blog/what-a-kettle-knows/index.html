@@ -170,10 +170,17 @@
       <button class="tab" data-obj="eat">EAT</button>
       <button class="tab" data-obj="usad">USAD</button>
     </div>
+    <p class="ob-swipe mono">swipe to see the whole diagram →</p>
     <div class="ob-svg" id="objSvg"></div>
     <p class="ob-caption" id="objCaption"></p>
+    <div class="ob-legend">
+      <span><i class="sw learn"></i>learning</span>
+      <span><i class="sw frozen"></i>not learning</span>
+      <span><i class="ln data"></i>data</span>
+      <span><i class="ln grad"></i>training signal</span>
+    </div>
   </div>
-  <figcaption>How each model is trained. Patches come in at the bottom, flow up through the transformer's layers, where every token can look at every other, and come out at the top. The patches are real ones from the kettle. Dasheng and EAT have about 85 and 90 million parameters; USAD has about 25 million.</figcaption>
+  <figcaption>How each model is trained, drawn on real patches from the kettle. Inside each transformer, every token in one layer can look at every token in the next. Dasheng and EAT have about 85 and 90 million parameters; USAD has about 25 million.</figcaption>
 </figure>
 
 <section class="col">
