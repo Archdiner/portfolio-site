@@ -1119,11 +1119,11 @@ async function buildBenchTable() {
 /* ------------------------------------------------------------------ how each model learns */
 const OB = { model: "dasheng", tiles: null };
 const OB_TEXT = {
-  dasheng: "Hide most of the patches. The transformer reads the rest and redraws the hidden ones, and its drawing is compared with the real thing.",
-  eat: "The student sees a few patches; the teacher, a slowly updated copy of the student, sees them all. The student learns to predict what the teacher makes of the hidden ones.",
-  usad: "Nothing is hidden. A smaller student hears the same clip as a speech expert and a sound expert, and learns to give the same outputs as both.",
+  dasheng: "Most patches are hidden. The model redraws them, the loss measures how far its drawing is from the real patches, and that error flows back to update the model.",
+  eat: "The teacher sees the whole clip; the student sees only a few patches and tries to match what the teacher makes of the rest. Only the student learns from the loss. The teacher just takes a slow copy of the student.",
+  usad: "Two frozen experts and a smaller student hear the same clip. The student learns to match both experts' outputs at once, so one small model ends up carrying a bit of each.",
 };
-const OB_HIDDEN = [1, 2, 4, 5, 6];  // which of the 8 patches are hidden
+const OB_HIDDEN = [1, 2, 4, 5, 6];
 async function buildObjectives() {
   if (!$("#objectives")) return;
   if (!PT.data) {
@@ -1141,69 +1141,85 @@ async function buildObjectives() {
   $$("#objTabs .tab").forEach((b) => b.addEventListener("click", () => { OB.model = b.dataset.obj; drawObjectives(); }));
   drawObjectives();
 }
-// one transformer: tokens in at the bottom, layers wired all-to-all, tokens out at the top
-function obTransformer({ x, y, n, size, gap, layers = 3, h = 150, tone = "blood", label, inputs, outputs }) {
-  const w = n * size + (n - 1) * gap, cx = (i) => x + i * (size + gap) + size / 2, col = tone === "teal" ? C.teal : C.blood;
-  const top = y, bot = y + h, ly = (k) => top + 32 + k * ((h - 56) / (layers - 1));
-  let s = `<rect x="${x - 10}" y="${top}" width="${w + 20}" height="${h}" rx="10" class="ob-block ${tone}"/>`;
-  if (label) s += `<text x="${x - 2}" y="${top + 14}" class="ob-blabel" fill="${col}">${label}</text>`;
-  for (let k = 0; k < layers - 1; k++)
-    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++)
-      s += `<line x1="${cx(i)}" y1="${ly(k)}" x2="${cx(j)}" y2="${ly(k + 1)}" class="ob-att" style="animation-delay:${((i + j) % n) * 0.12 + k * 0.4}s"/>`;
-  for (let k = 0; k < layers; k++) for (let i = 0; i < n; i++) s += `<circle cx="${cx(i)}" cy="${ly(k)}" r="3.2" fill="${col}"/>`;
-  // flow in from the input tokens and out to the output tokens
-  for (let i = 0; i < n; i++) {
-    s += `<line x1="${cx(i)}" y1="${bot + 14}" x2="${cx(i)}" y2="${ly(layers - 1)}" class="ob-flow ${inputs && inputs[i] === "hidden" ? "dim" : ""}"/>`;
-    s += `<line x1="${cx(i)}" y1="${ly(0)}" x2="${cx(i)}" y2="${top - 14}" class="ob-flow"/>`;
-  }
-  // inputs (below) and outputs (above)
-  const sq = (i, yy, kind) => {
-    const xx = x + i * (size + gap);
-    if (kind === "hidden") return `<rect x="${xx}" y="${yy}" width="${size}" height="${size}" rx="3" class="ob-hid"/><text x="${xx + size / 2}" y="${yy + size / 2 + 4}" class="ob-q" text-anchor="middle">?</text>`;
-    if (kind === "real" || kind === "blur") return `<image href="${OB.tiles[kind][i]}" x="${xx}" y="${yy}" width="${size}" height="${size}" preserveAspectRatio="none" class="${kind === "blur" ? "ob-guess" : ""}"/>` + (kind === "blur" ? `<rect x="${xx}" y="${yy}" width="${size}" height="${size}" rx="3" class="ob-guess-edge"/>` : "");
-    if (kind === "faint") return `<rect x="${xx}" y="${yy}" width="${size}" height="${size}" rx="3" class="ob-faint"/>`;
-    return `<rect x="${xx}" y="${yy}" width="${size}" height="${size}" rx="3" class="ob-vec ${kind}"/>`;
-  };
-  inputs.forEach((k, i) => (s += sq(i, bot + 16, k)));
-  outputs.forEach((k, i) => (s += sq(i, top - 16 - size, k)));
-  return { svg: s, w, cx, top, bot };
+const OB_T = 22, OB_G = 3, OB_GW = 4 * OB_T + 3 * OB_G, OB_GH = 2 * OB_T + OB_G;
+function obGrid(x, y, kinds) {  // 8 patches as a 4 x 2 grid
+  let s = "";
+  kinds.forEach((k, i) => {
+    const xx = x + (i % 4) * (OB_T + OB_G), yy = y + Math.floor(i / 4) * (OB_T + OB_G);
+    if (k === "real" || k === "blur") s += `<image href="${OB.tiles[k][i]}" x="${xx}" y="${yy}" width="${OB_T}" height="${OB_T}" preserveAspectRatio="none"/>` + (k === "blur" ? `<rect x="${xx}" y="${yy}" width="${OB_T}" height="${OB_T}" rx="2" class="ob-redraw"/>` : "");
+    else if (k === "hidden") s += `<rect x="${xx}" y="${yy}" width="${OB_T}" height="${OB_T}" rx="2" class="ob-hid"/><text x="${xx + OB_T / 2}" y="${yy + OB_T / 2 + 4}" class="ob-q" text-anchor="middle">?</text>`;
+    else if (k === "faint") s += `<rect x="${xx}" y="${yy}" width="${OB_T}" height="${OB_T}" rx="2" class="ob-faint"/>`;
+    else s += `<rect x="${xx}" y="${yy}" width="${OB_T}" height="${OB_T}" rx="2" class="ob-vec ${k}"/>`;
+  });
+  return s;
 }
+function obSnow(x, y, col) {  // frozen
+  let s = `<g stroke="${col}" stroke-width="1.4" stroke-linecap="round">`;
+  for (let a = 0; a < 3; a++) { const r = (a * Math.PI) / 3; s += `<line x1="${x - 6 * Math.cos(r)}" y1="${y - 6 * Math.sin(r)}" x2="${x + 6 * Math.cos(r)}" y2="${y + 6 * Math.sin(r)}"/>`; }
+  return s + "</g>";
+}
+// a transformer drawn as columns of layers, every node wired to every node in the next layer
+function obBlock(x, y, { w = 200, h = 118, layers = 3, tone = "learn", label, badge }) {
+  const col = tone === "frozen" ? C.teal : C.blood, n = 8, top = y + 14, step = (h - 28) / (n - 1);
+  const lx = (k) => x + 26 + k * ((w - 52) / (layers - 1)), ny = (i) => top + i * step;
+  let s = `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="9" class="ob-block ${tone}"/>`;
+  for (let k = 0; k < layers - 1; k++) for (let i = 0; i < n; i++) for (let j = 0; j < n; j++)
+    s += `<line x1="${lx(k)}" y1="${ny(i)}" x2="${lx(k + 1)}" y2="${ny(j)}" class="ob-att" style="animation-delay:${((i + j) % n) * 0.15 + k * 0.5}s"/>`;
+  for (let k = 0; k < layers; k++) for (let i = 0; i < n; i++) s += `<circle cx="${lx(k)}" cy="${ny(i)}" r="2.6" fill="${col}"/>`;
+  s += `<text x="${x}" y="${y - 8}" class="ob-blabel" fill="${col}">${label}</text>`;
+  if (badge) s += tone === "frozen" ? obSnow(x + w - 8, y - 12, col) + `<text x="${x + w - 18}" y="${y - 8}" class="ob-badge" text-anchor="end" fill="${col}">${badge}</text>` : `<text x="${x + w}" y="${y - 8}" class="ob-badge" text-anchor="end" fill="${col}">${badge}</text>`;
+  return { s, l: [x, y + h / 2], r: [x + w, y + h / 2], top: [x + w / 2, y], bot: [x + w / 2, y + h] };
+}
+const obArrow = (x1, y1, x2, y2, cls = "ob-data") => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="${cls}" marker-end="url(#${cls === "ob-data" ? "obA" : cls === "ob-ema" ? "obE" : "obG"})"/>`;
+const obPath = (d, cls) => `<path d="${d}" class="${cls}" fill="none" marker-end="url(#${cls === "ob-ema" ? "obE" : "obG"})"/>`;
+const obLoss = (x, y) => `<circle cx="${x}" cy="${y}" r="19" class="ob-loss"/><text x="${x}" y="${y + 4}" class="ob-losst" text-anchor="middle">loss</text>`;
+const obLab = (x, y, t, a = "middle") => `<text x="${x}" y="${y}" class="ob-label" text-anchor="${a}">${t}</text>`;
+const OB_N = 8;
 function drawObjectives() {
-  const m = OB.model, hid = (i) => OB_HIDDEN.includes(i), N = 8;
+  const m = OB.model, hid = (i) => OB_HIDDEN.includes(i), all = (k) => Array.from({ length: OB_N }, () => k);
+  const masked = Array.from({ length: OB_N }, (_, i) => (hid(i) ? "hidden" : "real"));
   $$("#objTabs .tab").forEach((b) => b.classList.toggle("on", b.dataset.obj === m));
-  let body = "", W = 720, H = 340;
-  const lab = (x, y, t, anchor = "middle") => `<text x="${x}" y="${y}" class="ob-label" text-anchor="${anchor}">${t}</text>`;
+  let W = 760, H, s = "";
   if (m === "dasheng") {
-    const T = obTransformer({ x: 70, y: 110, n: N, size: 30, gap: 8, tone: "blood", label: "transformer",
-      inputs: Array.from({ length: N }, (_, i) => (hid(i) ? "hidden" : "real")),
-      outputs: Array.from({ length: N }, (_, i) => (hid(i) ? "blur" : "faint")) });
-    body += T.svg + lab(70 + T.w / 2, 330, "the patches, most of them hidden") + lab(70 + T.w / 2, 46, "its drawing of the hidden ones");
-    const tx = 470;
-    OB_HIDDEN.forEach((t, k) => (body += `<image href="${OB.tiles.real[t]}" x="${tx + k * 38}" y="${64}" width="30" height="30" preserveAspectRatio="none"/>`));
-    body += lab(tx + (OB_HIDDEN.length * 38 - 8) / 2, 46, "the real patches");
-    body += `<text x="${(70 + T.w + tx) / 2 + 4}" y="86" class="ob-eq" text-anchor="middle">≈</text>`;
+    H = 250; const cy = 140;
+    s += obGrid(20, cy - OB_GH / 2, masked) + obLab(20 + OB_GW / 2, cy + 44, "most patches hidden");
+    const B = obBlock(160, cy - 59, { tone: "learn", label: "transformer", badge: "learning" });
+    s += B.s + obArrow(20 + OB_GW + 8, cy, 152, cy);
+    s += obArrow(B.r[0] + 8, cy, 392, cy) + obGrid(400, cy - OB_GH / 2, Array.from({ length: OB_N }, (_, i) => (hid(i) ? "blur" : "faint"))) + obLab(400 + OB_GW / 2, cy + 44, "its redraw");
+    s += obArrow(400 + OB_GW + 8, cy, 578, cy) + obLoss(600, cy);
+    s += obGrid(655, cy - OB_GH / 2, all("real")) + obLab(655 + OB_GW / 2, cy + 44, "real patches") + obArrow(650, cy, 623, cy);
+    s += obPath(`M 600 ${cy - 21} C 600 6, 272 6, 272 ${cy - 80}`, "ob-grad") + obLab(520, 62, "update the model");
   } else if (m === "eat") {
-    const S = obTransformer({ x: 70, y: 110, n: N, size: 24, gap: 6, tone: "blood", label: "student",
-      inputs: Array.from({ length: N }, (_, i) => (hid(i) ? "hidden" : "real")),
-      outputs: Array.from({ length: N }, (_, i) => (hid(i) ? "guess" : "faint")) });
-    const Tt = obTransformer({ x: 440, y: 110, n: N, size: 24, gap: 6, tone: "teal", label: "teacher",
-      inputs: Array.from({ length: N }, () => "real"),
-      outputs: Array.from({ length: N }, (_, i) => (hid(i) ? "target" : "faint")) });
-    body += S.svg + Tt.svg;
-    body += lab(70 + S.w / 2, 326, "sees a few patches") + lab(440 + Tt.w / 2, 326, "sees them all");
-    body += `<path d="M ${70 + S.w + 14} 185 L ${440 - 14} 185" class="ob-ema" marker-end="url(#obArrow)"/>` + lab((70 + S.w + 440) / 2, 176, "slow copy");
-    body += `<path d="M ${70 + S.w / 2} 48 Q ${(70 + S.w + 440) / 2} 22 ${440 + Tt.w / 2} 48" class="ob-match"/>` + lab((70 + S.w + 440) / 2, 20, "match the hidden ones");
+    H = 420; const ty = 92, sy = 300, ly = (ty + sy) / 2;
+    const T = obBlock(160, ty - 59, { tone: "frozen", label: "teacher", badge: "no gradients" });
+    const S = obBlock(160, sy - 59, { tone: "learn", label: "student", badge: "learning" });
+    s += T.s + S.s;
+    s += obGrid(20, ty - OB_GH / 2, all("real")) + obLab(20 + OB_GW / 2, ty + 42, "the whole clip") + obArrow(20 + OB_GW + 8, ty, 152, ty);
+    s += obGrid(20, sy - OB_GH / 2, masked) + obLab(20 + OB_GW / 2, sy + 42, "a few patches") + obArrow(20 + OB_GW + 8, sy, 152, sy);
+    const tOut = Array.from({ length: OB_N }, (_, i) => (hid(i) ? "target" : "faint")), sOut = Array.from({ length: OB_N }, (_, i) => (hid(i) ? "guess" : "faint"));
+    s += obArrow(T.r[0] + 8, ty, 392, ty) + obGrid(400, ty - OB_GH / 2, tOut) + obLab(400 + OB_GW / 2, ty + 42, "its view of the hidden ones");
+    s += obArrow(S.r[0] + 8, sy, 392, sy) + obGrid(400, sy - OB_GH / 2, sOut) + obLab(400 + OB_GW / 2, sy + 42, "the student's guess");
+    s += obLoss(600, ly) + obArrow(400 + OB_GW + 8, ty, 584, ly - 12) + obArrow(400 + OB_GW + 8, sy, 584, ly + 12);
+    s += obPath(`M 600 ${ly + 21} C 600 ${sy + 82}, 260 ${sy + 82}, 260 ${sy + 66}`, "ob-grad") + obLab(430, sy + 108, "update the student");
+    s += obPath(`M 110 ${sy - 66 + 8} C 70 ${ly + 20}, 70 ${ly - 20}, 152 ${ty + 50}`, "ob-ema");
+    s += `<text x="58" y="${ly + 4}" class="ob-label ema" text-anchor="middle">slow</text><text x="58" y="${ly + 19}" class="ob-label ema" text-anchor="middle">copy</text>`;
   } else {
-    const ins = Array.from({ length: 6 }, () => "real");
-    const A = obTransformer({ x: 20, y: 110, n: 6, size: 20, gap: 5, tone: "teal", label: "expert", inputs: ins, outputs: Array.from({ length: 6 }, () => "target") });
-    const S = obTransformer({ x: 285, y: 140, n: 6, size: 20, gap: 5, layers: 2, h: 110, tone: "blood", label: "student", inputs: ins, outputs: Array.from({ length: 6 }, () => "guess") });
-    const B = obTransformer({ x: 550, y: 110, n: 6, size: 20, gap: 5, tone: "teal", label: "expert", inputs: ins, outputs: Array.from({ length: 6 }, () => "target") });
-    body += A.svg + S.svg + B.svg;
-    body += lab(20 + A.w / 2, 326, "speech expert") + lab(285 + S.w / 2, 326, "student (smaller)") + lab(550 + B.w / 2, 326, "sound expert");
-    body += `<path d="M ${20 + A.w / 2} 52 Q ${20 + A.w + 40} 60 ${285 - 4} 92" class="ob-match"/><path d="M ${550 + B.w / 2} 52 Q ${550 - 40} 60 ${285 + S.w + 4} 92" class="ob-match"/>`;
-    body += lab(285 + S.w / 2, 46, "match both");
+    H = 490; const y1 = 78, y2 = 222, ys = 386, cx = 20, cyc = (y2 + ys) / 2 - 10;
+    const A = obBlock(200, y1 - 52, { h: 104, tone: "frozen", label: "speech expert", badge: "frozen" });
+    const Bk = obBlock(200, y2 - 52, { h: 104, tone: "frozen", label: "sound expert", badge: "frozen" });
+    const S = obBlock(230, ys - 44, { w: 140, h: 88, layers: 2, tone: "learn", label: "student", badge: "learning" });
+    s += A.s + Bk.s + S.s;
+    s += obGrid(cx, cyc - OB_GH / 2, all("real")) + obLab(cx + OB_GW / 2, cyc + 42, "the same clip");
+    s += obArrow(cx + OB_GW + 8, cyc - 8, 192, y1 + 10) + obArrow(cx + OB_GW + 8, cyc, 192, y2 + 8) + obArrow(cx + OB_GW + 8, cyc + 8, 222, ys);
+    s += obArrow(408, y1, 452, y1) + obGrid(460, y1 - OB_GH / 2, all("target"));
+    s += obArrow(408, y2, 452, y2) + obGrid(460, y2 - OB_GH / 2, all("target"));
+    s += obArrow(378, ys, 452, ys) + obGrid(460, ys - OB_GH / 2, all("guess")) + obLab(460 + OB_GW / 2, ys - 32, "the student's outputs");
+    const lx = 650, lyy = (y2 + ys) / 2 + 12;
+    s += obLoss(lx, lyy) + obArrow(460 + OB_GW + 8, y1, lx - 10, lyy - 18) + obArrow(460 + OB_GW + 8, y2, lx - 16, lyy - 10) + obArrow(460 + OB_GW + 8, ys, lx - 16, lyy + 10);
+    s += obPath(`M ${lx} ${lyy + 21} C ${lx} ${H - 40}, 300 ${H - 40}, 300 ${ys + 52}`, "ob-grad") + obLab(480, H - 8, "update the student");
   }
-  $("#objSvg").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="How ${m} is trained"><defs><marker id="obArrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="${C.teal}"/></marker></defs>${body}</svg>`;
+  const defs = `<defs>${[["obA", C.faint], ["obG", C.blood], ["obE", C.teal]].map(([id, c]) => `<marker id="${id}" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="${c}"/></marker>`).join("")}</defs>`;
+  $("#objSvg").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="How ${m} is trained">${defs}${s}</svg>`;
   $("#objCaption").textContent = OB_TEXT[m];
 }
 
