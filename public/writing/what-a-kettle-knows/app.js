@@ -10,8 +10,8 @@ const clockT = (s) => `${Math.floor(s / 60)}:${(s % 60).toFixed(1).padStart(4, "
 const dpr = () => window.devicePixelRatio || 1;
 const json = (n) => fetch(`assets/data/${n}.json`).then((r) => r.json());
 
-const C = { blood: "#7c2b26", teal: "#2f6f5e", gold: "#a8792f", ink: "#1d1b17", muted: "#6f675c", faint: "#9a9183", line: "#e2d9c8", card: "#fffdf8", dark: "#171614", peach: "#f3a27f", sage: "#6fbfa8" };
-const STAGE = { off: { c: "#8c8275", name: "off" }, heat: { c: C.gold, name: "heating" }, boil: { c: C.teal, name: "boiling" } };
+const C = { blood: "#d03a2f", teal: "#2563a8", gold: "#e0821c", ink: "#111111", muted: "#666666", faint: "#999999", line: "#e4e4e4", card: "#ffffff", dark: "#111111", peach: "#3fb6e8", sage: "#5aa0d8" };
+const STAGE = { off: { c: "#8a8a8a", name: "off" }, heat: { c: C.gold, name: "heating" }, boil: { c: C.teal, name: "boiling" } };
 const ENC = {
   dsp_rich: ["Recipe", "dsp"], mn04_as: ["Tagger S", "tag"], mn10_as: ["Tagger M", "tag"], mn20_as: ["Tagger L", "tag"],
   usad2_small: ["USAD", "ssl"], dasheng_base: ["Dasheng", "ssl"], eat_pretrain: ["EAT", "ssl"], beats_iter3: ["BEATs", "ssl"],
@@ -124,7 +124,7 @@ function drawWave(cv, peaks, { color = C.blood, bg = C.card, upto = 1, ghost = n
 let _lut;
 function lut() {
   if (_lut) return _lut;
-  const stops = [[0, [23, 22, 20]], [0.3, [40, 46, 42]], [0.52, [47, 111, 94]], [0.74, [168, 121, 47]], [0.9, [236, 168, 122]], [1, [252, 244, 222]]];
+  const stops = [[0, [0, 0, 4]], [0.25, [59, 15, 112]], [0.5, [140, 41, 129]], [0.72, [222, 73, 104]], [0.88, [254, 159, 109]], [1, [252, 253, 191]]];
   _lut = [];
   for (let i = 0; i < 256; i++) {
     const t = i / 255; let j = 0;
@@ -186,7 +186,7 @@ function buildBlind() {
   }));
 }
 function drawBlind() {
-  drawWave($("#blindWave"), S.k.peaks, { color: C.peach, bg: C.dark, upto: heardMax, ghost: "#26231f" });
+  drawWave($("#blindWave"), S.k.peaks, { color: C.peach, bg: C.dark, upto: heardMax, ghost: "#222222" });
 }
 function updateCallback() {
   const el = $("#guessCallback");
@@ -298,9 +298,9 @@ function drawZoom() {
   const [a, b] = zoomWindow(), D = S.k.duration, span = b - a;
   // overview
   const ov = $("#zoomOverview");
-  drawWave(ov, S.k.peaks, { color: "#c9b9a6", bg: C.card });
+  drawWave(ov, S.k.peaks, { color: "#c6c6c6", bg: C.card });
   const g0 = ov.getContext("2d"), w0 = ov.clientWidth, h0 = ov.clientHeight;
-  g0.fillStyle = "rgba(124,43,38,.18)"; g0.strokeStyle = C.blood; g0.lineWidth = 1.5;
+  g0.fillStyle = "rgba(208,58,47,.18)"; g0.strokeStyle = C.blood; g0.lineWidth = 1.5;
   const x0 = (a / D) * w0, ww = Math.max(3, (span / D) * w0);
   g0.fillRect(x0, 0, ww, h0); g0.strokeRect(x0 + 0.5, 0.5, ww - 1, h0 - 1);
   // main
@@ -332,14 +332,14 @@ function drawZoom() {
         g.fillRect(px, mid - hi * scale, 1, Math.max(1, (hi - lo) * scale));
       }
     } else {
-      g.strokeStyle = "rgba(124,43,38,.45)"; g.lineWidth = 1.2; g.beginPath();
+      g.strokeStyle = "rgba(208,58,47,.45)"; g.lineWidth = 1.2; g.beginPath();
       for (let i = s0; i < s1; i++) { const x = ((i - s0) / n) * w, y = mid - samples[i] * scale; i === s0 ? g.moveTo(x, y) : g.lineTo(x, y); }
       g.stroke();
       if (n < w / 3) {
         g.fillStyle = C.blood;
         for (let i = s0; i < s1; i++) {
           const x = ((i - s0) / n) * w, y = mid - samples[i] * scale;
-          g.strokeStyle = "rgba(124,43,38,.25)"; g.beginPath(); g.moveTo(x, mid); g.lineTo(x, y); g.stroke();
+          g.strokeStyle = "rgba(208,58,47,.25)"; g.beginPath(); g.moveTo(x, mid); g.lineTo(x, y); g.stroke();
           g.beginPath(); g.arc(x, y, 3.2, 0, 7); g.fill();
         }
       }
@@ -412,7 +412,7 @@ function buildSim() {
     const M = S.similarity.matrices[cur], L = ["A", "B", "C", "D"];
     const off = M.flatMap((r, i) => r.filter((_, j) => j !== i)), lo = Math.min(...off), hi = Math.max(...off);
     const col = (v, i, j) => {
-      if (i === j) return ["#e9e1d2", C.faint];
+      if (i === j) return ["#e8e8e8", C.faint];
       const t = (v - lo) / (hi - lo || 1), a = [246, 238, 226], b = [124, 43, 38];
       return [`rgb(${a.map((x, k) => Math.round(x + (b[k] - x) * t)).join(",")})`, t > 0.55 ? "#fff" : C.ink];
     };
@@ -498,7 +498,7 @@ function drawBounce() {
     g.strokeStyle = C.teal; g.lineWidth = 1.5; g.beginPath(); g.moveTo(x, 14); g.lineTo(x, h); g.stroke();
     const isLast = i === xs.length - 1;
     if (isLast || (x - prev > 16 && lastX - x > 16)) {
-      g.fillStyle = C.teal; g.font = "600 11px Inter"; g.textAlign = "center"; g.fillText(i + 1, Math.max(5, x), 11); prev = x;
+      g.fillStyle = C.teal; g.font = "600 11px 'IBM Plex Sans'"; g.textAlign = "center"; g.fillText(i + 1, Math.max(5, x), 11); prev = x;
     }
   });
 }
@@ -543,7 +543,7 @@ function memoryChart(target, keys, title) {
     ["Is it happening?", T.by_type.at], ["How long did it last?", T.by_type.dur], ["Since when?", T.by_type.since],
     ["How long ago was it?", T.by_type.ago], ["How many times?", T.by_type.count], ["All 298 questions", { ours: T.ours, af3: T.af3, const: T.const, n: T.n }, true],
   ];
-  const series = [["ours", "The diary", C.teal], ["af3", "Audio Flamingo 3", C.blood], ["const", "Same answer each time", "#c9bca4"]].filter(([k]) => keys.includes(k));
+  const series = [["ours", "The diary", C.teal], ["af3", "Audio Flamingo 3", C.blood], ["const", "Same answer each time", "#c6c6c6"]].filter(([k]) => keys.includes(k));
   const W = 640, labelW = 226, bh = 11, gap = 3, gh = series.length * (bh + gap) + 16, top = 34, H = top + groups.length * gh + 4;
   const X = (v) => labelW + v * (W - labelW - 46);
   let b = "";
@@ -581,7 +581,7 @@ function buildCost() {
   rows.forEach(([l, rtf, c], i) => {
     const y = top + i * rowH, hrs = rtf * 24;
     b += `<text x="${labelW - 12}" y="${y + 15}" text-anchor="end" font-size="13" fill="${C.ink}">${l}</text>`;
-    b += `<rect x="${labelW}" y="${y + 2}" width="${W - labelW - 10}" height="18" rx="3" fill="#f2ece0"/>`;
+    b += `<rect x="${labelW}" y="${y + 2}" width="${W - labelW - 10}" height="18" rx="3" fill="#efefef"/>`;
     b += `<rect x="${labelW}" y="${y + 2}" width="${Math.max(2, X(hrs) - labelW)}" height="18" rx="3" fill="${c}"/>`;
     b += `<text x="${X(hrs) + 8}" y="${y + 15.5}" font-size="12" font-family="IBM Plex Mono" fill="${C.ink}">${fmtT(hrs)} · ${(rtf * 100).toFixed(1)}% of a core</text>`;
   });
@@ -649,7 +649,7 @@ async function buildPatches() {
   $$("#patchGoals .tab").forEach((x) => x.classList.remove("on"));
   drawPatches();
 }
-const CODE_COLORS = ["#7c2b26", "#2f6f5e", "#a8792f", "#3b6ea5", "#7a5aa6", "#b5523b", "#4f8a5b", "#c49a3c", "#5f7f9e", "#8c4f6f", "#6b6b3a", "#38707a"];
+const CODE_COLORS = ["#d03a2f", "#2563a8", "#e0821c", "#3b6ea5", "#7a5aa6", "#b5523b", "#4f8a5b", "#c49a3c", "#5f7f9e", "#8c4f6f", "#6b6b3a", "#38707a"];
 const PATCH_NOTES = {
   whole: "The kettle's first 24 seconds as a spectrogram: the click, the heating rumble, and the start of the boil.",
   cut: "Cut into a grid. Each square gets flattened into a list of numbers and becomes one token, like a word in a sentence.",
@@ -674,8 +674,8 @@ function drawPatches() {
     const px = tg.getImageData(0, 0, 1, 1).data; sum[0] += px[0]; sum[1] += px[1]; sum[2] += px[2]; n++;
     if (!hid) { g.imageSmoothingEnabled = true; g.drawImage(PT.img, sx, sy, d.pt, d.pf, x, y, pw, ph); continue; }
     if (!PT.goal) {
-      g.fillStyle = "#2a2723"; g.fillRect(x, y, pw, ph);
-      g.fillStyle = "#8c8275"; g.font = `500 ${Math.min(16, pw * 0.5)}px Inter`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("?", x + pw / 2, y + ph / 2);
+      g.fillStyle = "#262626"; g.fillRect(x, y, pw, ph);
+      g.fillStyle = "#8a8a8a"; g.font = `500 ${Math.min(16, pw * 0.5)}px 'IBM Plex Sans'`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("?", x + pw / 2, y + ph / 2);
     } else if (PT.goal === "redraw") {
       tg.drawImage(PT.img, sx, sy, d.pt, d.pf, 0, 0, 3, 3);
       g.imageSmoothingEnabled = true; g.drawImage(tmp, 0, 0, 3, 3, x, y, pw, ph);
@@ -691,7 +691,7 @@ function drawPatches() {
   if (teacherBar) {
     const y = h - teacherBar + 6;
     g.fillStyle = `rgb(${Math.round(sum[0] / n)},${Math.round(sum[1] / n)},${Math.round(sum[2] / n)})`; g.fillRect(0, y, w, teacherBar - 6);
-    g.fillStyle = "#fff"; g.font = "500 11px Inter"; g.textAlign = "left"; g.textBaseline = "middle"; g.fillText("teacher's summary of the whole clip", 8, y + (teacherBar - 6) / 2);
+    g.fillStyle = "#fff"; g.font = "500 11px 'IBM Plex Sans'"; g.textAlign = "left"; g.textBaseline = "middle"; g.fillText("teacher's summary of the whole clip", 8, y + (teacherBar - 6) / 2);
   }
   $("#patchNote").textContent = PATCH_NOTES[PT.goal || PT.step];
 }
@@ -728,7 +728,7 @@ function drawTiny() {
     for (const q of ["x0", "x1", "y0", "y1"]) v[q] = v[q] + (tgt[q] - v[q]) * 0.5;
     TN.view[k] = v;
     const pad = 16, sx = (x) => pad + ((x - v.x0) / (v.x1 - v.x0 || 1)) * (w - 2 * pad), sy = (y) => pad + ((y - v.y0) / (v.y1 - v.y0 || 1)) * (h - 2 * pad);
-    g.fillStyle = "#faf6ee"; g.fillRect(0, 0, w, h);
+    g.fillStyle = "#f7f7f7"; g.fillRect(0, 0, w, h);
     pts.forEach(([x, y], i) => {
       g.fillStyle = TINY_COLORS[TN.d.labels[i]]; g.globalAlpha = 0.85;
       g.beginPath(); g.arc(sx(x), sy(y), 3.6, 0, 7); g.fill();
@@ -881,7 +881,7 @@ function drawRealMap() {
   let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
   m.z.forEach(([a, b]) => { x0 = Math.min(x0, a); x1 = Math.max(x1, a); y0 = Math.min(y0, b); y1 = Math.max(y1, b); });
   const pad = 18, sx = (a) => pad + ((a - x0) / (x1 - x0 || 1)) * (w - 2 * pad), sy = (b) => pad + ((b - y0) / (y1 - y0 || 1)) * (h - 2 * pad);
-  g.fillStyle = "#faf6ee"; g.fillRect(0, 0, w, h);
+  g.fillStyle = "#f7f7f7"; g.fillRect(0, 0, w, h);
   m.z.forEach(([a, b], i) => { g.fillStyle = TINY_COLORS[y[i]]; g.globalAlpha = 0.85; g.beginPath(); g.arc(sx(a), sy(b), 4, 0, 7); g.fill(); });
   g.globalAlpha = 1;
   $("#realNote").innerHTML = `<b>${Math.round(m.acc * 100)}% of windows sit closest to their own kind.</b> ${esc(REAL_NOTES[RM.map])}`;
@@ -906,9 +906,9 @@ function drawRepeats() {
   }
   REP_ROWS.forEach(([k, col]) => {
     const c = r.curves[k], cv = $(`[data-rep="${k}"]`), { g, w, h } = sizeCanvas(cv);
-    g.fillStyle = "#faf6ee"; g.fillRect(0, 0, w, h);
+    g.fillStyle = "#f7f7f7"; g.fillRect(0, 0, w, h);
     const X = (t) => (t / r.duration) * w;
-    g.fillStyle = "rgba(124,43,38,.10)"; g.fillRect(X(r.probe[0]), 0, X(r.probe[1]) - X(r.probe[0]), h);
+    g.fillStyle = "rgba(208,58,47,.10)"; g.fillRect(X(r.probe[0]), 0, X(r.probe[1]) - X(r.probe[0]), h);
     r.times.forEach((t) => { g.fillStyle = C.gold; g.beginPath(); g.moveTo(X(t) - 5, 0); g.lineTo(X(t) + 5, 0); g.lineTo(X(t), 7); g.fill(); });
     const lo = Math.min(...c), hi = Math.max(...c), Y = (v) => h - 6 - ((v - lo) / (hi - lo || 1)) * (h - 16);
     g.strokeStyle = col; g.lineWidth = 1.3; g.beginPath();
@@ -919,7 +919,7 @@ function drawRepeats() {
     marks.forEach((i) => {
       const t = i / 25, real = r.times.some((tt) => Math.abs(tt - t) < 0.4);
       if (real) hits++;
-      g.fillStyle = real ? C.blood : "#9a9183"; g.beginPath(); g.arc(X(t), Y(c[i]), 4, 0, 7); g.fill();
+      g.fillStyle = real ? C.blood : "#999999"; g.beginPath(); g.arc(X(t), Y(c[i]), 4, 0, 7); g.fill();
     });
     $(`[data-count="${k}"]`).textContent = `${marks.length} found · ${hits} of 6 real taps`;
   });
@@ -977,13 +977,13 @@ function benchPatch(cv, goal) {
       g.strokeStyle = C.ink; g.lineWidth = 1.2; g.strokeRect(x + 1, y + 1, pw - 2, ph - 2); g.lineWidth = 1;
     }
   }
-  const y = h - bar; g.font = "500 11px Inter"; g.textBaseline = "middle"; g.textAlign = "left";
+  const y = h - bar; g.font = "500 11px 'IBM Plex Sans'"; g.textBaseline = "middle"; g.textAlign = "left";
   const seg = (x0, x1, col, txt) => { g.fillStyle = col; g.fillRect(x0, y, x1 - x0 - 2, bar); g.fillStyle = "#fff"; g.fillText(txt, x0 + 6, y + bar / 2); };
   if (goal === "labels") { const cut = (12.7 / 24) * w; seg(0, cut, C.gold, "label: kettle heating"); seg(cut, w, C.teal, "label: kettle boiling"); }
   else if (goal === "expert") seg(0, w, C.ink, "target: what the real Dasheng outputs for each window");
   else if (goal === "teacher") seg(0, w, `rgb(${Math.round(sum[0] / n)},${Math.round(sum[1] / n)},${Math.round(sum[2] / n)})`, "the teacher sees every patch; its view of the hidden ones is the target");
-  else if (goal === "code") seg(0, w, "#5f5a52", "target: the code word of each hidden patch, from a small codebook");
-  else seg(0, w, "#5f5a52", "target: the hidden patches themselves, pixel by pixel");
+  else if (goal === "code") seg(0, w, "#5a5a5a", "target: the code word of each hidden patch, from a small codebook");
+  else seg(0, w, "#5a5a5a", "target: the hidden patches themselves, pixel by pixel");
 }
 async function buildBenches() {
   const benches = $$(".bench"); if (!benches.length) return;
@@ -1023,7 +1023,7 @@ function drawBench(goal) {
   for (const q of ["x0", "x1", "y0", "y1"]) v[q] += (tgt[q] - v[q]) * 0.45;
   st.view = v;
   const pad = 14, sx = (x) => pad + ((x - v.x0) / (v.x1 - v.x0 || 1)) * (w - 2 * pad), sy = (y) => pad + ((y - v.y0) / (v.y1 - v.y0 || 1)) * (h - 2 * pad);
-  g.fillStyle = "#faf6ee"; g.fillRect(0, 0, w, h);
+  g.fillStyle = "#f7f7f7"; g.fillRect(0, 0, w, h);
   pts.forEach(([x, y], i) => { g.fillStyle = TINY_COLORS[LAB.d.labels[i]]; g.globalAlpha = 0.85; g.beginPath(); g.arc(sx(x), sy(y), 3.6, 0, 7); g.fill(); });
   g.globalAlpha = 1;
   const step = Math.round((st.i / st.last) * LAB.d.steps);
@@ -1055,7 +1055,7 @@ function buildReport() {
     if (!col[3]) return `<td class="rc-n">${v < 1 ? "0" : v.toFixed(v < 10 ? 1 : 0)}</td>`;
     const vals = rows.map((r) => col[2](r[2])).filter((x) => x != null), lo = Math.min(...vals), hi = Math.max(...vals);
     let t = (v - lo) / (hi - lo || 1); if (col[3] === "min") t = 1 - t;
-    const bg = `rgba(47,111,94,${(0.08 + t * 0.72).toFixed(2)})`;
+    const bg = `rgba(37,99,168,${(0.08 + t * 0.72).toFixed(2)})`;
     return `<td class="rc-n" style="background:${bg};color:${t > 0.6 ? "#fff" : C.ink}">${v.toFixed(2)}</td>`;
   };
   $("#report").innerHTML = `<p class="chart-title">The report card</p><div class="table-scroll"><table class="rc"><thead><tr><th>listener</th><th>trained by</th>${cols.map((c) => `<th>${c[0]}<small>${c[1]}</small></th>`).join("")}</tr></thead><tbody>${
@@ -1117,7 +1117,7 @@ function wireSelfHover() {
 /* ------------------------------------------------------------------ rebuilt counting test */
 async function buildBenchTable() {
   const d = await json("repeats_bench"), R = d.results;
-  const rules = [["peaks", "last", "original rule", "#c9bca4"], ["dips", "last", "count the dips", C.teal], ["onset", "last, position removed", "match the start, position removed", C.blood]];
+  const rules = [["peaks", "last", "original rule", "#c6c6c6"], ["dips", "last", "count the dips", C.teal], ["onset", "last, position removed", "match the start, position removed", C.blood]];
   const rows = [["Dasheng", "Dasheng"], ["USAD", "USAD"], ["EAT", "EAT"], ["raw spectrogram", "spectrogram"]];
   const W = 640, labelW = 130, bh = 11, gap = 3, gh = rules.length * (bh + gap) + 14, top = 34, H = top + rows.length * gh + 40;
   const X = (v) => labelW + v * (W - labelW - 50);
