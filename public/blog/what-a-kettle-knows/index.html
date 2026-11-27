@@ -160,12 +160,30 @@
   <p>The last step in the figure, hiding most of the patches, matters too. It's how most modern audio models learn in the first place, which is where we're headed next.</p>
   <h2>Where the listeners come from</h2>
   <p>So how does a model learn to make sense of those tokens? You could train one from scratch to recognise a kettle, but you'd need thousands of recordings with every sound labelled, start to finish, which is slow, expensive work that rarely gets done. Instead, audio has followed the path text and images took before it, and split the job in two. First, one big general model learns from millions of unlabelled clips using <a href="https://en.wikipedia.org/wiki/Self-supervised_learning">self-supervised learning</a> (the model sets itself a puzzle, usually hiding most of the patches and trying to predict what was there). Then a much smaller labelled set adapts it to a specific task. Unlabelled audio is everywhere and labels are expensive, so this has become the standard way to build a listener, and everything in this post works that way.</p>
-  <p>I picked three of these general models to explore. They're openly available, small enough to run on a laptop (between 25 and 90 million <em>parameters</em>, the numbers a model learns), and, most interestingly, each one learned from a different puzzle:</p>
-  <ul class="tidy">
-    <li><b><a href="https://huggingface.co/mispeech/dasheng-base">Dasheng</a></b> hides most of the patches and redraws them, pixel by pixel.</li>
-    <li><b><a href="https://huggingface.co/worstchan/EAT-base_epoch30_pretrain">EAT</a></b> hides most of the patches and predicts what a "teacher" thinks they contain. The teacher is a slowly updated copy of EAT itself that gets to see the whole clip, so the targets improve as EAT does.</li>
-    <li><b><a href="https://huggingface.co/MIT-SLS/USAD2-Small">USAD</a></b> learns by copying two expert models at once, one trained on speech and one on general sound.</li>
-  </ul>
+  <p>I picked three of these general models to explore. They're openly available, small enough to run on a laptop (between 25 and 90 million <em>parameters</em>, the numbers a model learns), and, most interestingly, each one learned from a different puzzle. Step through how each one trains:</p>
+</section>
+
+<figure class="wide">
+  <div class="card objectives" id="objectives">
+    <div class="tabs" id="objTabs" role="tablist">
+      <button class="tab on" data-obj="dasheng">Dasheng: redraw what's hidden</button>
+      <button class="tab" data-obj="eat">EAT: match a teacher</button>
+      <button class="tab" data-obj="usad">USAD: copy two experts</button>
+    </div>
+    <p class="ometa mono" id="objMeta"></p>
+    <div class="ostage" id="objStage"></div>
+    <p class="ocaption" id="objCaption"></p>
+    <div class="octl">
+      <button class="play small" id="objPlay" aria-label="Play or pause"><span class="play-icon"></span></button>
+      <button class="ghost" id="objPrev">back</button>
+      <span class="odots" id="objDots"><i></i><i></i><i></i><i></i><i></i></span>
+      <button class="ghost" id="objNext">next</button>
+    </div>
+  </div>
+  <figcaption>How each model trains, drawn on real patches from the kettle. The models' drawings and descriptions here are illustrations of what they're asked to produce, not their actual output.</figcaption>
+</figure>
+
+<section class="col">
   <p>For comparison, I also tested a few simpler listeners: a hand-written recipe of acoustic measurements with no learning at all, and some small models trained directly on human labels. Here's the whole cast:</p>
 </section>
 

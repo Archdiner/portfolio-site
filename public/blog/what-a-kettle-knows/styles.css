@@ -329,3 +329,48 @@ table.rc td.rc-how{color:var(--muted)}
 .blind-box{margin-top:6px}
 .blind .pin{border-left-color:rgba(241,234,220,.45)}
 .blind .pin span{background:#2a2622;color:#f1eadc;border-color:#4a443b}
+
+/* how each model learns */
+.objectives .tabs{margin-bottom:10px}
+.ometa{margin:0 0 16px;color:var(--muted);text-transform:none;letter-spacing:.02em;font-size:12px}
+.ometa a{color:var(--blood)}
+.ostage{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;overflow-x:auto;padding:6px 2px 10px;min-height:190px}
+.ostage [data-show]{opacity:0;transform:translateY(6px);transition:opacity .5s,transform .5s}
+.ostage [data-show].on{opacity:1;transform:none}
+.ocol{display:flex;flex-direction:column;align-items:center;gap:6px;flex:none}
+.olab{font:600 12px/1.3 var(--sans);color:var(--ink);margin:0;text-align:center;max-width:150px}
+.osub{font:400 11px/1.3 var(--sans);color:var(--muted);margin:0;text-align:center;max-width:150px}
+.ogrid{display:grid;grid-template-columns:repeat(8,17px);gap:2px}
+.otile{width:17px;height:17px;border-radius:2px;display:block}
+.ohid{background:#2a2622;color:#8c8275;font:600 10px/17px var(--sans);text-align:center}
+.odim{opacity:.25}
+.ored{outline:1.5px dashed var(--peach,#f3a27f);outline-offset:-1px}
+.oarrow{font:400 20px var(--sans);color:var(--faint);flex:none}
+.omodel{gap:8px}
+.obox{border:1.5px solid var(--blood);border-radius:8px;padding:8px 12px;font:600 13px var(--sans);color:var(--blood);text-align:center;background:#fbf3ef;min-width:96px}
+.obox small{display:block;font:400 11px var(--sans);color:var(--muted)}
+.obox.teacher{border-color:var(--teal);color:var(--teal);background:#eef5f1}
+.oema{font:500 11px var(--sans);color:var(--teal)}
+.ovecs{display:flex;gap:5px;align-items:flex-end}
+.obars{display:flex;gap:1px;align-items:flex-end;height:34px;padding:2px;border:1px solid var(--line);border-radius:3px;background:#fff}
+.obars i{display:block;width:4px;background:var(--teal);border-radius:1px}
+.obars.guess i{background:var(--blood)}
+.obars.whole{border-color:var(--ink)}
+.oexperts{display:flex;gap:8px}
+.oexperts span{font:500 11px var(--sans);color:var(--teal);border:1px solid var(--teal);border-radius:99px;padding:2px 8px}
+.ocompare{display:flex;flex-direction:column;align-items:center;flex:none;font:500 11px var(--sans);color:var(--muted)}
+.ocompare b{font:400 26px var(--serif);color:var(--ink);line-height:1}
+.onudge{color:var(--blood)}
+.ocaption{font:400 16px/1.5 var(--serif);color:var(--ink);margin:6px 0 10px;min-height:3em}
+.octl{display:flex;align-items:center;gap:10px}
+.octl .ghost{margin-left:0}
+.odots{display:flex;gap:6px}
+.odots i{width:8px;height:8px;border-radius:50%;background:var(--line)}
+.odots i.on{background:var(--blood)}
+@media (max-width:760px){
+  .ostage{flex-direction:column;align-items:flex-start;min-height:0}
+  .oarrow{transform:rotate(90deg);align-self:center}
+  .ocol{align-items:flex-start}
+  .olab,.osub{text-align:left;max-width:none}
+}
+@media (min-width:761px){.ostage{flex-wrap:wrap;justify-content:center;overflow:visible;row-gap:18px}}

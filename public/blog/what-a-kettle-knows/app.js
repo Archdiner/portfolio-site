@@ -46,6 +46,7 @@ async function boot() {
   run("#bounceWave", buildBounce);
   run("#probeCurve", buildProbe);
   run("#patches", buildPatches);
+  run("#objectives", buildObjectives);
   run("#tiny", buildTiny);
   run("#flipChart", buildFlip);
   run("#curve", buildCurve);
@@ -1112,6 +1113,143 @@ async function buildBenchTable() {
   const cx = X(d.chance_exact);
   b += `<line x1="${cx}" x2="${cx}" y1="${top - 4}" y2="${wy + 16}" stroke="${C.ink}" stroke-dasharray="4 3" opacity=".6"/><text x="${cx + 4}" y="${wy + 30}" font-size="11" fill="${C.muted}">guessing the most common count (${d.chance_exact.toFixed(2)})</text>`;
   $("#benchTable").innerHTML = `<div class="chart"><p class="chart-title">Counting repeats, rebuilt: three rules, the same models</p>${svg(W, H, b, "Rebuilt counting test")}<p class="chart-sub" style="margin-top:6px">* USAD is barely affected by window position and the spectrogram not at all, so their third bar matches the start without removing anything.</p></div>`;
+}
+
+
+/* ------------------------------------------------------------------ how each model learns (step-through) */
+const OBJ = { model: "dasheng", step: 1, timer: null, tiles: null, started: false };
+const OBJ_MODELS = {
+  dasheng: {
+    name: "Dasheng", link: "https://huggingface.co/mispeech/dasheng-base",
+    meta: "Transformer · about 85 million parameters · patches span every pitch and are 4 time steps wide",
+    hide: true, target: "pixels", experts: 0, teacher: false,
+    steps: [
+      "Start with a clip of the kettle, cut into patches.",
+      "Hide most of them. The model only gets to see the rest.",
+      "The model, a transformer, reads the patches it can see…",
+      "…and redraws the missing ones, pixel by pixel.",
+      "Its drawing is compared with the real patches, and the difference nudges the model's settings a little. Repeat millions of times, on millions of clips.",
+    ],
+  },
+  eat: {
+    name: "EAT", link: "https://huggingface.co/worstchan/EAT-base_epoch30_pretrain",
+    meta: "Transformer · about 90 million parameters · 16 × 16 patches",
+    hide: true, target: "teacher", experts: 0, teacher: true,
+    steps: [
+      "Same clip, same patches.",
+      "The student only sees a few of the patches.",
+      "A teacher, a copy of the student, sees all of them and describes each patch as a short list of numbers.",
+      "The student guesses the teacher's description of every hidden patch, and of the clip as a whole.",
+      "The guesses are compared and the student is nudged. Then the teacher takes a small step towards the student, so as the student improves, so do its targets.",
+    ],
+  },
+  usad: {
+    name: "USAD", link: "https://huggingface.co/MIT-SLS/USAD2-Small",
+    meta: "Transformer · about 25 million parameters",
+    hide: false, target: "experts", experts: 2, teacher: false,
+    steps: [
+      "Same clip, but this time nothing is hidden.",
+      "Two expert models listen to it: one trained on speech, one on general sound. Each describes it as numbers.",
+      "The student, a smaller transformer, listens to the same clip…",
+      "…and tries to produce both experts' descriptions at once.",
+      "It's nudged towards whichever it gets wrong. The result is one small model carrying a bit of both experts.",
+    ],
+  },
+};
+async function buildObjectives() {
+  if (!$("#objectives")) return;
+  if (!PT.data) {
+    PT.data = await json("patches");
+    PT.img = specImage({ b64: PT.data.b64, frames: PT.data.frames, n_mels: PT.data.n_mels });
+  }
+  const d = PT.data, rows = [1, 2], cols = Array.from({ length: 8 }, (_, i) => 5 + i);
+  OBJ.tiles = rows.flatMap((f) => cols.map((t) => ({ f, t })));
+  const hidden = [0, 1, 3, 4, 6, 7, 8, 10, 11, 13, 15];
+  OBJ.tiles.forEach((p, i) => (p.hidden = hidden.includes(i)));
+  $$("#objTabs .tab").forEach((b) => b.addEventListener("click", () => { OBJ.model = b.dataset.obj; OBJ.step = 1; renderObjectives(); restartObj(); }));
+  $("#objPlay").addEventListener("click", () => (OBJ.timer ? stopObj() : restartObj(true)));
+  $("#objPrev").addEventListener("click", () => { stopObj(); OBJ.step = Math.max(1, OBJ.step - 1); applyObjStep(); });
+  $("#objNext").addEventListener("click", () => { stopObj(); OBJ.step = Math.min(5, OBJ.step + 1); applyObjStep(); });
+  new IntersectionObserver((es, io) => { if (es[0].isIntersecting && !OBJ.started) { OBJ.started = true; io.disconnect(); restartObj(true); } }, { threshold: 0.45 }).observe($("#objectives"));
+  renderObjectives();
+}
+function stopObj() { clearInterval(OBJ.timer); OBJ.timer = null; $("#objPlay").classList.remove("on"); }
+function restartObj(fromStart) {
+  stopObj(); if (fromStart && OBJ.step >= 5) OBJ.step = 1;
+  $("#objPlay").classList.add("on");
+  OBJ.timer = setInterval(() => {
+    if (OBJ.step >= 5) { stopObj(); return; }
+    OBJ.step++; applyObjStep();
+  }, 2600);
+  applyObjStep();
+}
+function tileCanvas(p, mode) {
+  const d = PT.data, cv = document.createElement("canvas"), s = 36, r = window.devicePixelRatio || 1;
+  cv.width = s * r; cv.height = s * r; cv.className = "otile";
+  const g = cv.getContext("2d"); g.imageSmoothingEnabled = true;
+  if (mode === "blur") {
+    const tmp = document.createElement("canvas"); tmp.width = 3; tmp.height = 3;
+    tmp.getContext("2d").drawImage(PT.img, p.t * d.pt, p.f * d.pf, d.pt, d.pf, 0, 0, 3, 3);
+    g.drawImage(tmp, 0, 0, 3, 3, 0, 0, cv.width, cv.height);
+  } else g.drawImage(PT.img, p.t * d.pt, p.f * d.pf, d.pt, d.pf, 0, 0, cv.width, cv.height);
+  return cv;
+}
+function barsFor(p, salt) {  // a short "description" of a patch, drawn as bars (illustrative)
+  const d = PT.data, tmp = document.createElement("canvas"); tmp.width = 1; tmp.height = 4;
+  const tg = tmp.getContext("2d"); tg.drawImage(PT.img, p.t * d.pt, p.f * d.pf, d.pt, d.pf, 0, 0, 1, 4);
+  const px = tg.getImageData(0, 0, 1, 4).data, v = [];
+  for (let i = 0; i < 4; i++) v.push((px[i * 4] + px[i * 4 + 1]) / 510);
+  return [...v, (v[0] + v[3]) / 2].map((x, i) => Math.min(1, Math.max(0.08, x * (0.8 + 0.1 * ((i + salt) % 3)))));
+}
+function barsEl(vals, cls) {
+  return `<span class="obars ${cls || ""}">${vals.map((v) => `<i style="height:${Math.round(v * 100)}%"></i>`).join("")}</span>`;
+}
+function renderObjectives() {
+  const m = OBJ_MODELS[OBJ.model], tiles = OBJ.tiles;
+  $$("#objTabs .tab").forEach((b) => b.classList.toggle("on", b.dataset.obj === OBJ.model));
+  $("#objMeta").innerHTML = `<a href="${m.link}">${m.name}</a> · ${esc(m.meta)}`;
+  const grid = (id) => `<div class="ogrid" id="${id}"></div>`;
+  const hiddenTiles = tiles.filter((p) => p.hidden);
+  let target = "", guess = "";
+  if (m.target === "pixels") {
+    guess = `<div class="ocol" data-show="4"><p class="olab">its drawing</p>${grid("oGuess")}</div>`;
+    target = `<div class="ocol" data-show="5"><p class="olab">the real patches</p>${grid("oTarget")}</div>`;
+  } else if (m.target === "teacher") {
+    guess = `<div class="ocol" data-show="4"><p class="olab">student's guess</p><div class="ovecs">${hiddenTiles.slice(0, 5).map((p, i) => barsEl(barsFor(p, i + 1), "guess")).join("")}${barsEl([0.6, 0.5, 0.7, 0.4, 0.55], "guess whole")}</div><p class="osub">one per hidden patch, plus the whole clip</p></div>`;
+    target = `<div class="ocol" data-show="3"><p class="olab">teacher's description</p><div class="ovecs">${hiddenTiles.slice(0, 5).map((p, i) => barsEl(barsFor(p, i))).join("")}${barsEl([0.62, 0.45, 0.72, 0.38, 0.6], "whole")}</div><p class="osub">the teacher sees every patch</p></div>`;
+  } else {
+    guess = `<div class="ocol" data-show="4"><p class="olab">student's two answers</p><div class="ovecs">${barsEl([0.5, 0.7, 0.3, 0.6, 0.4], "guess")}${barsEl([0.6, 0.3, 0.8, 0.5, 0.45], "guess")}</div></div>`;
+    target = `<div class="ocol" data-show="2"><p class="olab">the experts' descriptions</p><div class="ovecs">${barsEl([0.55, 0.75, 0.25, 0.65, 0.4])}${barsEl([0.65, 0.3, 0.85, 0.45, 0.5])}</div><div class="oexperts"><span>speech expert</span><span>sound expert</span></div></div>`;
+  }
+  $("#objStage").innerHTML = `
+    <div class="ocol" data-show="1"><p class="olab">the clip, as patches</p>${grid("oClip")}</div>
+    <div class="oarrow" data-show="${m.hide ? 2 : 3}">→</div>
+    <div class="ocol" data-show="${m.hide ? 2 : 3}"><p class="olab">${m.hide ? "what the student sees" : "what the student hears"}</p>${grid("oSeen")}</div>
+    <div class="oarrow" data-show="3">→</div>
+    <div class="ocol omodel" data-show="3"><div class="obox">${m.teacher || m.experts ? "student" : "model"}<small>transformer</small></div>
+      ${m.teacher ? `<div class="oema" data-show="5">↓ teacher slowly follows</div><div class="obox teacher" data-show="3">teacher<small>same model, slowly updated</small></div>` : ""}</div>
+    <div class="oarrow" data-show="4">→</div>
+    ${guess}
+    <div class="ocompare" data-show="5"><span>compare</span><b>≈</b><span class="onudge">nudge the model</span></div>
+    ${target}`;
+  const fill = (id, fn) => { const el = $("#" + id); if (!el) return; tiles.forEach((p) => el.appendChild(fn(p))); };
+  fill("oClip", (p) => tileCanvas(p));
+  fill("oSeen", (p) => {
+    if (!m.hide || !p.hidden) return tileCanvas(p);
+    const e = document.createElement("span"); e.className = "otile ohid"; e.textContent = "?"; return e;
+  });
+  fill("oGuess", (p) => {
+    if (!p.hidden) { const e = tileCanvas(p); e.classList.add("odim"); return e; }
+    const e = tileCanvas(p, "blur"); e.classList.add("ored"); return e;
+  });
+  fill("oTarget", (p) => { const e = tileCanvas(p); if (!p.hidden) e.classList.add("odim"); return e; });
+  applyObjStep();
+}
+function applyObjStep() {
+  const m = OBJ_MODELS[OBJ.model];
+  $$("#objStage [data-show]").forEach((el) => el.classList.toggle("on", Number(el.dataset.show) <= OBJ.step));
+  $("#objCaption").innerHTML = `<b>${OBJ.step}.</b> ${esc(m.steps[OBJ.step - 1])}`;
+  $$("#objDots i").forEach((d, i) => d.classList.toggle("on", i < OBJ.step));
 }
 
 boot();
