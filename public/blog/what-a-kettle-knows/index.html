@@ -170,7 +170,6 @@
       <button class="tab" data-obj="eat">EAT</button>
       <button class="tab" data-obj="usad">USAD</button>
     </div>
-    <p class="ob-swipe mono">swipe to see the whole diagram →</p>
     <div class="ob-svg" id="objSvg"></div>
     <p class="ob-caption" id="objCaption"></p>
     <div class="ob-legend">
@@ -184,25 +183,9 @@
 </figure>
 
 <section class="col">
-  <p>For comparison, I also tested a few simpler listeners: a hand-written recipe of acoustic measurements with no learning at all, and some small models trained directly on human labels. Here's the whole cast:</p>
+  <p>For comparison, I also tested a few simpler listeners: a hand-written recipe of acoustic measurements with no learning at all, and some small models trained directly on human labels.</p>
 </section>
 
-<figure class="wide">
-  <div class="card tree" aria-label="A family tree of training objectives">
-    <div class="tq">Does it learn at all?</div>
-    <div class="tb"><span class="tn">no</span><div class="tl gold">The recipe<small>70 hand-picked measurements</small></div></div>
-    <div class="tq">Does it get labels?</div>
-    <div class="tb"><span class="tn">yes</span><div class="tl blood">AudioSet taggers<small>two million labelled YouTube clips</small></div></div>
-    <div class="tq">No labels. So what does it predict about the patches it can't see?</div>
-    <div class="tb four">
-      <div class="tl teal">the pixels<small>Dasheng</small></div>
-      <div class="tl teal">a code word<small>BEATs</small></div>
-      <div class="tl teal">a teacher's view<small>EAT</small></div>
-      <div class="tl teal">an expert's view<small>USAD</small></div>
-    </div>
-  </div>
-  <figcaption>Every listener in this post, sorted by how it was trained.</figcaption>
-</figure>
 
 <section class="col">
   <h2>Teaching EAT fifteen words</h2>
