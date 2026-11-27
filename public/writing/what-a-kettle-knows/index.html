@@ -184,11 +184,6 @@
 </figure>
 
 <section class="col">
-  <p>For comparison, I also tested a few simpler listeners: a hand-written recipe of acoustic measurements with no learning at all, and some small models trained directly on human labels.</p>
-</section>
-
-
-<section class="col">
   <h2>Teaching EAT fifteen words</h2>
   <p>Out of the box, a general model like EAT doesn't actually output names. It outputs lists of numbers describing what it heard. But a name is the first thing a home listener needs, which brings us to the second half of the recipe, <a href="https://en.wikipedia.org/wiki/Fine-tuning_(deep_learning)">fine-tuning</a> (adding a small layer on top that turns the model's view of each moment into labels, then training a little longer on labelled examples). I chose EAT as the base because, in my tests, it was the best of these listeners at noticing when something in a scene changes. I trained it on RealDESED, a collection of real home recordings labelled with fifteen everyday sounds: footsteps, dishes, doors, a light switch, a vacuum, a coffee machine and so on. The whole thing took under an hour on one rented GPU.</p>
   <p>On recordings it hadn't seen before, it gets roughly nine in ten right. It's worth knowing what that score measures, though. It's per ten-second window, and only asks whether each sound happened at all, not exactly when. That distinction will matter in a moment. I'll call the result the Ear. Here's everything it reported while listening to our kettle:</p>
@@ -237,16 +232,7 @@
 </figure>
 
 <section class="col">
-  <p>On a clean recording like this, matching the raw waveform works almost perfectly: each bounce lines up with the first one and makes a sharp peak. I ran the test over 100 counting clips, tuning on the first 50 and scoring on the last 50. On another 125 clips I also checked something easier: whether each model noticed that the scene had changed at all.</p>
-</section>
-
-<figure class="wide">
-  <div class="card" id="skillsChart"></div>
-  <figcaption>Scores from my test, using its original counting rule. Dashed lines mark luck.</figcaption>
-</figure>
-
-<section class="col">
-  <p>Noticing a change went fine. Counting, on the other hand, was a wipeout: waveform matching scored 0.94 (where 1 is perfect), and no model got above 0.14, barely better than guessing. Bigger models didn't help either; the 90-million-parameter ones did no better than the one with a million. For a while I took this to mean the models simply couldn't count. It turns out the way I was counting was a big part of the problem.</p>
+  <p>On a clean recording like this, matching the raw waveform works almost perfectly: each bounce lines up with the first one and makes a sharp peak. So I ran the same test with each model over 100 counting clips, tuning on the first 50 and scoring on the last 50. It was a wipeout. Waveform matching scored 0.94 (where 1 is perfect), and no model got above 0.14, barely better than guessing. Size didn't help either: the 90-million-parameter models did no better than a small tagger with about a million. For a while I took this to mean the models simply couldn't count. It turns out the way I was counting was a big part of the problem.</p>
   <p>To see why, here's a small re-creation: a mug tapped six times over our kettle boiling.</p>
 </section>
 
@@ -281,44 +267,21 @@
     <div class="selfsim-wrap"><canvas id="selfCanvas" height="340" aria-label="Every moment of the kettle compared with every other moment"></canvas></div>
     <p class="patch-note" id="selfNote"></p>
   </div>
-  <figcaption>The kettle compared with itself, moment by moment. Both axes are time; brighter means more alike. Hover to see which two moments a point compares.</figcaption>
+  <figcaption>The kettle compared with itself, moment by moment. Both axes are time, with the recording drawn along each; brighter means more alike. Switch tabs to watch a map being built, or hover to see which two moments a point compares.</figcaption>
 </figure>
 
 <section class="col">
   <p>The spectrogram's map follows the sound itself: one big block while the boil is loudest, then another once the roar dulls and the kettle switches off. EAT and Dasheng show a grid instead. Remember the position stamps from earlier? Their outputs still remember where each moment sat inside its ten-second chunk. During the steady boil, two EAT outputs from the same spot in different chunks are 0.98 alike, compared with 0.89 for outputs half a chunk apart, even though the sound barely changes. For naming a sound this hardly matters. For matching moments against each other, it's noise.</p>
   <p>Reading from a middle layer of the model instead doesn't help; in EAT's middle layer the effect is even stronger (0.94 against 0.55). What does fix it is surprisingly simple: work out the average output at each position and subtract it, which flattens the grid completely.</p>
-  <p>One re-creation isn't proof, so I rebuilt the counting test at a bigger scale: 120 clips of the boil with a short sound repeated two to eight times. I tuned each counting rule on half of them and scored it on the other half:</p>
-</section>
-
-<figure class="wide">
-  <div class="card" id="benchTable"></div>
-  <figcaption>Share of 60 rebuilt test items where the count comes out exactly right (each bar is good to about ±0.12). The dashed line is always guessing the most common count.<sup><a href="#fn5" id="r5">5</a></sup></figcaption>
-</figure>
-
-<section class="col">
-  <p>The original rule fails here too, just as it did in my test. But change only the rule and Dasheng's score roughly triples, to 0.57 by counting dips and 0.60 by matching the start of the sound with the position stamps removed, ahead of raw waveform matching in the same noise. USAD improves as well. EAT stays weak, partly because it only produces about six outputs per second, which is coarse for something as short as a tap.</p>
+  <p>One re-creation isn't proof, so I rebuilt the counting test at a bigger scale: 120 clips of the boil with a short sound repeated two to eight times, with each counting rule tuned on half of them and scored on the other half.<sup><a href="#fn5" id="r5">5</a></sup> The original rule failed here too. But change only the rule and Dasheng's score roughly triples, to 0.57 by counting dips and 0.60 by matching the start of the sound with the position stamps removed, ahead of raw waveform matching in the same noise (0.43; each score is good to about ±0.12). USAD improves as well. EAT stays weak, partly because it only produces about six outputs per second, which is coarse for something as short as a tap.</p>
   <p>So the models mostly <em>heard</em> the repeats; what failed was how I asked them to keep count. That idea, that hearing is the easier part and keeping track is where things go wrong, runs through the rest of this post. (This is a rebuilt version of my test, on one kind of background, and I haven't yet rescored the original 100 counting clips with the fixed rules.)</p>
   <h2>What about a bigger model?</h2>
-  <p>At this point you might reasonably be wondering why I'm fiddling with small listeners at all. There are now large audio-language models you can hand a recording and question in plain English. They're built roughly like this:</p>
-</section>
-
-<figure class="wide">
-  <div class="card alm" aria-label="An audio-language model: audio goes into an encoder, the encoder's output goes into a language model, which writes an answer">
-    <div class="alm-box"><b>ten minutes of audio</b><span>plus a question</span></div><div class="alm-arrow">→</div>
-    <div class="alm-box"><b>audio encoder</b><span>turns sound into tokens, like the models above</span></div><div class="alm-arrow">→</div>
-    <div class="alm-box"><b>language model</b><span>reads them alongside the question, like words</span></div><div class="alm-arrow">→</div>
-    <div class="alm-box out"><b>"none"</b><span>its most common answer</span></div>
-  </div>
-  <figcaption>How an audio-language model like Audio Flamingo 3 is put together. The encoder does the hearing, and the language model does the talking.</figcaption>
-</figure>
-
-<section class="col">
-  <p>So I tried one, Audio Flamingo 3, on a much harder version of the kettle question: a week of audio recorded continuously in one person's home,<sup><a href="#fn6" id="r6">6</a></sup> with 298 questions like whether the vacuum was on at a given moment, since when, for how long, and how many times. Each question came with ten minutes of audio.</p>
-  <p>It mostly answered "none". Overall it scored 0.19, which is actually below the 0.26 you'd get from a baseline that ignores the audio entirely and always gives the most common answer. Some of that was down to my prompt and my scoring, so I wouldn't read too much into the exact number. I didn't test the biggest commercial models, some of which can now take hours of audio at once, but a recent long-audio benchmark, <a href="https://arxiv.org/abs/2609.01542">TAG-Bench</a>, found the same weakness: when a sound repeats, even the best model it tested got the count right only 13.2% of the time.</p>
-  <p>I spent even longer with <a href="https://huggingface.co/blog/thinkingmachines-inkling">Inkling</a>, Thinking Machines Lab's open model released in July, mostly with its smaller sibling, Inkling-Small. It does well on the usual audio benchmarks, and with voices it was genuinely impressive: asked which of six emotions an actor was using, it got 61% right, better than human raters listening to the same clips (about 41%). Home sounds were a different story. Asked which of fifteen everyday sounds were in real home recordings, it scored 0.43, well behind a small model trained on AudioSet labels (0.62). It beat that model on footsteps, but missed keys, typing, the microwave, the toilet and the vacuum. When I asked it to speak up only if a phone or doorbell rang, it spoke up for everything. And whenever I asked how many times a sound happened, or which came first, it was at chance, even on items where it had clearly heard both sounds. Where I tried the full-size Inkling, it did no better, and on voices it actually did worse.</p>
-  <p>This seems odd at first, because models like these are excellent with speech. Ask one what someone said and it'll usually get it right. The difference mostly comes down to what they're trained, and rewarded, on. Speech comes with enormous amounts of matching text (transcripts, subtitles), so a model can be trained to turn talking into words, and graded on it, at huge scale. Everyday sounds rarely come with more than a one-line caption ("a kettle boiling"), and almost never with when each sound started and stopped. So the models get very good at speech and at captions, and almost nothing in their training ever asks them to keep time.</p>
-  <p>That doesn't mean the sound is lost, though. Whisper, trained only on speech, turns out to <a href="https://arxiv.org/abs/2307.03183">carry plenty of information about background sounds</a> inside it. And a recent study, <a href="https://arxiv.org/abs/2609.05871">Where Does the Sound Go?</a>, traced sound through audio-language models layer by layer and found that details about non-speech sounds are still there near the very end, even when the model's answers about them are close to chance. The models heard it; they were just never taught to say so, which is the same pattern we saw with counting.</p>
-  <h2>Knowing when to listen</h2>
+  <p>At this point you might reasonably be wondering why I'm fiddling with small listeners at all. There are now large audio-language models you can hand a recording and question in plain English: an audio encoder, much like the models above, turns the sound into tokens, and a language model reads them alongside your question.</p>
+  <p>So I tried one, Audio Flamingo 3, on a much harder version of the kettle question: a week of audio recorded continuously in one person's home,<sup><a href="#fn6" id="r6">6</a></sup> with 298 questions like whether the vacuum was on at a given moment, since when, for how long, and how many times, each with ten minutes of audio. It mostly answered "none". Overall it scored 0.19, below the 0.26 you'd get by ignoring the audio and always giving the most common answer. Some of that is down to my prompt and scoring, and I didn't test the biggest commercial models, but a recent long-audio benchmark, <a href="https://arxiv.org/abs/2609.01542">TAG-Bench</a>, found the same weakness: when a sound repeats, even the best model it tested got the count right only 13.2% of the time.</p>
+  <p><a href="https://huggingface.co/blog/thinkingmachines-inkling">Inkling</a>, Thinking Machines Lab's open model from July, told a similar story (I mostly tested its smaller sibling, Inkling-Small). With voices it was genuinely impressive: asked which of six emotions an actor was using, it got 61% right, better than human raters on the same clips (about 41%). With home sounds it scored 0.43 at picking out which of fifteen were present, well behind a small model trained on AudioSet labels (0.62), and whenever I asked how many times a sound happened, or which came first, it was at chance.</p>
+  <p>The gap mostly comes down to what these models are trained, and rewarded, on. Speech comes with enormous amounts of matching text, so a model can be trained and graded on turning talking into words at huge scale. Everyday sounds rarely get more than a one-line caption ("a kettle boiling"), and almost never a note of when each one started and stopped. The sound isn't lost, though. Whisper, trained only on speech, <a href="https://arxiv.org/abs/2307.03183">carries plenty of information about background sounds</a>, and <a href="https://arxiv.org/abs/2609.05871">Where Does the Sound Go?</a> traced sound through audio-language models layer by layer and found non-speech details still there near the very end, even when the answers about them were close to chance. The models heard it; nothing in their training asked them to keep time, which is the same pattern we saw with counting.</p>
+  
+<h2>Knowing when to listen</h2>
   <p>Training data leaves fingerprints in other ways too. <a href="https://github.com/openai/whisper">Whisper</a>, a popular speech-to-text model, learned from hundreds of thousands of hours of internet audio paired with whatever text came with it, much of it subtitles. Out of curiosity, I ran the small version over an hour of that same home with nobody in it. In 49 of those 60 minutes it produced text, and it kept writing the same sentence:</p>
   <blockquote>Thank you very much for watching this video and I will see you in much for watching.</blockquote>
   <p>This is a well-documented problem. A common explanation is that the end of an online video is often quiet, and the subtitles over that quiet often say exactly this, so to Whisper an empty room sounds like the end of a video. Putting a small voice-activity detector in front of it (a tiny model whose only job is to spot when someone is talking) made the invented words disappear. That's the standard fix, and tools like <a href="https://github.com/m-bain/whisperX">WhisperX</a> do the same. With speech mixed into the home's background noise, the word error rate fell from 25% to 4%.</p>
