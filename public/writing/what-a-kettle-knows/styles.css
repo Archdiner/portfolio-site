@@ -325,3 +325,7 @@ table.rc td.rc-how{color:var(--muted)}
 
 .masthead-link{color:var(--blood);text-decoration:none}
 .masthead-link:hover{text-decoration:underline;text-underline-offset:3px}
+
+.blind-box{margin-top:6px}
+.blind .pin{border-left-color:rgba(241,234,220,.45)}
+.blind .pin span{background:#2a2622;color:#f1eadc;border-color:#4a443b}
